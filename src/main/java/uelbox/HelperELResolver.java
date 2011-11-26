@@ -5,7 +5,6 @@ import javax.el.ELResolver;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableObject;
 
 /**
  * Abstract "helper" ELResolver:  handles each step in the resolution
@@ -15,42 +14,132 @@ import org.apache.commons.lang3.mutable.MutableObject;
  * Not thread-safe.
  */
 public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
-    private static class MethodInvocationNotSupportedException extends UnsupportedOperationException {
+    /**
+     * HelperELResolver.WithWorkingStorage
+     *
+     * @param <WORKING_STORAGE>
+     * @param <RESULT>
+     */
+    public abstract static class WithWorkingStorage<WORKING_STORAGE, RESULT> extends HelperELResolver<RESULT> {
+        private class StateWithWorkingStorage extends WithWorkingStorage.State {
+            WORKING_STORAGE workingStorage;
+
+            @Override
+            void reset() {
+                super.reset();
+                workingStorage = null;
+            }
+        }
+
+        /**
+         * HelperELResolver.WithWorkingStorage.AsResult
+         *
+         * @param <WORKING_STORAGE>
+         */
+        public abstract static class AsResult<WORKING_STORAGE> extends WithWorkingStorage<WORKING_STORAGE,
+                WORKING_STORAGE> {
+            /**
+             * Create a new HelperELResolver.WithWorkingStorage.AsResult.
+             *
+             * @param wrapped
+             */
+            protected AsResult(ELResolver wrapped) {
+                super(wrapped);
+            }
+
+        }
+
+        /**
+         * Create a new HelperELResolver.WithWorkingStorage.
+         *
+         * @param wrapped
+         */
+        protected WithWorkingStorage(ELResolver wrapped) {
+            super(wrapped);
+        }
+
+        /**
+         * Get the working storage object in play for the current resolution in this context.
+         *
+         * @param context
+         * @return WORKING_STORAGE
+         */
+        protected final WORKING_STORAGE getWorkingStorage(ELContext context) {
+            return ((StateWithWorkingStorage) UEL.getContext(context, State.class)).workingStorage;
+        }
+
+        @Override
+        StateWithWorkingStorage getOrCreateState(ELContext context, Object base) {
+            StateWithWorkingStorage state = (StateWithWorkingStorage) super.getOrCreateState(context, base);
+            if (state.workingStorage == null) {
+                state.workingStorage = createWorkingStorage(context, base);
+            }
+            return state;
+        }
+
+        @Override
+        StateWithWorkingStorage createState(ELContext context, Object base) {
+            return new StateWithWorkingStorage();
+        }
+
+        /**
+         * Create a working storage object for the specified context and base object.
+         *
+         * @param context
+         * @param base
+         * @return WORKING_STORAGE
+         */
+        protected abstract WORKING_STORAGE createWorkingStorage(ELContext context, Object base);
+
+        @Override
+        protected final void afterGetValue(ELContext context, Object base, Object property, Object value) {
+            afterGetValue(context, base, property, value, getWorkingStorage(context));
+        }
+
+        protected abstract void afterGetValue(ELContext context, Object base, Object property, Object value,
+                                              WORKING_STORAGE workingStorage);
+
+        @Override
+        protected final RESULT afterSetValue(ELContext context, Object base, Object property) {
+            return afterSetValue(context, base, property, getWorkingStorage(context));
+        }
+
+        protected abstract RESULT afterSetValue(ELContext context, Object base, Object property,
+                                                WORKING_STORAGE workingStorage);
+
     }
 
-    private class State {
+    enum Completion {NO, YES;}
+
+    class State {
         final MutableInt depth = new MutableInt();
         Object tip;
-        boolean complete;
+        Completion completion;
         RESULT result;
 
-        void setResult(RESULT result) {
-            this.result = result;
-            complete = true;
+        State() {
+            reset();
+        }
+
+        void reset() {
+            depth.setValue(0);
+            tip = null;
+            completion = Completion.NO;
         }
     }
 
-    private final ThreadLocal<State> currentState = new ThreadLocal<State>() {
-        @Override
-        protected State initialValue() {
-            return new State();
-        }
-    };
-
+    /**
+     * Create a new HelperELResolver.
+     *
+     * @param wrapped
+     */
     protected HelperELResolver(ELResolver wrapped) {
         super(wrapped);
     }
 
     @Override
     public final Object getValue(ELContext context, Object base, Object property) {
-        State state;
-        synchronized (this) {
-            state = currentState.get();
-            if (state.complete) {
-                currentState.remove();
-                state = currentState.get();
-            }
-        }
+        State state = getOrCreateState(context, base);
         Object value = super.getValue(context, base, property);
 
         // deal with the (unusual) case that we never receive a read against a null base:
@@ -82,39 +171,13 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
         return value;
     }
 
-    /**
-     * Method invocation support is perhaps a little shaky, due to the fact that any
-     * non-nested method invocation is assumed to be the final one.  The result of this is that
-     * {@link #afterInvoke(javax.el.ELContext, Object, Object, Class[], Object[])} may be invoked more than once.
-     *
-     * @param context
-     * @param base
-     * @param method
-     * @param paramTypes
-     * @param params
-     * @return result of calling the method against the wrapped ELResolver for nested invocations; {@code null}
-     *         otherwise.
-     */
     @Override
-    public final Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
-        State state = currentState.get();
-        // behave normally for internal/nested method invocations:
-        if (base == state.tip && state.depth.intValue() == 0) {
-            try {
-                state.setResult(afterInvoke(context, base, method, paramTypes, params));
-                return null;
-            } catch (MethodInvocationNotSupportedException e) {
-                // swallow, assume this helper is intended for valueExpressions
-            }
-        }
-        return super.invoke(context, base, method, paramTypes, params);
-    }
-
-    @Override
-    public void setValue(ELContext context, Object base, Object property, Object value) {
-        State state = currentState.get();
+    public final void setValue(ELContext context, Object base, Object property, Object value) {
+        State state = getOrCreateState(context, base);
         Validate.validState(base == state.tip && state.depth.intValue() == 0);
-        state.setResult(afterSetValue(context, base, property));
+        state.result = afterSetValue(context, base, property);
+        state.completion = Completion.YES;
+        context.setPropertyResolved(true);
     }
 
     /**
@@ -142,34 +205,36 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
     }
 
     /**
-     * Post-process {@link #invoke(javax.el.ELContext, Object, Object, Class[], Object[])}.  Default
-     * behavior allows the method invocation to proceed as usual.
-     *
-     * @param context
-     * @param base
-     * @param method
-     * @param paramTypes
-     * @param params
-     * @return RESULT
-     */
-    protected RESULT afterInvoke(ELContext context, Object base, Object method, Class<?>[] paramTypes,
-                                 Object[] params) {
-        throw new MethodInvocationNotSupportedException();
-    }
-
-    /**
-     * Get result. Available only once per context operation.
+     * Get result. Should be called exactly once after a context operation (optional if the HelperELResolver
+     * instance is not to be reused).
      *
      * @return RESULT
      */
-    public final RESULT getResult() {
-        State state = currentState.get();
-        Validate.validState(state != null && state.complete);
+    public final RESULT getResult(ELContext context) {
+        State state = UEL.getContext(context, State.class);
+        Validate.validState(state != null && state.completion != Completion.NO);
         try {
             return state.result;
         } finally {
-            currentState.remove();
+            state.reset();
         }
     }
 
+    State getOrCreateState(ELContext context, Object base) {
+        synchronized (context) {
+            State state = UEL.getContext(context, State.class);
+            if (state == null) {
+                state = createState(context, base);
+                context.putContext(State.class, state);
+            } else if (state.completion == Completion.YES) {
+                state.reset();
+            }
+            state.tip = base;
+            return state;
+        }
+    }
+
+    State createState(ELContext context, Object base) {
+        return new State();
+    }
 }

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- *
+ * Test ELUtils
  */
 public class ELUtilsTest {
     private ELContext context;
@@ -20,23 +20,23 @@ public class ELUtilsTest {
 
     @Test
     public void testGetExpressionFactory() {
-        ExpressionFactory expressionFactory = ELUtils.getExpressionFactory(context);
+        ExpressionFactory expressionFactory = UEL.getExpressionFactory(context);
         Assert.assertNotNull(expressionFactory);
-        Assert.assertSame(expressionFactory, ELUtils.getExpressionFactory(context));
+        Assert.assertSame(expressionFactory, UEL.getExpressionFactory(context));
     }
 
     @Test
     public void testEmbedExpression() {
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("foo[bar].baz"));
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("#{foo[bar].baz}"));
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("${foo[bar].baz}"));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("foo[bar].baz"));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("#{foo[bar].baz}"));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("${foo[bar].baz}"));
     }
 
     @Test
     public void testEmbedExpressionWithTrigger() {
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("foo[bar].baz", '#'));
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("#{foo[bar].baz}", '#'));
-        Assert.assertEquals("#{foo[bar].baz}", ELUtils.embed("${foo[bar].baz}", '#'));
-        Assert.assertEquals("!{foo[bar].baz}", ELUtils.embed("${foo[bar].baz}", '!'));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("foo[bar].baz", '#'));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("#{foo[bar].baz}", '#'));
+        Assert.assertEquals("#{foo[bar].baz}", UEL.embed("${foo[bar].baz}", '#'));
+        Assert.assertEquals("!{foo[bar].baz}", UEL.embed("${foo[bar].baz}", '!'));
     }
 }

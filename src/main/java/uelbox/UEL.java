@@ -6,27 +6,41 @@ import javax.el.ExpressionFactory;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * EL utility methods.
+ * UEL utility methods.
  */
-public class ELUtils {
+public class UEL {
     /**
      * Get an ExpressionFactory instance for the specified context,
      * using {@link ELContext#getContext(Class)}, and setting such a context value, if not found,
      * to {@link javax.el.ExpressionFactory#newInstance()}.
+     *
      * @param elContext
      * @return ExpressionFactory
      */
-    public static ExpressionFactory getExpressionFactory(ELContext elContext) {
-        ExpressionFactory result = (ExpressionFactory) elContext.getContext(ExpressionFactory.class);
+    public static ExpressionFactory getExpressionFactory(ELContext context) {
+        ExpressionFactory result = getContext(context, ExpressionFactory.class);
         if (result == null) {
             result = ExpressionFactory.newInstance();
-            elContext.putContext(ExpressionFactory.class, result);
+            context.putContext(ExpressionFactory.class, result);
         }
         return result;
     }
 
     /**
+     * Casts context objects per documented convention.
+     *
+     * @param context
+     * @param key
+     * @param <T>
+     * @return T
+     */
+    public static <T> T getContext(ELContext context, Class<T> key) {
+        return (T) context.getContext(key);
+    }
+
+    /**
      * Embed the specified expression, if necessary, using '#' as the triggering character.
+     *
      * @param expression
      * @return String
      */
@@ -36,6 +50,7 @@ public class ELUtils {
 
     /**
      * Embed the specified expression, if necessary, using the specified triggering character.
+     *
      * @param expression
      * @param trigger
      * @return String
