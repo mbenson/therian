@@ -8,7 +8,7 @@ import javax.el.ELResolver;
 /**
  * Wraps an {@link ELResolver}.
  */
-public abstract class ELResolverWrapper extends ELResolver {
+public class ELResolverWrapper extends ELResolver {
     protected final ELResolver wrapped;
 
     /**
@@ -16,7 +16,7 @@ public abstract class ELResolverWrapper extends ELResolver {
      *
      * @param wrapped
      */
-    protected ELResolverWrapper(ELResolver wrapped) {
+    public ELResolverWrapper(ELResolver wrapped) {
         this.wrapped = wrapped;
     }
 
