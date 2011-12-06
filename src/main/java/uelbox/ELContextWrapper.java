@@ -54,7 +54,8 @@ public abstract class ELContextWrapper extends ELContext {
     }
 
     @Override
-    public Object getContext(Class<?> key) {
+    @SuppressWarnings("rawtypes")
+    public Object getContext(Class key) {
         Object result = super.getContext(key);
         return result == null ? wrapped.getContext(key) : result;
     }
