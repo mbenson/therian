@@ -9,7 +9,8 @@ import javax.el.VariableMapper;
 import org.apache.commons.lang3.Validate;
 
 /**
- * ELContext wrapper which wraps the ELResolver and may shadow variables, locale settings, and context objects.
+ * ELContext wrapper which wraps the ELResolver and may shadow variables, locale
+ * settings, and context objects.
  */
 public abstract class ELContextWrapper extends ELContext {
     private final ELResolver elResolver;
@@ -36,6 +37,13 @@ public abstract class ELContextWrapper extends ELContext {
         setLocale(wrapped.getLocale());
     }
 
+    /**
+     * Create a wrapped ELResolver for use with the wrapped {@link ELContext}.
+     *
+     * @param elResolver
+     *            to wrap
+     * @return {@link ELResolver}
+     */
     protected abstract ELResolver wrap(ELResolver elResolver);
 
     @Override
@@ -61,8 +69,8 @@ public abstract class ELContextWrapper extends ELContext {
     }
 
     /**
-     * Convenience method to return a typed context object
-     * when key resolves per documented convention to an object of the same type.
+     * Convenience method to return a typed context object when key resolves per
+     * documented convention to an object of the same type.
      *
      * @param key
      * @param <T>
@@ -70,7 +78,7 @@ public abstract class ELContextWrapper extends ELContext {
      * @see ELContext#getContext(Class)
      */
     public final <T> T getTypedContext(Class<T> key) {
-        return (T) getContext(key);
+        return UEL.getContext(this, key);
     }
 
 }

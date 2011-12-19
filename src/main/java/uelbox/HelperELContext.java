@@ -2,7 +2,6 @@ package uelbox;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
-import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 
 /**
@@ -32,7 +31,9 @@ public abstract class HelperELContext<RESULT> extends ELContextWrapper {
 
     @Override
     public HelperELResolver<RESULT> getELResolver() {
-        return (HelperELResolver<RESULT>) super.getELResolver();
+    	@SuppressWarnings("unchecked")
+		final HelperELResolver<RESULT> result = (HelperELResolver<RESULT>) super.getELResolver();
+    	return result;
     }
 
     /**

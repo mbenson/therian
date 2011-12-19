@@ -3,8 +3,6 @@ package uelbox;
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * UEL utility methods.
  */
@@ -35,7 +33,9 @@ public class UEL {
      * @return T
      */
     public static <T> T getContext(ELContext context, Class<T> key) {
-        return (T) context.getContext(key);
+    	@SuppressWarnings("unchecked")
+		final T result = (T) context.getContext(key);
+    	return result;
     }
 
     /**
