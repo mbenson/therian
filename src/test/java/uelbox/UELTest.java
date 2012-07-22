@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test ELUtils
+ * Test {@link UEL}.
  */
-public class ELUtilsTest {
+public class UELTest {
     private ELContext context;
 
     @Before
