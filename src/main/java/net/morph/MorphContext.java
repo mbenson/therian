@@ -77,7 +77,7 @@ public class MorphContext extends ELContextWrapper {
      * @throws IllegalArgumentException
      *             if no operators are successful
      */
-    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT perform(OPERATION operation) {
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation) {
         final MorphContext originalContext = getCurrentInstance();
         if (originalContext != this) {
             CURRENT_INSTANCE.set(this);
@@ -103,7 +103,7 @@ public class MorphContext extends ELContextWrapper {
                             break;
                         }
                         // already determined that operator supports operation:
-                        performRaw(operation, operator);
+                        evalRaw(operation, operator);
                     }
                 }
                 return operation.getResult();
@@ -124,7 +124,7 @@ public class MorphContext extends ELContextWrapper {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void performRaw(Operation operation, Operator operator) {
+    private void evalRaw(Operation operation, Operator operator) {
         Operators.validateImplementation(operator).perform(operation);
     }
 
@@ -136,14 +136,14 @@ public class MorphContext extends ELContextWrapper {
      * @param <OPERATION>
      * @return operation's result
      */
-    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT delegateSuccess(OPERATION operation) {
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(OPERATION operation) {
         Validate.validState(!operations.isEmpty(), "cannot delegate without an ongoing operation");
         RESULT result;
         Operation<?> owner = operations.peek();
         try {
             Validate.isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner,
                 operation);
-            result = perform(operation);
+            result = eval(operation);
         } finally {
             owner.setSuccessful(operation.isSuccessful());
         }

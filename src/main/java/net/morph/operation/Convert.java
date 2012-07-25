@@ -79,7 +79,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
         if (TypeUtils.isAssignable(getSourcePosition().getType(), super.getTargetPosition().getType())) {
             @SuppressWarnings("unchecked")
             final TARGET value = (TARGET) getSourcePosition().getValue();
-            if (MorphContext.getRequiredInstance().perform(ImmutableCheck.of(value)).booleanValue()) {
+            if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(value)).booleanValue()) {
                 getTargetPosition().setValue(value);
                 setSuccessful(true);
             }

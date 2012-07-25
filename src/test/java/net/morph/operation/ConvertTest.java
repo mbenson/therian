@@ -42,47 +42,47 @@ public class ConvertTest {
 
     @Test
     public void testImmutableAssignable() {
-        assertNull(morphContext.perform(new Convert<String, CharSequence>(new Constant<String>(null) {
+        assertNull(morphContext.eval(new Convert<String, CharSequence>(new Constant<String>(null) {
         }, CharSequence.class)));
-        assertEquals("", morphContext.perform(new Convert<String, CharSequence>(Constant.of(""), CharSequence.class)));
-        assertEquals("", morphContext.perform(new Convert<String, String>(Constant.of(""), String.class)));
+        assertEquals("", morphContext.eval(new Convert<String, CharSequence>(Constant.of(""), CharSequence.class)));
+        assertEquals("", morphContext.eval(new Convert<String, String>(Constant.of(""), String.class)));
         assertSame(MetasyntacticVariable.FOO,
-            morphContext.perform(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Constant
+            morphContext.eval(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Constant
                 .of(MetasyntacticVariable.FOO), MetasyntacticVariable.class)));
-        assertSame(MetasyntacticVariable.FOO, morphContext.perform(new Convert<MetasyntacticVariable, Enum<?>>(Constant
+        assertSame(MetasyntacticVariable.FOO, morphContext.eval(new Convert<MetasyntacticVariable, Enum<?>>(Constant
             .of(MetasyntacticVariable.FOO), Enum.class)));
         assertEquals(Integer.valueOf(666),
-            morphContext.perform(new Convert<Integer, Integer>(Constant.of(Integer.valueOf(666)), Integer.class)));
+            morphContext.eval(new Convert<Integer, Integer>(Constant.of(Integer.valueOf(666)), Integer.class)));
         assertEquals(Integer.valueOf(666),
-            morphContext.perform(new Convert<Integer, Number>(Constant.of(Integer.valueOf(666)), Number.class)));
+            morphContext.eval(new Convert<Integer, Number>(Constant.of(Integer.valueOf(666)), Number.class)));
     }
 
     @Test
     public void testCoerciontoString() {
         assertEquals("666",
-            morphContext.perform(new Convert<Integer, String>(Constant.of(Integer.valueOf(666)), String.class)));
+            morphContext.eval(new Convert<Integer, String>(Constant.of(Integer.valueOf(666)), String.class)));
     }
 
     @Test
     public void testCoerciontoEnum() {
-        assertNull(morphContext.perform(new Convert<Object, MetasyntacticVariable>(new Constant<Object>(null) {
+        assertNull(morphContext.eval(new Convert<Object, MetasyntacticVariable>(new Constant<Object>(null) {
         }, MetasyntacticVariable.class)));
-        assertNull(morphContext.perform(new Convert<String, MetasyntacticVariable>(Constant.of(""),
+        assertNull(morphContext.eval(new Convert<String, MetasyntacticVariable>(Constant.of(""),
             MetasyntacticVariable.class)));
-        assertSame(MetasyntacticVariable.FOO, morphContext.perform(new Convert<String, MetasyntacticVariable>(Constant
+        assertSame(MetasyntacticVariable.FOO, morphContext.eval(new Convert<String, MetasyntacticVariable>(Constant
             .of("FOO"), MetasyntacticVariable.class)));
     }
 
     @Test
     public void testCoercionToBoolean() {
-        assertFalse(morphContext.perform(new Convert<Object, Boolean>(new Constant<Object>(null) {
+        assertFalse(morphContext.eval(new Convert<Object, Boolean>(new Constant<Object>(null) {
         }, Boolean.class)).booleanValue());
-        assertFalse(morphContext.perform(new Convert<String, Boolean>(Constant.of(""), Boolean.class)).booleanValue());
-        assertFalse(morphContext.perform(new Convert<String, Boolean>(Constant.of("false"), Boolean.class))
+        assertFalse(morphContext.eval(new Convert<String, Boolean>(Constant.of(""), Boolean.class)).booleanValue());
+        assertFalse(morphContext.eval(new Convert<String, Boolean>(Constant.of("false"), Boolean.class))
             .booleanValue());
-        assertFalse(morphContext.perform(new Convert<String, Boolean>(Constant.of("whatever"), Boolean.class))
+        assertFalse(morphContext.eval(new Convert<String, Boolean>(Constant.of("whatever"), Boolean.class))
             .booleanValue());
-        assertTrue(morphContext.perform(new Convert<String, Boolean>(Constant.of("true"), Boolean.class))
+        assertTrue(morphContext.eval(new Convert<String, Boolean>(Constant.of("true"), Boolean.class))
             .booleanValue());
     }
 
