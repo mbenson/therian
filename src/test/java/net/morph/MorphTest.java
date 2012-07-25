@@ -24,6 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class MorphTest {
+    public enum MetasyntacticVariable {
+        FOO, BAR, BAZ;
+    }
+
     private MorphContext morphContext;
 
     @Before
@@ -34,9 +38,16 @@ public class MorphTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testImmutableAssignable() {
-        assertNull(morphContext.perform(new Convert<String, CharSequence>(new Constant<String>(null) {}, CharSequence.class)));
+        assertNull(morphContext.perform(new Convert<String, CharSequence>(new Constant<String>(null) {
+        }, CharSequence.class)));
         assertEquals("", morphContext.perform(new Convert<String, CharSequence>(Constant.of(""), CharSequence.class)));
         assertEquals("", morphContext.perform(new Convert<String, String>(Constant.of(""), String.class)));
+        assertEquals(MetasyntacticVariable.FOO,
+            morphContext.perform(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Constant
+                .of(MetasyntacticVariable.FOO), MetasyntacticVariable.class)));
+        assertEquals(MetasyntacticVariable.FOO,
+            morphContext.perform(new Convert<MetasyntacticVariable, Enum<?>>(Constant
+                    .of(MetasyntacticVariable.FOO), Enum.class)));
     }
 
     @SuppressWarnings("deprecation")
