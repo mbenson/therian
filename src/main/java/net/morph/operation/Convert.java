@@ -90,9 +90,9 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
     protected void init() {
         super.init();
         if (TypeUtils.isAssignable(getSourcePosition().getType(), super.getTargetPosition().getType())) {
-            @SuppressWarnings("unchecked")
-            final TARGET value = (TARGET) getSourcePosition().getValue();
-            if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(value)).booleanValue()) {
+            if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(getSourcePosition())).booleanValue()) {
+                @SuppressWarnings("unchecked")
+                final TARGET value = (TARGET) getSourcePosition().getValue();
                 getTargetPosition().setValue(value);
                 setSuccessful(true);
             }

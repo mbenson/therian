@@ -16,37 +16,42 @@
 package net.morph.operation;
 
 import net.morph.Operation;
+import net.morph.position.Position;
+import net.morph.position.Position.Readable;
 
 /**
  * Operation to check an object for immutability. Uses success as its result,
  * because it wants to run until some {@link Operator} gives it a {@code true}
  * value.
  */
-public class ImmutableCheck extends Operation<Boolean> {
-    private final Object object;
+public final class ImmutableCheck<T> extends Operation<Boolean> {
+    private final Position.Readable<T> position;
 
-    private ImmutableCheck(Object object) {
-        this.object = object;
+    private ImmutableCheck(Readable<T> position) {
+        super();
+        this.position = position;
     }
 
-    public Object getObject() {
-        return object;
+    public Position.Readable<T> getPosition() {
+        return position;
     }
 
     /**
      * Success as result.
      */
     @Override
-    public final Boolean getResult() {
+    public Boolean getResult() {
         return isSuccessful();
     }
 
     /**
-     * Create an {@link ImmutableCheck} operation of {@code object}.
-     * @param object
+     * Create an {@link ImmutableCheck} operation against {@code position}.
+     * 
+     * @param T
+     * @param position
      * @return operation
      */
-    public static <TYPE> ImmutableCheck of(Object object) {
-        return new ImmutableCheck(object);
+    public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
+        return new ImmutableCheck<T>(position);
     }
 }

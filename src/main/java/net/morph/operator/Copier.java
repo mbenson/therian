@@ -37,8 +37,7 @@ public abstract class Copier<SOURCE, DEST> implements Operator<Copy<? extends SO
 
     public boolean supports(Copy<? extends SOURCE, ? extends DEST> copy) {
         // cannot copy to immutable types
-        if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(copy.getTargetPosition().getValue()))
-            .booleanValue()) {
+        if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()) {
             return false;
         }
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Copier.class);

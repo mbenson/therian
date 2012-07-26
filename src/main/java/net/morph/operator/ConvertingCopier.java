@@ -29,15 +29,13 @@ import net.morph.position.Position;
 public class ConvertingCopier implements Operator<Copy<?, ?>> {
 
     public void perform(Copy<?, ?> operation) {
-        //TODO create convert operation
+        // TODO create convert operation
         Convert<?, ?> convert = null;
         MorphContext.getRequiredInstance().forwardTo(convert);
     }
 
     public boolean supports(Copy<?, ?> operation) {
         return operation.getTargetPosition() instanceof Position.Writable
-            && MorphContext.getRequiredInstance().eval(ImmutableCheck.of(operation.getTargetPosition().getValue()))
-                .booleanValue();
+            && MorphContext.getRequiredInstance().eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue();
     }
-
 }
