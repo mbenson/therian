@@ -78,14 +78,12 @@ public class Operators {
      * Validate an Operator implementation.
      * 
      * @param operator
-     * @param <RESULT>
      * @param <OPERATOR>
      * @return {@code operator}
      * @throws OperatorDefinitionException
      *             on invalid operator
      */
-    public static <RESULT, OPERATOR extends Operator<Operation<RESULT>>> OPERATOR validateImplementation(
-        OPERATOR operator) {
+    public static <OPERATOR extends Operator<?>> OPERATOR validateImplementation(OPERATOR operator) {
         if (operator.getClass().getTypeParameters().length > 0) {
             throw new OperatorDefinitionException(operator, TYPE_PARAMS_DETECTED);
         }
