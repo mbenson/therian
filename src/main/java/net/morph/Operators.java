@@ -20,6 +20,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.Map;
 
 import net.morph.operator.ConvertingCopier;
+import net.morph.operator.DefaultImmutableChecker;
 import net.morph.operator.ELCoercionConverter;
 
 import org.apache.commons.functor.UnaryPredicate;
@@ -38,6 +39,7 @@ public class Operators {
          */
         new ELCoercionConverter(),
         new ConvertingCopier(),
+        new DefaultImmutableChecker()
     };
     //@formatter:on
 
