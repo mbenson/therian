@@ -22,7 +22,7 @@ import net.morph.Morph;
 import net.morph.MorphContext;
 import net.morph.MorphModule;
 import net.morph.operator.DefaultImmutableChecker;
-import net.morph.position.Constant;
+import net.morph.position.Ref;
 import net.morph.testfixture.MetasyntacticVariable;
 
 import org.junit.Before;
@@ -39,19 +39,18 @@ public class ConvertTest {
 
     @Test
     public void testImmutableAssignable() {
-        assertNull(morphContext.eval(new Convert<String, CharSequence>(new Constant<String>(null) {
-        }, CharSequence.class)));
-        assertEquals("", morphContext.eval(new Convert<String, CharSequence>(Constant.of(""), CharSequence.class)));
-        assertEquals("", morphContext.eval(new Convert<String, String>(Constant.of(""), String.class)));
+        assertNull(morphContext.eval(new Convert<String, CharSequence>(new Ref<String>(null) {}, CharSequence.class)));
+        assertEquals("", morphContext.eval(new Convert<String, CharSequence>(Ref.to(""), CharSequence.class)));
+        assertEquals("", morphContext.eval(new Convert<String, String>(Ref.to(""), String.class)));
         assertSame(MetasyntacticVariable.FOO,
-            morphContext.eval(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Constant
-                .of(MetasyntacticVariable.FOO), MetasyntacticVariable.class)));
-        assertSame(MetasyntacticVariable.FOO, morphContext.eval(new Convert<MetasyntacticVariable, Enum<?>>(Constant
-            .of(MetasyntacticVariable.FOO), Enum.class)));
+            morphContext.eval(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Ref
+                .to(MetasyntacticVariable.FOO), MetasyntacticVariable.class)));
+        assertSame(MetasyntacticVariable.FOO, morphContext.eval(new Convert<MetasyntacticVariable, Enum<?>>(Ref
+            .to(MetasyntacticVariable.FOO), Enum.class)));
         assertEquals(Integer.valueOf(666),
-            morphContext.eval(new Convert<Integer, Integer>(Constant.of(Integer.valueOf(666)), Integer.class)));
+            morphContext.eval(new Convert<Integer, Integer>(Ref.to(Integer.valueOf(666)), Integer.class)));
         assertEquals(Integer.valueOf(666),
-            morphContext.eval(new Convert<Integer, Number>(Constant.of(Integer.valueOf(666)), Number.class)));
+            morphContext.eval(new Convert<Integer, Number>(Ref.to(Integer.valueOf(666)), Number.class)));
     }
 
 }

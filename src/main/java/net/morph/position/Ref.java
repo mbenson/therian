@@ -24,25 +24,25 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
- * Readable constant value.
+ * Reference to a given value.
  * 
  * @param <T>
  */
-public class Constant<T> implements Position.Readable<T> {
-    private static final TypeVariable<?>[] TYPE_PARAMS = Constant.class.getTypeParameters();
+public class Ref<T> implements Position.Readable<T> {
+    private static final TypeVariable<?>[] TYPE_PARAMS = Ref.class.getTypeParameters();
 
     private final T value;
     private final Type type;
 
     /**
      * If {@code value} may be {@code null}, create an anonymous subclass e.g.
-     * <code>new Constant<String>(null) {}</code>.
+     * <code>new Ref<String>(null) {}</code>.
      * 
      * @param value
      */
-    protected Constant(T value) {
+    protected Ref(T value) {
         this.value = value;
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Constant.class);
+        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Ref.class);
         if (typeArguments.containsKey(TYPE_PARAMS[0])) {
             this.type = typeArguments.get(TYPE_PARAMS[0]);
         } else {
@@ -63,10 +63,10 @@ public class Constant<T> implements Position.Readable<T> {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof Constant == false) {
+        if (obj instanceof Ref == false) {
             return false;
         }
-        Constant<?> other = (Constant<?>) obj;
+        Ref<?> other = (Ref<?>) obj;
         return other.getType().equals(type) && ObjectUtils.equals(other.getValue(), value);
     }
 
@@ -83,16 +83,16 @@ public class Constant<T> implements Position.Readable<T> {
     public String toString() {
         return String.format("Constant<%s>(%s)", type, value);
     }
-    
+
     /**
      * Valid for non-{@code null} values only, and then can only get raw type
      * from value. Use an anonymous subclass for greater flexibility WRT types.
      * 
      * @param value
-     * @return Constant
+     * @return Ref
      */
-    public static <T> Constant<T> of(T value) {
-        return new Constant<T>(value);
+    public static <T> Ref<T> to(T value) {
+        return new Ref<T>(value);
     }
 
 }

@@ -78,7 +78,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
             public void setValue(TARGET value) {
             }
-            
+
             @Override
             public String toString() {
                 return targetType.toString();
@@ -98,7 +98,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
             }
         }
     }
-    
+
     @Override
     protected TARGET provideResult() {
         return result.value;

@@ -19,12 +19,13 @@ import java.lang.reflect.Type;
 
 /**
  * Object position.
- *
+ * 
  * @param <T>
  */
 public interface Position<T> {
     /**
      * Get the type represented by this position.
+     * 
      * @return Type
      */
     Type getType();
@@ -35,6 +36,7 @@ public interface Position<T> {
     public interface Readable<T> extends Position<T> {
         /**
          * Get the value at this position.
+         * 
          * @return T
          */
         T getValue();
@@ -42,11 +44,13 @@ public interface Position<T> {
 
     /**
      * Writable position.
+     * 
      * @param <T>
      */
     public interface Writable<T> extends Position<T> {
         /**
          * Set a value at this position.
+         * 
          * @param value
          */
         void setValue(T value);

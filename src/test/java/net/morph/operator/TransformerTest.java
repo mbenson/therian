@@ -24,7 +24,7 @@ import net.morph.MorphModule;
 public abstract class TransformerTest {
 
     protected MorphContext morphContext;
-    
+
     @Before
     public void setup() {
         morphContext = Morph.usingModules(modules()).context();

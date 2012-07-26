@@ -25,10 +25,12 @@ import javax.el.ELResolver;
  * Special ELResolver that:
  * <ul>
  * <li>Helps implement operators</li>
- * <li>Provides our conversion facilities to {@link #setValue(javax.el.ELContext, Object, Object, Object)}</li>
+ * <li>Provides our conversion facilities to
+ * {@link #setValue(javax.el.ELContext, Object, Object, Object)}</li>
  * </ul>
  */
-//TODO review responsibilities and corresponding doco of this class, or make private to MorphContext
+// TODO review responsibilities and corresponding doco of this class, or make
+// private to MorphContext
 public class MorphContextELResolver extends ELResolver {
     private final ELResolver delegate;
 
@@ -43,7 +45,8 @@ public class MorphContextELResolver extends ELResolver {
 
     @Override
     public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-        // TODO cache/key? perhaps PropertyDescriptors only? that could work. maybe via a different API
+        // TODO cache/key? perhaps PropertyDescriptors only? that could work.
+        // maybe via a different API
         return delegate.getFeatureDescriptors(context, base);
     }
 
@@ -66,7 +69,8 @@ public class MorphContextELResolver extends ELResolver {
 
     @Override
     public void setValue(ELContext context, Object base, Object property, Object value) {
-        //TODO possibly record stuff?, also force conversions through our facilities
+        // TODO possibly record stuff?, also force conversions through our
+        // facilities
         delegate.setValue(context, base, property, value);
     }
 }

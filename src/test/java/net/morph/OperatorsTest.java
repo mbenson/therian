@@ -58,9 +58,8 @@ public class OperatorsTest {
     @Test
     public void testSupporting() {
         @SuppressWarnings("unchecked")
-        final List<Surgeon<? extends Surgery>> surgeons = Arrays.asList(new Surgeon<Appendectomy>() {
-        }, new Surgeon<Tonsillectomy>() {
-        });
+        final List<Surgeon<? extends Surgery>> surgeons =
+            Arrays.asList(new Surgeon<Appendectomy>() {}, new Surgeon<Tonsillectomy>() {});
         assertEquals(
             1,
             IteratorToGeneratorAdapter
@@ -75,8 +74,7 @@ public class OperatorsTest {
 
     @Test
     public void testValidateImplementation() {
-        Operators.validateImplementation(new Surgeon<Appendectomy>() {
-        });
+        Operators.validateImplementation(new Surgeon<Appendectomy>() {});
     }
 
     @Test(expected = OperatorDefinitionException.class)

@@ -86,7 +86,7 @@ public class MorphContext extends ELContextWrapper {
         }
         try {
             if (operations.contains(operation)) {
-                //TODO handle better, e.g. copy of recursive graph
+                // TODO handle better, e.g. copy of recursive graph
                 throw new OperationException(operation, "recursive operation detected");
             }
             operations.push(operation);
