@@ -16,7 +16,8 @@
 package net.morph;
 
 /**
- * Exception thrown to signify a problem with the definition of an Operator.
+ * Exception thrown to signify a problem with the definition of an
+ * {@link Operator}.
  */
 public class OperatorDefinitionException extends RuntimeException {
     /** Serialization version */
@@ -25,12 +26,12 @@ public class OperatorDefinitionException extends RuntimeException {
     public OperatorDefinitionException() {
     }
 
-    public OperatorDefinitionException(String s) {
-        super(s);
+    public OperatorDefinitionException(String message, Object... args) {
+        super(String.format(message, args));
     }
 
-    public OperatorDefinitionException(String s, Throwable throwable) {
-        super(s, throwable);
+    public OperatorDefinitionException(Throwable throwable, String message, Object... args) {
+        super(String.format(message, args), throwable);
     }
 
     public OperatorDefinitionException(Throwable throwable) {
