@@ -37,10 +37,26 @@ public class Operators {
          * TODO add
          */
         new ELCoercionConverter(),
-        new ConvertingCopier()
-        };
+        new ConvertingCopier(),
+    };
     //@formatter:on
 
+    /**
+     * Get standard operators.
+     * 
+     * @return Operator[]
+     */
+    public static Operator<?>[] standard() {
+        return STANDARD_OPERATORS;
+    }
+
+    /**
+     * Get a {@link UnaryPredicate} to match {@link Operator}s that support
+     * {@code Operation}.
+     * 
+     * @param operation
+     * @return {@link UnaryPredicate}
+     */
     public static UnaryPredicate<Operator<?>> supporting(final Operation<?> operation) {
         return new UnaryPredicate<Operator<?>>() {
             public boolean test(Operator<?> operator) {
@@ -54,10 +70,6 @@ public class Operators {
                 return false;
             }
         };
-    }
-
-    public static Operator<?>[] standard() {
-        return STANDARD_OPERATORS;
     }
 
     /**
