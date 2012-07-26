@@ -19,21 +19,25 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
  * Readable constant value.
- *
+ * 
  * @param <T>
  */
 public class Constant<T> implements Position.Readable<T> {
     private static final TypeVariable<?>[] TYPE_PARAMS = Constant.class.getTypeParameters();
+
     private final T value;
     private final Type type;
 
     /**
-     * If {@code value} may be {@code null}, create an anonymous subclass e.g. <code>new Constant<String>(null) {}</code>. 
+     * If {@code value} may be {@code null}, create an anonymous subclass e.g.
+     * <code>new Constant<String>(null) {}</code>.
+     * 
      * @param value
      */
     protected Constant(T value) {
@@ -54,9 +58,36 @@ public class Constant<T> implements Position.Readable<T> {
         return value;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Constant == false) {
+            return false;
+        }
+        Constant<?> other = (Constant<?>) obj;
+        return other.getType().equals(type) && ObjectUtils.equals(other.getValue(), value);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 37 << 4;
+        result |= type.hashCode();
+        result <<= 4;
+        result |= ObjectUtils.hashCode(value);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Constant<%s>(%s)", type, value);
+    }
+    
     /**
-     * Valid for non-{@code null} values only, and then can only get raw type from value.
-     * Use an anonymous subclass for greater flexibility WRT types. 
+     * Valid for non-{@code null} values only, and then can only get raw type
+     * from value. Use an anonymous subclass for greater flexibility WRT types.
+     * 
      * @param value
      * @return Constant
      */

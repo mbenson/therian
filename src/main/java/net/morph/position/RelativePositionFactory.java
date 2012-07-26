@@ -76,11 +76,12 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof RelativePositionFactory<?, ?, ?>.RelativePositionInvocationHandler == false) {
+            if (obj instanceof RelativePositionFactory.RelativePositionInvocationHandler == false) {
                 return false;
             }
-            RelativePositionFactory<?, ?, ?>.RelativePositionInvocationHandler other =
-                (RelativePositionFactory<?, ?, ?>.RelativePositionInvocationHandler) obj;
+            @SuppressWarnings("rawtypes")
+            RelativePositionFactory.RelativePositionInvocationHandler other =
+                (RelativePositionFactory.RelativePositionInvocationHandler) obj;
             return ObjectUtils.equals(parent, other.parent) && ObjectUtils.equals(mixins, other.mixins);
         }
     }

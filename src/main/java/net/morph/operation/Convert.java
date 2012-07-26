@@ -47,6 +47,11 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
             Convert.super.getTargetPosition().setValue(value);
         }
 
+        @Override
+        public String toString() {
+            return Convert.super.getTargetPosition().toString();
+        }
+
         private boolean isPrimitive(Type type) {
             return type instanceof Class && ((Class<?>) type).isPrimitive();
         }
@@ -63,12 +68,20 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
     // TODO make private, replace with fluent API
     public Convert(Readable<SOURCE> sourcePosition, final Type targetType) {
         this(sourcePosition, new Position.Writable<TARGET>() {
+            {
+                Validate.notNull(targetType, "targetType");
+            }
 
             public Type getType() {
                 return targetType;
             }
 
             public void setValue(TARGET value) {
+            }
+            
+            @Override
+            public String toString() {
+                return targetType.toString();
             }
         });
     }

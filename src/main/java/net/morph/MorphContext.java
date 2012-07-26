@@ -17,6 +17,7 @@ package net.morph;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
@@ -26,6 +27,7 @@ import net.morph.util.ReadOnlyUtils;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+
 import uelbox.ELContextWrapper;
 
 /**
@@ -84,13 +86,8 @@ public class MorphContext extends ELContextWrapper {
         }
         try {
             if (operations.contains(operation)) {
-                for (Operation<?> element : operations) {
-                    if (element.equals(operation)) {
-                        @SuppressWarnings("unchecked")
-                        final OPERATION equalOperation = (OPERATION) element;
-                        return equalOperation.getResult();
-                    }
-                }
+                //TODO handle better, e.g. copy of recursive graph
+                throw new OperationException(operation, "recursive operation detected");
             }
             operations.push(operation);
 
@@ -99,15 +96,16 @@ public class MorphContext extends ELContextWrapper {
                 if (!operation.isSuccessful()) {
                     for (Operator<?> operator : FilteredIterable.of(getTypedContext(Morph.class).getOperators())
                         .retain(Operators.supporting(operation))) {
+                        // already determined that operator supports operation:
+                        evalRaw(operation, operator);
                         if (operation.isSuccessful()) {
                             break;
                         }
-                        // already determined that operator supports operation:
-                        evalRaw(operation, operator);
                     }
                 }
                 return operation.getResult();
             } finally {
+                assert operations.pop() == operation;
             }
         } finally {
             // javadoc not clear on whether set(null) is truly equivalent to

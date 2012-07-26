@@ -15,31 +15,37 @@
  */
 package net.morph.operation;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
+
 import net.morph.Operation;
 import net.morph.position.Position;
 
 /**
- * Abstract transform operation.
- * A "transformer" is an operator over a transform operation.  Defining "Transformer" in terms of
- * our object model would constrict the behavior of transformer implementations in detrimental ways.
+ * Abstract transform operation. A "transformer" is an operator over a transform
+ * operation. Defining "Transformer" in terms of our object model would
+ * constrict the behavior of transformer implementations in detrimental ways.
  */
-public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends Operation<RESULT> {
+public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends
+    Operation<RESULT> {
     private final Position.Readable<SOURCE> sourcePosition;
     private final TARGET_POSITION targetPosition;
 
     /**
      * Create a new Transform instance.
+     * 
      * @param sourcePosition
      * @param targetPosition
      */
     protected Transform(Position.Readable<SOURCE> sourcePosition, TARGET_POSITION targetPosition) {
         super();
-        this.sourcePosition = sourcePosition;
-        this.targetPosition = targetPosition;
+        this.sourcePosition = Validate.notNull(sourcePosition, "sourcePosition");
+        this.targetPosition = Validate.notNull(targetPosition, "targetPosition");
     }
 
     /**
      * Get the sourcePosition.
+     * 
      * @return Position.Readable<SOURCE>
      */
     public Position.Readable<SOURCE> getSourcePosition() {
@@ -48,6 +54,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the targetPosition.
+     * 
      * @return TARGET_POSITION
      */
     public TARGET_POSITION getTargetPosition() {
@@ -57,5 +64,34 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     @Override
     public final RESULT getResult() {
         return super.getResult();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        Transform<?, ?, ?, ?> other = (Transform<?, ?, ?, ?>) obj;
+        return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
+            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 41 << 4;
+        result |= getClass().hashCode();
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getSourcePosition());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getTargetPosition());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
     }
 }
