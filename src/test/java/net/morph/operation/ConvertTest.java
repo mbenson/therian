@@ -20,6 +20,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import net.morph.Morph;
 import net.morph.MorphContext;
+import net.morph.MorphModule;
+import net.morph.operator.DefaultImmutableChecker;
 import net.morph.position.Constant;
 import net.morph.testfixture.MetasyntacticVariable;
 
@@ -32,8 +34,7 @@ public class ConvertTest {
 
     @Before
     public void setup() {
-//        morphContext = Morph.usingModules().context();
-        morphContext = Morph.standard().context();
+        morphContext = Morph.usingModules(MorphModule.create().withOperators(new DefaultImmutableChecker())).context();
     }
 
     @Test
