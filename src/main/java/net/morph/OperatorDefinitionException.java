@@ -23,18 +23,28 @@ public class OperatorDefinitionException extends RuntimeException {
     /** Serialization version */
     private static final long serialVersionUID = -7571972458679149796L;
 
-    public OperatorDefinitionException() {
+    private final Operator<?> operator;
+
+    public OperatorDefinitionException(Operator<?> operator) {
+        this.operator = operator;
     }
 
-    public OperatorDefinitionException(String message, Object... args) {
+    public OperatorDefinitionException(Operator<?> operator, String message, Object... args) {
         super(String.format(message, args));
+        this.operator = operator;
     }
 
-    public OperatorDefinitionException(Throwable throwable, String message, Object... args) {
+    public OperatorDefinitionException(Operator<?> operator, Throwable throwable, String message, Object... args) {
         super(String.format(message, args), throwable);
+        this.operator = operator;
     }
 
-    public OperatorDefinitionException(Throwable throwable) {
+    public OperatorDefinitionException(Operator<?> operator, Throwable throwable) {
         super(throwable);
+        this.operator = operator;
+    }
+
+    public Operator<?> getOperator() {
+        return operator;
     }
 }

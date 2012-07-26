@@ -62,7 +62,7 @@ public class Operators {
     public static UnaryPredicate<Operator<?>> supporting(final Operation<?> operation) {
         return new UnaryPredicate<Operator<?>>() {
             public boolean test(Operator<?> operator) {
-                Map<TypeVariable<?>, Type> typeArguments =
+                final Map<TypeVariable<?>, Type> typeArguments =
                     TypeUtils.getTypeArguments(operator.getClass(), Operator.class);
                 if (TypeUtils.isInstance(operation, typeArguments.get(Operator.class.getTypeParameters()[0]))) {
                     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -87,7 +87,7 @@ public class Operators {
     public static <RESULT, OPERATOR extends Operator<Operation<RESULT>>> OPERATOR validateImplementation(
         OPERATOR operator) {
         if (operator.getClass().getTypeParameters().length > 0) {
-            throw new OperatorDefinitionException(TYPE_PARAMS_DETECTED);
+            throw new OperatorDefinitionException(operator, TYPE_PARAMS_DETECTED);
         }
         return operator;
     }
