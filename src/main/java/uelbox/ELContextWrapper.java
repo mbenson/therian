@@ -1,5 +1,7 @@
 package uelbox;
 
+import java.util.Locale;
+
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
@@ -34,7 +36,6 @@ public abstract class ELContextWrapper extends ELContext {
                 return ELContextWrapper.this.wrapped.getVariableMapper().resolveVariable(variable);
             }
         };
-        setLocale(wrapped.getLocale());
     }
 
     /**
@@ -59,6 +60,12 @@ public abstract class ELContextWrapper extends ELContext {
     @Override
     public VariableMapper getVariableMapper() {
         return variableMapper;
+    }
+
+    @Override
+    public Locale getLocale() {
+        final Locale result = super.getLocale();
+        return result == null ? super.getLocale() : result;
     }
 
     @Override
