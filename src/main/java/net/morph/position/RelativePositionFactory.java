@@ -32,16 +32,16 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 /**
- * Relative Position factory.
+ * {@link RelativePosition} factory.
  */
 public abstract class RelativePositionFactory<P, T, POSITION_TYPE extends Position<T>> {
     private static final Class<?>[] TO_IMPLEMENT_BASE = { RelativePosition.class };
 
     private class RelativePositionInvocationHandler implements InvocationHandler {
-        final Position<? extends P> parentPosition;
+        final Position.Readable<? extends P> parentPosition;
         final Map<Class<? extends Position<?>>, Mixin<P, T>> mixins;
 
-        protected RelativePositionInvocationHandler(Position<? extends P> parentPosition,
+        protected RelativePositionInvocationHandler(Position.Readable<? extends P> parentPosition,
             Map<Class<? extends Position<?>>, Mixin<P, T>> mixins) {
             super();
             this.parentPosition = parentPosition;
@@ -114,16 +114,20 @@ public abstract class RelativePositionFactory<P, T, POSITION_TYPE extends Positi
         this.mixins = Collections.unmodifiableMap(m);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Class<? extends Position<?>>[] getImplementedTypes(Class<? extends Mixin> mixinType) {
-        final HashSet<Class<? extends Position>> set = new HashSet<Class<? extends Position>>();
+    private static Class<? extends Position<?>>[] getImplementedTypes(
+        @SuppressWarnings("rawtypes") Class<? extends Mixin> mixinType) {
+        final HashSet<Class<? extends Position<?>>> set = new HashSet<Class<? extends Position<?>>>();
         for (Class<?> iface : mixinType.getInterfaces()) {
             Implements annotation = iface.getAnnotation(Implements.class);
             if (annotation != null) {
-                Collections.addAll(set, annotation.value());
+                @SuppressWarnings("unchecked")
+                final Class<? extends Position<?>>[] classes = (Class<? extends Position<?>>[]) annotation.value();
+                Collections.addAll(set, classes);
             }
         }
-        return set.toArray(new Class[set.size()]);
+        @SuppressWarnings("unchecked")
+        final Class<? extends Position<?>>[] result = set.toArray(new Class[set.size()]);
+        return result;
     }
 
     /**
@@ -132,7 +136,7 @@ public abstract class RelativePositionFactory<P, T, POSITION_TYPE extends Positi
      * @param parent
      * @return POSITION_TYPE
      */
-    public final POSITION_TYPE of(Position<? extends P> parentPosition) {
+    public final POSITION_TYPE of(Position.Readable<? extends P> parentPosition) {
         @SuppressWarnings("unchecked")
         final POSITION_TYPE result =
             (POSITION_TYPE) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),

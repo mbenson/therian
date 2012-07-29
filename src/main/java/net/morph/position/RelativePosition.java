@@ -23,12 +23,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Type;
 
 /**
- * Relative {@link Position}.
+ * {@link Position} relative to some other {@link Position.Readable}.
  * 
  * @param <P>
  * @param <T>
  */
-public interface RelativePosition<P, T> extends Position<T> {
+public abstract class RelativePosition<P, T> implements Position<T> {
 
     /**
      * Describes a {@link RelativePosition.Mixin}.
@@ -43,7 +43,7 @@ public interface RelativePosition<P, T> extends Position<T> {
 
     /**
      * Uses an {@link Implements} annotation to declare the {@link Position} interface(s) for which it provides an
-     * implementation, defining corresponding methods prepending the parent object as an argument.
+     * implementation, defining corresponding methods prepending the parent position as an argument.
      * 
      * @param <P>
      * @param <T>
@@ -59,7 +59,7 @@ public interface RelativePosition<P, T> extends Position<T> {
      */
     @Implements(Position.class)
     public interface GetType<P, T> extends Mixin<P, T> {
-        Type getType(Position<? extends P> parentPosition);
+        Type getType(Position.Readable<? extends P> parentPosition);
     }
 
     /**
@@ -70,7 +70,7 @@ public interface RelativePosition<P, T> extends Position<T> {
      */
     @Implements(Position.Readable.class)
     public interface GetValue<P, T> extends Mixin<P, T> {
-        T getValue(Position<? extends P> parentPosition);
+        T getValue(Position.Readable<? extends P> parentPosition);
     }
 
     /**
@@ -81,14 +81,24 @@ public interface RelativePosition<P, T> extends Position<T> {
      */
     @Implements(Position.Writable.class)
     public interface SetValue<P, T> extends Mixin<P, T> {
-        void setValue(Position<? extends P> parentValue, T value);
+        void setValue(Position.Readable<? extends P> parentValue, T value);
     }
 
-    /**
-     * Get parent {@link Position}.
-     * 
-     * @return Position
-     *         <P>
-     */
-    Position<? extends P> getParentPosition();
+    private final Position.Readable<? extends P> parentPosition;
+    private final RelativePositionFactory<P, T, ? extends Position<T>> factory;
+
+    protected RelativePosition(Position.Readable<? extends P> parentPosition,
+        RelativePositionFactory<P, T, ? extends Position<T>> factory) {
+        super();
+        this.parentPosition = parentPosition;
+        this.factory = factory;
+    }
+
+    public final Position.Readable<? extends P> getParentPosition() {
+        return parentPosition;
+    }
+
+    public final RelativePositionFactory<P, T, ? extends Position<T>> getFactory() {
+        return factory;
+    }
 }
