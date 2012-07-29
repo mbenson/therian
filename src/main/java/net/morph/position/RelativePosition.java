@@ -38,9 +38,8 @@ public abstract class RelativePosition {
     }
 
     /**
-     * Uses an {@link Implements} annotation to declare the {@link Position}
-     * interface(s) for which it provides an implementation, defining
-     * corresponding methods prepending the parent object as an argument.
+     * Uses an {@link Implements} annotation to declare the {@link Position} interface(s) for which it provides an
+     * implementation, defining corresponding methods prepending the parent object as an argument.
      * 
      * @param <P>
      * @param <T>

@@ -20,9 +20,8 @@ import net.morph.position.Position;
 import net.morph.position.Position.Readable;
 
 /**
- * Operation to check an object for immutability. Uses success as its result,
- * because it wants to run until some {@link Operator} gives it a {@code true}
- * value.
+ * Operation to check an object for immutability. Uses success as its result, because it wants to run until some
+ * {@link Operator} gives it a {@code true} value.
  */
 public final class ImmutableCheck<T> extends Operation<Boolean> {
     private final Position.Readable<T> position;

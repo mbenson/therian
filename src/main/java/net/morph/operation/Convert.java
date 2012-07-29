@@ -26,8 +26,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
- * Convert operation. An attempt to convert an immutable value to an assignable
- * type automatically succeeds.
+ * Convert operation. An attempt to convert an immutable value to an assignable type automatically succeeds.
  * 
  * @param <SOURCE>
  * @param <TARGET>

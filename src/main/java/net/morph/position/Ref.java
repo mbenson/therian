@@ -35,8 +35,7 @@ public class Ref<T> implements Position.Readable<T> {
     private final Type type;
 
     /**
-     * If {@code value} may be {@code null}, create an anonymous subclass e.g.
-     * <code>new Ref<String>(null) {}</code>.
+     * If {@code value} may be {@code null}, create an anonymous subclass e.g. <code>new Ref<String>(null) {}</code>.
      * 
      * @param value
      */
@@ -85,8 +84,8 @@ public class Ref<T> implements Position.Readable<T> {
     }
 
     /**
-     * Valid for non-{@code null} values only, and then can only get raw type
-     * from value. Use an anonymous subclass for greater flexibility WRT types.
+     * Valid for non-{@code null} values only, and then can only get raw type from value. Use an anonymous subclass for
+     * greater flexibility WRT types.
      * 
      * @param value
      * @return Ref

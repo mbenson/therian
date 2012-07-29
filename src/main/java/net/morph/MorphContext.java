@@ -35,8 +35,8 @@ import uelbox.ELContextWrapper;
  */
 public class MorphContext extends ELContextWrapper {
     /**
-     * Nested {@link ELContextWrapper} that wraps what this {@link MorphContext}
-     * wraps, which can be used with "utility" {@link ELResolver} wrappers.
+     * Nested {@link ELContextWrapper} that wraps what this {@link MorphContext} wraps, which can be used with "utility"
+     * {@link ELResolver} wrappers.
      */
     public abstract class NestedELContextWrapper extends ELContextWrapper {
 
@@ -83,8 +83,7 @@ public class MorphContext extends ELContextWrapper {
     /**
      * Get some usable {@link MorphContext} instance.
      * 
-     * @return current thread-bound instance or
-     *         {@code Morph.standard().context()}
+     * @return current thread-bound instance or {@code Morph.standard().context()}
      */
     public static MorphContext getInstance() {
         final MorphContext current = getCurrentInstance();
@@ -95,8 +94,8 @@ public class MorphContext extends ELContextWrapper {
     }
 
     /**
-     * Performs the specified operation by invoking any compatible operator
-     * until the operation is marked as successful, then returns the result.
+     * Performs the specified operation by invoking any compatible operator until the operation is marked as successful,
+     * then returns the result.
      * 
      * @param operation
      * @param <RESULT>

@@ -25,8 +25,7 @@ import javax.el.ELResolver;
  * Special ELResolver that:
  * <ul>
  * <li>Helps implement operators</li>
- * <li>Provides our conversion facilities to
- * {@link #setValue(javax.el.ELContext, Object, Object, Object)}</li>
+ * <li>Provides our conversion facilities to {@link #setValue(javax.el.ELContext, Object, Object, Object)}</li>
  * </ul>
  */
 // TODO review responsibilities and corresponding doco of this class, or make

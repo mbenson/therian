@@ -16,8 +16,8 @@
 package net.morph;
 
 /**
- * Implements an {@link Operation}. Note that a concrete {@link Operator}
- * implementation should host no direct type variables.
+ * Implements an {@link Operation}. Note that a concrete {@link Operator} implementation should host no direct type
+ * variables.
  * 
  * @param <OPERATION>
  * @see Operators#validateImplementation(Operator)

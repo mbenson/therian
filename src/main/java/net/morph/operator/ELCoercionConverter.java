@@ -25,11 +25,9 @@ import net.morph.Operator;
 import net.morph.operation.Convert;
 
 /**
- * Special operator that handles conversions by applying EL coercion rules.
- * Quintessential example of a "converter" that does not extend Converter due to
- * its differing type allowances. Intended as a fallback strategy to implement
- * "simple" conversions (aka coercions) when other approaches have been
- * exhausted.
+ * Special operator that handles conversions by applying EL coercion rules. Quintessential example of a "converter" that
+ * does not extend Converter due to its differing type allowances. Intended as a fallback strategy to implement "simple"
+ * conversions (aka coercions) when other approaches have been exhausted.
  */
 public class ELCoercionConverter implements Operator<Convert<?, ?>> {
 

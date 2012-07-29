@@ -22,9 +22,8 @@ import net.morph.Operation;
 import net.morph.position.Position;
 
 /**
- * Abstract transform operation. A "transformer" is an operator over a transform
- * operation. Defining "Transformer" in terms of our object model would
- * constrict the behavior of transformer implementations in detrimental ways.
+ * Abstract transform operation. A "transformer" is an operator over a transform operation. Defining "Transformer" in
+ * terms of our object model would constrict the behavior of transformer implementations in detrimental ways.
  */
 public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends
     Operation<RESULT> {

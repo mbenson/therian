@@ -16,9 +16,8 @@
 package net.morph;
 
 /**
- * Some operation; note that these are not intended for use on multiple threads.
- * An operation may not require any operator's assistance, as in the case of a
- * conversion to a type already assignable from the source.
+ * Some operation; note that these are not intended for use on multiple threads. An operation may not require any
+ * operator's assistance, as in the case of a conversion to a type already assignable from the source.
  * 
  * @param <RESULT>
  */
@@ -26,9 +25,8 @@ public abstract class Operation<RESULT> {
     private boolean successful;
 
     /**
-     * Get the result. Default implementation throws {@link OperationException}
-     * if the operation was unsuccessful, then defers to
-     * {@link #provideResult()}.
+     * Get the result. Default implementation throws {@link OperationException} if the operation was unsuccessful, then
+     * defers to {@link #provideResult()}.
      * 
      * @return RESULT
      * @see #provideResult()
@@ -51,8 +49,7 @@ public abstract class Operation<RESULT> {
     }
 
     /**
-     * Template method; must be implemented unless {@link #getResult()} is
-     * overridden.
+     * Template method; must be implemented unless {@link #getResult()} is overridden.
      * 
      * @return RESULT
      */

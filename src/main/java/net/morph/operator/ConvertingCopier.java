@@ -23,8 +23,8 @@ import net.morph.operation.ImmutableCheck;
 import net.morph.position.Position;
 
 /**
- * {@link Copy} {@link Operator} that attempts overwriting conversion for
- * writable target positions storing immutable values.
+ * {@link Copy} {@link Operator} that attempts overwriting conversion for writable target positions storing immutable
+ * values.
  */
 public class ConvertingCopier implements Operator<Copy<?, ?>> {
 

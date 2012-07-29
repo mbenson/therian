@@ -53,8 +53,7 @@ public class Operators {
     }
 
     /**
-     * Get a {@link UnaryPredicate} to match {@link Operator}s that support
-     * {@code Operation}.
+     * Get a {@link UnaryPredicate} to match {@link Operator}s that support {@code Operation}.
      * 
      * @param operation
      * @return {@link UnaryPredicate}

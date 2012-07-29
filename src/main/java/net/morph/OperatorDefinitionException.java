@@ -16,8 +16,7 @@
 package net.morph;
 
 /**
- * Exception thrown to signify a problem with the definition of an
- * {@link Operator}.
+ * Exception thrown to signify a problem with the definition of an {@link Operator}.
  */
 public class OperatorDefinitionException extends RuntimeException {
     /** Serialization version */
