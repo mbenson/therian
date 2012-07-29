@@ -86,7 +86,9 @@ public interface RelativePosition<P, T> extends Position<T> {
 
     /**
      * Get parent {@link Position}.
-     * @return Position<P>
+     * 
+     * @return Position
+     *         <P>
      */
     Position<? extends P> getParentPosition();
 }

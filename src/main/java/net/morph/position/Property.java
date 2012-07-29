@@ -15,7 +15,7 @@ public class Property<P, T, POSITION_TYPE extends Position.Readable<T> & Positio
             public Type getType(Position<? extends P> parentPosition) {
                 // TODO Auto-generated method stub
                 final MorphContext context = MorphContext.getInstance();
-                
+
                 return null;
             }
 
