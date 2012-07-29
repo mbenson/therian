@@ -56,8 +56,8 @@ public class HelperELContextTest {
         foo = new Foo();
         foo.getBar().put("baz", new Baz());
         context = new SimpleELContext();
-        context.getVariableMapper().setVariable("foo", UEL.getExpressionFactory(context).createValueExpression(foo,
-                Foo.class));
+        context.getVariableMapper().setVariable("foo",
+            UEL.getExpressionFactory(context).createValueExpression(foo, Foo.class));
         expressionFactory = UEL.getExpressionFactory(context);
     }
 
@@ -87,13 +87,13 @@ public class HelperELContextTest {
 
                     @Override
                     protected void afterGetValue(ELContext context, Object base, Object property, Object value,
-                                                 TestResult workingStorage) {
+                        TestResult workingStorage) {
                         workingStorage.properties.add(property);
                     }
 
                     @Override
                     protected TestResult afterSetValue(ELContext context, Object base, Object property,
-                                                       TestResult workingStorage) {
+                        TestResult workingStorage) {
                         workingStorage.properties.add(property);
                         return workingStorage;
                     }
@@ -102,9 +102,9 @@ public class HelperELContextTest {
         };
 
         doValueExpressionTestResultAssertions(helper.evaluate(createValueExpression("foo.bar['baz'].value")), foo,
-                "bar", "baz", "value");
+            "bar", "baz", "value");
         doValueExpressionTestResultAssertions(helper.evaluate(createValueExpression("foo.bar['baz']")), foo, "bar",
-                "baz");
+            "baz");
         doValueExpressionTestResultAssertions(helper.evaluate(createValueExpression("foo.bar")), foo, "bar");
     }
 

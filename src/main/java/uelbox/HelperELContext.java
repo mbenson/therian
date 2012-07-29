@@ -5,14 +5,14 @@ import javax.el.ELResolver;
 import javax.el.ValueExpression;
 
 /**
- * Abstract "helper" ELContext:  wraps another ELContext and its associated ELResolver,
- * providing a convenience API to return results from evaluating ValueExpressions using a HelperELResolver.
- * Like any other ELContext, an instance of this class is not thread-safe.
+ * Abstract "helper" ELContext: wraps another ELContext and its associated ELResolver, providing a convenience API to
+ * return results from evaluating ValueExpressions using a HelperELResolver. Like any other ELContext, an instance of
+ * this class is not thread-safe.
  */
 public abstract class HelperELContext<RESULT> extends ELContextWrapper {
     /**
      * Create a new HelperELContext
-     *
+     * 
      * @param wrapped
      */
     protected HelperELContext(ELContext wrapped) {
@@ -21,7 +21,7 @@ public abstract class HelperELContext<RESULT> extends ELContextWrapper {
 
     /**
      * Create our HelperELResolver.
-     *
+     * 
      * @param elResolver
      * @return HelperELResolver
      * @see {@link ELContextWrapper#wrap(javax.el.ELResolver)}
@@ -31,14 +31,14 @@ public abstract class HelperELContext<RESULT> extends ELContextWrapper {
 
     @Override
     public HelperELResolver<RESULT> getELResolver() {
-    	@SuppressWarnings("unchecked")
-		final HelperELResolver<RESULT> result = (HelperELResolver<RESULT>) super.getELResolver();
-    	return result;
+        @SuppressWarnings("unchecked")
+        final HelperELResolver<RESULT> result = (HelperELResolver<RESULT>) super.getELResolver();
+        return result;
     }
 
     /**
      * Return the result of evaluating valueExpression.
-     *
+     * 
      * @param valueExpression
      * @return RESULT
      */

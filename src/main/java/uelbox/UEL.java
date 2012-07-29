@@ -8,10 +8,9 @@ import javax.el.ExpressionFactory;
  */
 public class UEL {
     /**
-     * Get an ExpressionFactory instance for the specified context,
-     * using {@link ELContext#getContext(Class)}, and setting such a context value, if not found,
-     * to {@link javax.el.ExpressionFactory#newInstance()}.
-     *
+     * Get an ExpressionFactory instance for the specified context, using {@link ELContext#getContext(Class)}, and
+     * setting such a context value, if not found, to {@link javax.el.ExpressionFactory#newInstance()}.
+     * 
      * @param elContext
      * @return ExpressionFactory
      */
@@ -26,21 +25,21 @@ public class UEL {
 
     /**
      * Casts context objects per documented convention.
-     *
+     * 
      * @param context
      * @param key
      * @param <T>
      * @return T
      */
     public static <T> T getContext(ELContext context, Class<T> key) {
-    	@SuppressWarnings("unchecked")
-		final T result = (T) context.getContext(key);
-    	return result;
+        @SuppressWarnings("unchecked")
+        final T result = (T) context.getContext(key);
+        return result;
     }
 
     /**
      * Embed the specified expression, if necessary, using '#' as the triggering character.
-     *
+     * 
      * @param expression
      * @return String
      */
@@ -50,7 +49,7 @@ public class UEL {
 
     /**
      * Embed the specified expression, if necessary, using the specified triggering character.
-     *
+     * 
      * @param expression
      * @param trigger
      * @return String

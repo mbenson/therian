@@ -13,7 +13,7 @@ public class ELResolverWrapper extends ELResolver {
 
     /**
      * Create a new ELResolverWrapper.
-     *
+     * 
      * @param wrapped
      */
     public ELResolverWrapper(ELResolver wrapped) {

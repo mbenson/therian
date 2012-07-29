@@ -7,16 +7,14 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 /**
- * Abstract "helper" ELResolver: handles each step in the resolution of an
- * expression, turning the ultimate set/invoke operation into a no-op, and
- * providing a result object after each such call. Automatically skips
- * intervening/nested calls between nodes of the "main" expression. Not
- * thread-safe.
+ * Abstract "helper" ELResolver: handles each step in the resolution of an expression, turning the ultimate set/invoke
+ * operation into a no-op, and providing a result object after each such call. Automatically skips intervening/nested
+ * calls between nodes of the "main" expression. Not thread-safe.
  */
 public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
     /**
      * HelperELResolver.WithWorkingStorage
-     *
+     * 
      * @param <WORKING_STORAGE>
      * @param <RESULT>
      */
@@ -33,14 +31,14 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
 
         /**
          * HelperELResolver.WithWorkingStorage.AsResult
-         *
+         * 
          * @param <WORKING_STORAGE>
          */
         public abstract static class AsResult<WORKING_STORAGE> extends
             WithWorkingStorage<WORKING_STORAGE, WORKING_STORAGE> {
             /**
              * Create a new HelperELResolver.WithWorkingStorage.AsResult.
-             *
+             * 
              * @param wrapped
              */
             protected AsResult(ELResolver wrapped) {
@@ -51,7 +49,7 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
 
         /**
          * Create a new HelperELResolver.WithWorkingStorage.
-         *
+         * 
          * @param wrapped
          */
         protected WithWorkingStorage(ELResolver wrapped) {
@@ -59,9 +57,8 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
         }
 
         /**
-         * Get the working storage object in play for the current resolution in
-         * this context.
-         *
+         * Get the working storage object in play for the current resolution in this context.
+         * 
          * @param context
          * @return WORKING_STORAGE
          */
@@ -88,9 +85,8 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
         }
 
         /**
-         * Create a working storage object for the specified context and base
-         * object.
-         *
+         * Create a working storage object for the specified context and base object.
+         * 
          * @param context
          * @param base
          * @return WORKING_STORAGE
@@ -138,7 +134,7 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
 
     /**
      * Create a new HelperELResolver.
-     *
+     * 
      * @param wrapped
      */
     protected HelperELResolver(ELResolver wrapped) {
@@ -193,9 +189,8 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
     }
 
     /**
-     * Post-process {@link #getValue(javax.el.ELContext, Object, Object)}.
-     * Default no-op.
-     *
+     * Post-process {@link #getValue(javax.el.ELContext, Object, Object)}. Default no-op.
+     * 
      * @param context
      * @param base
      * @param property
@@ -205,9 +200,8 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
     }
 
     /**
-     * Post-process
-     * {@link #setValue(javax.el.ELContext, Object, Object, Object)}.
-     *
+     * Post-process {@link #setValue(javax.el.ELContext, Object, Object, Object)}.
+     * 
      * @param context
      * @param base
      * @param property
@@ -220,9 +214,9 @@ public abstract class HelperELResolver<RESULT> extends ELResolverWrapper {
     }
 
     /**
-     * Get result. Should be called exactly once after a context operation
-     * (optional if the HelperELResolver instance is not to be reused).
-     *
+     * Get result. Should be called exactly once after a context operation (optional if the HelperELResolver instance is
+     * not to be reused).
+     * 
      * @return RESULT
      */
     public final RESULT getResult(ELContext context) {
