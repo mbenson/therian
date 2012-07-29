@@ -23,9 +23,13 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Type;
 
 /**
- * Relative Position semantic container.
+ * Relative {@link Position}.
+ * 
+ * @param <P>
+ * @param <T>
  */
-public abstract class RelativePosition {
+public interface RelativePosition<P, T> extends Position<T> {
+
     /**
      * Describes a {@link RelativePosition.Mixin}.
      */
@@ -48,36 +52,41 @@ public abstract class RelativePosition {
     }
 
     /**
-     * Get type relative to parent.
+     * Get type relative to parent position.
      * 
      * @param <P>
      * @param <T>
      */
     @Implements(Position.class)
     public interface GetType<P, T> extends Mixin<P, T> {
-        Type getType(P parentValue);
+        Type getType(Position<? extends P> parentPosition);
     }
 
     /**
-     * Get value relative to parent.
+     * Get value relative to parent position.
      * 
      * @param <P>
      * @param <T>
      */
     @Implements(Position.Readable.class)
     public interface GetValue<P, T> extends Mixin<P, T> {
-        T getValue(P parentValue);
+        T getValue(Position<? extends P> parentPosition);
     }
 
     /**
-     * Set value relative to parent.
+     * Set value relative to parent position.
      * 
      * @param <P>
      * @param <T>
      */
     @Implements(Position.Writable.class)
     public interface SetValue<P, T> extends Mixin<P, T> {
-        void setValue(P parentValue, T value);
+        void setValue(Position<? extends P> parentValue, T value);
     }
 
+    /**
+     * Get parent {@link Position}.
+     * @return Position<P>
+     */
+    Position<? extends P> getParentPosition();
 }

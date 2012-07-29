@@ -34,15 +34,17 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 /**
  * Relative Position factory.
  */
-public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE extends Position<TYPE>> {
-    private class RelativePositionInvocationHandler implements InvocationHandler {
-        final PARENT_TYPE parent;
-        final Map<Class<? extends Position<?>>, Mixin<PARENT_TYPE, TYPE>> mixins;
+public abstract class RelativePositionFactory<P, T, POSITION_TYPE extends Position<T>> {
+    private static final Class<?>[] TO_IMPLEMENT_BASE = { RelativePosition.class };
 
-        protected RelativePositionInvocationHandler(PARENT_TYPE parent,
-            Map<Class<? extends Position<?>>, Mixin<PARENT_TYPE, TYPE>> mixins) {
+    private class RelativePositionInvocationHandler implements InvocationHandler {
+        final Position<? extends P> parentPosition;
+        final Map<Class<? extends Position<?>>, Mixin<P, T>> mixins;
+
+        protected RelativePositionInvocationHandler(Position<? extends P> parentPosition,
+            Map<Class<? extends Position<?>>, Mixin<P, T>> mixins) {
             super();
-            this.parent = parent;
+            this.parentPosition = parentPosition;
             this.mixins = mixins;
         }
 
@@ -50,9 +52,12 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
          * {@inheritDoc}
          */
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Mixin<PARENT_TYPE, TYPE> mixin = mixins.get(method.getDeclaringClass());
+            Mixin<P, T> mixin = mixins.get(method.getDeclaringClass());
             if (mixin != null) {
-                return MethodUtils.invokeMethod(mixin, method.getName(), ArrayUtils.add(args, 0, parent));
+                return MethodUtils.invokeMethod(mixin, method.getName(), ArrayUtils.add(args, 0, parentPosition));
+            }
+            if (method.equals(RelativePosition.class.getMethod("getParentPosition"))) {
+                return parentPosition;
             }
             if (method.equals(Object.class.getMethod("equals", Object.class))) {
                 return args[0].getClass().equals(proxy.getClass()) && Proxy.getInvocationHandler(args[0]).equals(this);
@@ -62,7 +67,7 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
             }
             if (method.equals(Object.class.getMethod("toString"))) {
                 return String.format("Relative Position: %s of %s", RelativePositionFactory.this.getClass()
-                    .getSimpleName(), parent);
+                    .getSimpleName(), parentPosition);
             }
             throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType(),
                 method.getName(), Arrays.toString(args)));
@@ -82,22 +87,22 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
             @SuppressWarnings("rawtypes")
             RelativePositionFactory.RelativePositionInvocationHandler other =
                 (RelativePositionFactory.RelativePositionInvocationHandler) obj;
-            return ObjectUtils.equals(parent, other.parent) && ObjectUtils.equals(mixins, other.mixins);
+            return ObjectUtils.equals(parentPosition, other.parentPosition) && ObjectUtils.equals(mixins, other.mixins);
         }
     }
 
-    private final Map<Class<? extends Position<?>>, Mixin<PARENT_TYPE, TYPE>> mixins;
+    private final Map<Class<? extends Position<?>>, Mixin<P, T>> mixins;
 
     /**
      * Create a new RelativePositionFactory instance.
      * 
      * @param mixins
      */
-    protected RelativePositionFactory(Mixin<PARENT_TYPE, TYPE>... mixins) {
+    protected RelativePositionFactory(Mixin<P, T>... mixins) {
         super();
-        Map<Class<? extends Position<?>>, Mixin<PARENT_TYPE, TYPE>> m =
-            new HashMap<Class<? extends Position<?>>, RelativePosition.Mixin<PARENT_TYPE, TYPE>>();
-        for (Mixin<PARENT_TYPE, TYPE> mixin : mixins) {
+        final Map<Class<? extends Position<?>>, Mixin<P, T>> m =
+            new HashMap<Class<? extends Position<?>>, RelativePosition.Mixin<P, T>>();
+        for (Mixin<P, T> mixin : mixins) {
             for (Class<? extends Position<?>> positionType : getImplementedTypes(mixin.getClass())) {
                 if (m.containsKey(positionType)) {
                     throw new IllegalArgumentException(String.format("%s implemented by > 1 of mixins %s",
@@ -106,12 +111,12 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
                 m.put(positionType, mixin);
             }
         }
-        this.mixins = m;
+        this.mixins = Collections.unmodifiableMap(m);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static Class<? extends Position<?>>[] getImplementedTypes(Class<? extends Mixin> mixinType) {
-        HashSet<Class<? extends Position>> set = new HashSet<Class<? extends Position>>();
+        final HashSet<Class<? extends Position>> set = new HashSet<Class<? extends Position>>();
         for (Class<?> iface : mixinType.getInterfaces()) {
             Implements annotation = iface.getAnnotation(Implements.class);
             if (annotation != null) {
@@ -122,16 +127,18 @@ public abstract class RelativePositionFactory<TYPE, PARENT_TYPE, POSITION_TYPE e
     }
 
     /**
-     * Get a Position relative to parent.
+     * Get a {@link Position} relative to {@code parent}.
      * 
      * @param parent
      * @return POSITION_TYPE
      */
-    public final POSITION_TYPE from(Position.Readable<? extends PARENT_TYPE> parent) {
+    public final POSITION_TYPE of(Position<? extends P> parentPosition) {
         @SuppressWarnings("unchecked")
-        POSITION_TYPE result =
-            (POSITION_TYPE) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), mixins.keySet()
-                .toArray(new Class[mixins.size()]), new RelativePositionInvocationHandler(parent.getValue(), mixins));
+        final POSITION_TYPE result =
+            (POSITION_TYPE) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                // abusive, but works:
+                (Class<?>[]) ArrayUtils.addAll(TO_IMPLEMENT_BASE, mixins.keySet().toArray()),
+                new RelativePositionInvocationHandler(parentPosition, mixins));
         return result;
     }
 }
