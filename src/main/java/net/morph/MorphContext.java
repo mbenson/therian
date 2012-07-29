@@ -58,14 +58,40 @@ public class MorphContext extends ELContextWrapper {
         return new MorphContextELResolver(elResolver);
     }
 
+    /**
+     * Get current thread-bound instance.
+     * 
+     * @return {@link MorphContext} or {@code null}
+     */
     public static MorphContext getCurrentInstance() {
         return CURRENT_INSTANCE.get();
     }
 
+    /**
+     * Require current thread-bound instance.
+     * 
+     * @return {@link MorphContext}
+     * @throws IllegalStateException
+     *             if unavailable
+     */
     public static MorphContext getRequiredInstance() {
         final MorphContext result = getCurrentInstance();
         Validate.validState(result != null);
         return result;
+    }
+
+    /**
+     * Get some usable {@link MorphContext} instance.
+     * 
+     * @return current thread-bound instance or
+     *         {@code Morph.standard().context()}
+     */
+    public static MorphContext getInstance() {
+        final MorphContext current = getCurrentInstance();
+        if (current != null) {
+            return current;
+        }
+        return Morph.standard().context();
     }
 
     /**
