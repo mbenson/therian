@@ -80,7 +80,7 @@ public class Ref<T> implements Position.Readable<T> {
 
     @Override
     public String toString() {
-        return String.format("Constant<%s>(%s)", type, value);
+        return String.format("Ref<%s>(%s)", type, value);
     }
 
     /**
