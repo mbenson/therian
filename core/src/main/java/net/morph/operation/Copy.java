@@ -26,14 +26,16 @@ import net.morph.position.Position.Readable;
  */
 public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Position.Readable<TARGET>> {
 
-    @Deprecated
-    // TODO make private and replace with fluent API
-    public Copy(Readable<SOURCE> sourcePosition, Readable<TARGET> targetPosition) {
+    private Copy(Readable<SOURCE> sourcePosition, Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
     }
 
     @Override
     protected Void provideResult() {
         return null;
+    }
+
+    public static <S, T> Copy<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
+        return new Copy<S, T>(sourcePosition, targetPosition);
     }
 }
