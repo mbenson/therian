@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>uelbox</groupId>
+            <groupId>net.morph</groupId>
             <artifactId>uelbox</artifactId>
         </dependency>
         <dependency>

@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compile.source>1.6</maven.compile.source>
         <maven.compile.target>1.6</maven.compile.target>
+        <tomcat.version>7.0.29</tomcat.version>
+        <juel.version>2.2.5</juel.version>
     </properties>
 
     <developers>
@@ -27,9 +29,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>uelbox</groupId>
+                <groupId>net.morph</groupId>
                 <artifactId>uelbox</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.morph</groupId>
+                <artifactId>morph2</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -55,7 +62,13 @@
             <dependency>
                 <groupId>de.odysseus.juel</groupId>
                 <artifactId>juel-api</artifactId>
-                <version>2.2.3</version>
+                <version>${juel.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-el-api</artifactId>
+                <version>${tomcat.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -67,13 +80,20 @@
             <dependency>
                 <groupId>de.odysseus.juel</groupId>
                 <artifactId>juel-impl</artifactId>
-                <version>2.2.3</version>
+                <version>${juel.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jasper-el</artifactId>
+                <version>${tomcat.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <modules>
+        <module>uelbox</module>
         <module>core</module>
     </modules>
 
