@@ -27,6 +27,7 @@ public class PropertyTest {
     @Test
     public void testBasic() {
         final Book book = new Book();
+        book.setTitle("Cryptonomicon");
         RelativePosition.ReadWrite<Book, Author> authorOfBook = Property.<Author> at("author").of(Ref.to(book));
         assertEquals(Author.class, authorOfBook.getType());
         assertEquals(null, authorOfBook.getValue());
