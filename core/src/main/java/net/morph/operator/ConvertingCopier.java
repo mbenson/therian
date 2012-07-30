@@ -29,8 +29,8 @@ import net.morph.position.Position;
 public class ConvertingCopier implements Operator<Copy<?, ?>> {
 
     public void perform(Copy<?, ?> operation) {
-        // TODO create convert operation
-        Convert<?, ?> convert = null;
+        final Convert<?, ?> convert =
+            Convert.to((Position.Writable<?>) operation.getTargetPosition(), operation.getSourcePosition());
         MorphContext.getRequiredInstance().forwardTo(convert);
     }
 
