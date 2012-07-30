@@ -35,6 +35,13 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 public abstract class Copier<SOURCE, DEST> implements Operator<Copy<? extends SOURCE, ? extends DEST>> {
     private static final TypeVariable<?>[] TYPE_PARAMS = Copier.class.getTypeParameters();
 
+    /**
+     * By default, rejects immutable target positions, and ensures that type parameters are compatible.
+     * 
+     * @param copy
+     *            operation
+     * @see ImmutableCheck
+     */
     public boolean supports(Copy<? extends SOURCE, ? extends DEST> copy) {
         // cannot copy to immutable types
         if (MorphContext.getRequiredInstance().eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()) {
