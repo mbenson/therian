@@ -18,9 +18,8 @@ package net.morph.operation;
 import java.lang.reflect.Type;
 
 import net.morph.MorphContext;
+import net.morph.TypeLiteral;
 import net.morph.position.Position;
-import net.morph.position.Position.Readable;
-import net.morph.position.Position.Writable;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -58,14 +57,12 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     private final Result result;
 
-    private Convert(Readable<SOURCE> sourcePosition, Writable<TARGET> targetPosition) {
+    private Convert(Position.Readable<SOURCE> sourcePosition, Position.Writable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
         this.result = new Result();
     }
 
-    @Deprecated
-    // TODO make private, replace with fluent API
-    public Convert(Readable<SOURCE> sourcePosition, final Type targetType) {
+    private Convert(Position.Readable<SOURCE> sourcePosition, final Type targetType) {
         this(sourcePosition, new Position.Writable<TARGET>() {
             {
                 Validate.notNull(targetType, "targetType");
@@ -106,5 +103,17 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
     @Override
     public Position.Writable<TARGET> getTargetPosition() {
         return result;
+    }
+
+    public static <S, T> Convert<S, T> to(Class<T> targetType, Position.Readable<S> sourcePosition) {
+        return new Convert<S, T>(sourcePosition, targetType);
+    }
+
+    public static <S, T> Convert<S, T> to(TypeLiteral<T> targetType, Position.Readable<S> sourcePosition) {
+        return new Convert<S, T>(sourcePosition, targetType.value);
+    }
+
+    public static <S, T> Convert<S, T> to(Position.Writable<T> targetPosition, Position.Readable<S> sourcePosition) {
+        return new Convert<S, T>(sourcePosition, targetPosition);
     }
 }
