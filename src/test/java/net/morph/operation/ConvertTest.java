@@ -21,6 +21,7 @@ import static org.junit.Assert.assertSame;
 import net.morph.Morph;
 import net.morph.MorphContext;
 import net.morph.MorphModule;
+import net.morph.TypeLiteral;
 import net.morph.operator.DefaultImmutableChecker;
 import net.morph.position.Ref;
 import net.morph.testfixture.MetasyntacticVariable;
@@ -28,7 +29,6 @@ import net.morph.testfixture.MetasyntacticVariable;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class ConvertTest {
     private MorphContext morphContext;
 
@@ -39,18 +39,16 @@ public class ConvertTest {
 
     @Test
     public void testImmutableAssignable() {
-        assertNull(morphContext.eval(new Convert<String, CharSequence>(new Ref<String>(null) {}, CharSequence.class)));
-        assertEquals("", morphContext.eval(new Convert<String, CharSequence>(Ref.to(""), CharSequence.class)));
-        assertEquals("", morphContext.eval(new Convert<String, String>(Ref.to(""), String.class)));
+        TypeLiteral<CharSequence> charSequenceType = new TypeLiteral<CharSequence>() {};
+        assertNull(morphContext.eval(Convert.to(charSequenceType, new Ref<String>(null) {})));
+        assertEquals("", morphContext.eval(Convert.to(charSequenceType, Ref.to(""))));
+        assertEquals("", morphContext.eval(Convert.to(String.class, Ref.to(""))));
         assertSame(MetasyntacticVariable.FOO,
-            morphContext.eval(new Convert<MetasyntacticVariable, MetasyntacticVariable>(Ref
-                .to(MetasyntacticVariable.FOO), MetasyntacticVariable.class)));
-        assertSame(MetasyntacticVariable.FOO, morphContext.eval(new Convert<MetasyntacticVariable, Enum<?>>(Ref
-            .to(MetasyntacticVariable.FOO), Enum.class)));
-        assertEquals(Integer.valueOf(666),
-            morphContext.eval(new Convert<Integer, Integer>(Ref.to(Integer.valueOf(666)), Integer.class)));
-        assertEquals(Integer.valueOf(666),
-            morphContext.eval(new Convert<Integer, Number>(Ref.to(Integer.valueOf(666)), Number.class)));
+            morphContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to(MetasyntacticVariable.FOO))));
+        assertSame(MetasyntacticVariable.FOO,
+            morphContext.eval(Convert.to(new TypeLiteral<Enum<?>>() {}, Ref.to(MetasyntacticVariable.FOO))));
+        assertEquals(Integer.valueOf(666), morphContext.eval(Convert.to(Integer.class, Ref.to(Integer.valueOf(666)))));
+        assertEquals(Integer.valueOf(666), morphContext.eval(Convert.to(Number.class, Ref.to(Integer.valueOf(666)))));
     }
 
 }

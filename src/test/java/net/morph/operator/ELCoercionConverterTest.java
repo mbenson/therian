@@ -28,7 +28,6 @@ import net.morph.operation.Convert;
 import net.morph.position.Ref;
 import net.morph.testfixture.MetasyntacticVariable;
 
-@SuppressWarnings("deprecation")
 public class ELCoercionConverterTest extends TransformerTest {
 
     @Override
@@ -38,27 +37,24 @@ public class ELCoercionConverterTest extends TransformerTest {
 
     @Test
     public void testCoerciontoString() {
-        assertEquals("666", morphContext.eval(new Convert<Integer, String>(Ref.to(Integer.valueOf(666)), String.class)));
+        assertEquals("666", morphContext.eval(Convert.to(String.class, Ref.to(Integer.valueOf(666)))));
     }
 
     @Test
     public void testCoerciontoEnum() {
-        assertNull(morphContext.eval(new Convert<Object, MetasyntacticVariable>(new Ref<Object>(null) {},
-            MetasyntacticVariable.class)));
-        assertNull(morphContext
-            .eval(new Convert<String, MetasyntacticVariable>(Ref.to(""), MetasyntacticVariable.class)));
-        assertSame(MetasyntacticVariable.FOO,
-            morphContext.eval(new Convert<String, MetasyntacticVariable>(Ref.to("FOO"), MetasyntacticVariable.class)));
+        assertNull(morphContext.eval(Convert.to(MetasyntacticVariable.class, new Ref<Object>(null) {})));
+        assertNull(morphContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to(""))));
+        assertSame(MetasyntacticVariable.FOO, morphContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to("FOO"))));
     }
 
     @Test
     public void testCoercionToBoolean() {
-        assertFalse(morphContext.eval(new Convert<Object, Boolean>(new Ref<Object>(null) {}, Boolean.class))
+        assertFalse(morphContext.eval(Convert.<Object, Boolean> to(Boolean.class, new Ref<Object>(null) {}))
             .booleanValue());
-        assertFalse(morphContext.eval(new Convert<String, Boolean>(Ref.to(""), Boolean.class)).booleanValue());
-        assertFalse(morphContext.eval(new Convert<String, Boolean>(Ref.to("false"), Boolean.class)).booleanValue());
-        assertFalse(morphContext.eval(new Convert<String, Boolean>(Ref.to("whatever"), Boolean.class)).booleanValue());
-        assertTrue(morphContext.eval(new Convert<String, Boolean>(Ref.to("true"), Boolean.class)).booleanValue());
+        assertFalse(morphContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to(""))).booleanValue());
+        assertFalse(morphContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("false"))).booleanValue());
+        assertFalse(morphContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("whatever"))).booleanValue());
+        assertTrue(morphContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("true"))).booleanValue());
     }
 
 }
