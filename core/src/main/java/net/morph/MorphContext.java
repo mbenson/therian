@@ -130,7 +130,9 @@ public class MorphContext extends ELContextWrapper {
                 }
                 return operation.getResult();
             } finally {
-                assert operations.pop() == operation;
+                final Operation<?> opOnPop = operations.pop();
+                Validate.validState(opOnPop == operation,
+                    "operation stack out of whack; found %s where %s was expected", opOnPop, operation);
             }
         } finally {
             // javadoc not clear on whether set(null) is truly equivalent to
