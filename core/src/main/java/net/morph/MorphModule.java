@@ -26,7 +26,7 @@ public class MorphModule {
     private ELContextListener[] elContextListeners;
     private Operator<?>[] operators;
 
-    private MorphModule() {
+    protected MorphModule() {
     }
 
     public synchronized ELResolver[] getElResolvers() {
