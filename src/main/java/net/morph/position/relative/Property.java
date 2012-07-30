@@ -13,23 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package net.morph.position;
+package net.morph.position.relative;
 
 import java.lang.reflect.Type;
 
+import net.morph.MorphContext;
+import net.morph.position.Position;
+import net.morph.position.Position.Readable;
+import net.morph.position.relative.RelativePosition.ReadWrite;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
-import net.morph.MorphContext;
-
-public class Property<P, T, POSITION_TYPE extends Position.Readable<T> & Position.Writable<T>> extends
-    RelativePositionFactory<P, T, POSITION_TYPE> {
+public class Property<T> extends RelativePositionFactory<T> {
     private final String propertyName;
 
     @SuppressWarnings("unchecked")
     private Property(final String propertyName) {
-        super(new RelativePosition.GetType<P, T>() {
+        super(new RelativePosition.GetType<T>() {
 
-            public Type getType(Position.Readable<? extends P> parentPosition) {
+            public <P> Type getType(Position.Readable<? extends P> parentPosition) {
                 // TODO improve
                 final MorphContext context = MorphContext.getInstance();
                 final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
@@ -38,9 +41,9 @@ public class Property<P, T, POSITION_TYPE extends Position.Readable<T> & Positio
                 return type;
             }
 
-        }, new RelativePosition.GetValue<P, T>() {
+        }, new RelativePosition.GetValue<T>() {
 
-            public T getValue(Position.Readable<? extends P> parentPosition) {
+            public <P> T getValue(Position.Readable<? extends P> parentPosition) {
                 // TODO improve
                 final MorphContext context = MorphContext.getInstance();
                 final Object value = context.getELResolver().getValue(context, parentPosition.getValue(), propertyName);
@@ -49,9 +52,9 @@ public class Property<P, T, POSITION_TYPE extends Position.Readable<T> & Positio
                 return (T) value;
             }
 
-        }, new RelativePosition.SetValue<P, T>() {
+        }, new RelativePosition.SetValue<T>() {
 
-            public void setValue(Position.Readable<? extends P> parentPosition, T value) {
+            public <P> void setValue(Position.Readable<? extends P> parentPosition, T value) {
                 // TODO improve
                 final MorphContext context = MorphContext.getInstance();
                 context.getELResolver().setValue(context, parentPosition.getValue(), propertyName, value);
@@ -67,8 +70,28 @@ public class Property<P, T, POSITION_TYPE extends Position.Readable<T> & Positio
         return propertyName;
     }
 
-    public static <P, T, POSITION_TYPE extends Position.Readable<T> & Position.Writable<T>> Property<P, T, POSITION_TYPE> at(
-        String propertyName) {
-        return new Property<P, T, POSITION_TYPE>(propertyName);
+    @Override
+    public <P> RelativePosition.ReadWrite<P, T> of(Readable<P> parentPosition) {
+        return (ReadWrite<P, T>) super.of(parentPosition);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Property == false) {
+            return false;
+        }
+        return StringUtils.equals(((Property<?>) obj).propertyName, propertyName);
+    }
+    
+    @Override
+    public int hashCode() {
+        return (71 << 4) | propertyName.hashCode();
+    }
+    
+    public static <T> Property<T> at(String propertyName) {
+        return new Property<T>(Validate.notNull(propertyName, "propertyName"));
     }
 }

@@ -56,4 +56,11 @@ public interface Position<T> {
         void setValue(T value);
     }
 
+    /**
+     * Read/write position.
+     * 
+     * @param <T>
+     */
+    public interface ReadWrite<T> extends Readable<T>, Writable<T> {
+    }
 }
