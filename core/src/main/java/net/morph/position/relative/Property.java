@@ -15,36 +15,155 @@
  */
 package net.morph.position.relative;
 
+import java.beans.FeatureDescriptor;
+import java.beans.IndexedPropertyDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import javax.el.ELResolver;
 
 import net.morph.MorphContext;
+import net.morph.el.ELConstants;
 import net.morph.position.Position;
 import net.morph.position.Position.Readable;
+import net.morph.position.relative.RelativePosition.GetType;
 import net.morph.position.relative.RelativePosition.ReadWrite;
 
+import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.TypeUtils;
 
 public class Property<T> extends RelativePositionFactory<T> {
+    private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
+
+    private static class GetTypeMixin<T> implements GetType<T> {
+        enum FeatureExtractionStrategy {
+            GENERIC_TYPE_ATTRIBUTE {
+
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    return Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+                }
+            },
+            PROPERTY_DESCRIPTOR {
+
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    if (feature instanceof PropertyDescriptor) {
+                        PropertyDescriptor pd = (PropertyDescriptor) feature;
+                        Method readMethod = pd.getReadMethod();
+                        if (readMethod != null) {
+                            return readMethod.getGenericReturnType();
+                        }
+                        Method writeMethod = pd.getWriteMethod();
+                        if (writeMethod != null) {
+                            final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
+                            return writeMethod.getGenericParameterTypes()[arg];
+                        }
+
+                    }
+                    return null;
+                }
+            },
+            TYPE_ATTRIBUTE {
+
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    return Class.class.cast(feature.getValue(ELResolver.TYPE));
+                }
+            };
+            abstract Type getType(FeatureDescriptor feature);
+        }
+
+        final String propertyName;
+
+        GetTypeMixin(String propertyName) {
+            super();
+            this.propertyName = propertyName;
+        }
+
+        public <P> Type getType(final Position.Readable<? extends P> parentPosition) {
+            // TODO unroll from parentPosition type
+            return this.<P> getBasicType(parentPosition);
+        }
+
+        private <P> Type getBasicType(final Position.Readable<? extends P> parentPosition) {
+            final MorphContext context = MorphContext.getInstance();
+            final P parent = parentPosition.getValue();
+            final UnaryPredicate<FeatureDescriptor> filter = new UnaryPredicate<FeatureDescriptor>() {
+                public boolean test(FeatureDescriptor obj) {
+                    return propertyName.equals(obj.getName());
+                }
+            };
+
+            final Iterable<FeatureDescriptor> featureDescriptors =
+                parent == null ? Collections.<FeatureDescriptor> emptyList() : FilteredIterable.of(
+                    cache(context.getELResolver().getFeatureDescriptors(context, parent))).retain(filter);
+
+            for (FeatureDescriptor feature : featureDescriptors) {
+                Type fromGenericTypeAttribute = FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(feature);
+                if (fromGenericTypeAttribute != null) {
+                    return fromGenericTypeAttribute;
+                }
+            }
+            final Type parentType = parentPosition.getType();
+            final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
+            try {
+                final List<PropertyDescriptor> beanPropertyDescriptors =
+                    Arrays.asList(Introspector.getBeanInfo(rawParentType).getPropertyDescriptors());
+                for (PropertyDescriptor pd : FilteredIterable.of(beanPropertyDescriptors).retain(filter)) {
+                    Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
+                    if (fromPropertyDescriptor != null) {
+                        return fromPropertyDescriptor;
+                    }
+                }
+            } catch (IntrospectionException e) {
+                if (LOG.isLoggable(Level.WARNING)) {
+                    LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
+                }
+            }
+            for (FeatureDescriptor feature : featureDescriptors) {
+                Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
+                if (fromTypeAttribute != null) {
+                    return fromTypeAttribute;
+                }
+            }
+            final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
+            Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s", propertyName,
+                parentPosition);
+            return type;
+        }
+
+        private <FD extends FeatureDescriptor> Iterable<FD> cache(Iterator<FD> iterator) {
+            final ArrayList<FD> result = new ArrayList<FD>();
+            while (iterator.hasNext()) {
+                result.add(iterator.next());
+            }
+            return result;
+        }
+
+    }
+
     private final String propertyName;
 
     @SuppressWarnings("unchecked")
     private Property(final String propertyName) {
-        super(new RelativePosition.GetType<T>() {
-
-            public <P> Type getType(Position.Readable<? extends P> parentPosition) {
-                // TODO improve
-                final MorphContext context = MorphContext.getInstance();
-                final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
-                Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s", propertyName,
-                    parentPosition);
-                return type;
-            }
-
-        }, new RelativePosition.GetValue<T>() {
+        super(new GetTypeMixin<T>(propertyName), new RelativePosition.GetValue<T>() {
 
             public <P> T getValue(Position.Readable<? extends P> parentPosition) {
-                // TODO improve
                 final MorphContext context = MorphContext.getInstance();
                 final Object value = context.getELResolver().getValue(context, parentPosition.getValue(), propertyName);
                 Validate.validState(context.isPropertyResolved(), "could not get value %s from %s", propertyName,
@@ -55,7 +174,6 @@ public class Property<T> extends RelativePositionFactory<T> {
         }, new RelativePosition.SetValue<T>() {
 
             public <P> void setValue(Position.Readable<? extends P> parentPosition, T value) {
-                // TODO improve
                 final MorphContext context = MorphContext.getInstance();
                 context.getELResolver().setValue(context, parentPosition.getValue(), propertyName, value);
                 Validate.validState(context.isPropertyResolved(), "could not set value %s onto %s from %s", value,
@@ -85,12 +203,12 @@ public class Property<T> extends RelativePositionFactory<T> {
         }
         return StringUtils.equals(((Property<?>) obj).propertyName, propertyName);
     }
-    
+
     @Override
     public int hashCode() {
         return (71 << 4) | propertyName.hashCode();
     }
-    
+
     public static <T> Property<T> at(String propertyName) {
         return new Property<T>(Validate.notNull(propertyName, "propertyName"));
     }
