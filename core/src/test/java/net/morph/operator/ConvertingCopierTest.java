@@ -2,7 +2,6 @@ package net.morph.operator;
 
 import static org.junit.Assert.assertEquals;
 import net.morph.MorphModule;
-import net.morph.Operators;
 import net.morph.operation.Copy;
 import net.morph.position.Ref;
 import net.morph.position.relative.Property;
@@ -16,9 +15,10 @@ public class ConvertingCopierTest extends TransformerTest {
 
     @Override
     protected MorphModule[] modules() {
-        return ArrayUtils.toArray(MorphModule.create().withOperators(Operators.standard()));
+        return ArrayUtils.toArray(MorphModule.create().withOperators(new ELCoercionConverter(), new ConvertingCopier(),
+            new DefaultImmutableChecker()));
     }
-    
+
     @Test
     public void test() {
         final Address address = new Address();
