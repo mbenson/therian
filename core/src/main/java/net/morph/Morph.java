@@ -34,6 +34,7 @@ public class Morph {
     private static final Morph STANDARD = Morph.usingModules(DEFAULT_MODULE);
 
     private final MorphModule[] modules;
+    //TODO sort by type/params
     private final Set<Operator<?>> operators = new LinkedHashSet<Operator<?>>();
 
     private Morph(MorphModule... modules) {
