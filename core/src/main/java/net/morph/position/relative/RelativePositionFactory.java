@@ -16,13 +16,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
-public class RelativePositionFactory<T> {
-    private class RelativePositionInvocationHandler<P> implements InvocationHandler {
-        final Position.Readable<? extends P> parentPosition;
-        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<T>> mixins;
+public class RelativePositionFactory<PARENT, TYPE> {
+    private class RelativePositionInvocationHandler implements InvocationHandler {
+        final Position.Readable<? extends PARENT> parentPosition;
+        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins;
 
-        protected RelativePositionInvocationHandler(Position.Readable<? extends P> parentPosition,
-            Map<Class<? extends Position<?>>, RelativePosition.Mixin<T>> mixins) {
+        protected RelativePositionInvocationHandler(Position.Readable<? extends PARENT> parentPosition,
+            Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins) {
             super();
             this.parentPosition = parentPosition;
             this.mixins = mixins;
@@ -32,7 +32,7 @@ public class RelativePositionFactory<T> {
          * {@inheritDoc}
          */
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            final RelativePosition.Mixin<T> mixin = mixins.get(method.getDeclaringClass());
+            final RelativePosition.Mixin<TYPE> mixin = mixins.get(method.getDeclaringClass());
             if (mixin != null) {
                 return MethodUtils.invokeMethod(mixin, method.getName(), ArrayUtils.add(args, 0, parentPosition));
             }
@@ -79,7 +79,7 @@ public class RelativePositionFactory<T> {
             return result;
         }
 
-        private RelativePositionFactory<T> getRelativePositionFactory() {
+        private RelativePositionFactory<PARENT, TYPE> getRelativePositionFactory() {
             return RelativePositionFactory.this;
         }
     }
@@ -91,23 +91,23 @@ public class RelativePositionFactory<T> {
         }
     };
 
-    private final Map<Class<? extends Position<?>>, RelativePosition.Mixin<T>> mixins;
+    private final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins;
 
-    protected RelativePositionFactory(RelativePosition.Mixin<T>... mixins) {
+    protected RelativePositionFactory(RelativePosition.Mixin<TYPE>... mixins) {
         super();
-        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<T>> m =
-            new HashMap<Class<? extends Position<?>>, RelativePosition.Mixin<T>>();
-        for (RelativePosition.Mixin<T> mixin : mixins) {
+        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> m =
+            new HashMap<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>>();
+        for (RelativePosition.Mixin<TYPE> mixin : mixins) {
             addTo(m, mixin);
         }
         if (!m.containsKey(RelativePosition.class)) {
-            addTo(m, new RelativePosition.Mixin.GetParentPosition<T>());
+            addTo(m, new RelativePosition.Mixin.GetParentPosition<TYPE>());
         }
         this.mixins = Collections.unmodifiableMap(m);
     }
 
-    private void addTo(final Map<Class<? extends Position<?>>, RelativePosition.Mixin<T>> target,
-        final RelativePosition.Mixin<T> mixin) {
+    private void addTo(final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> target,
+        final RelativePosition.Mixin<TYPE> mixin) {
         for (Class<? extends Position<?>> positionType : RelativePosition.Mixin.HELPER.getImplementedTypes(mixin)) {
             if (target.containsKey(positionType)) {
                 throw new IllegalArgumentException(String.format("%s implemented by > 1 of mixins %s", positionType,
@@ -123,11 +123,11 @@ public class RelativePositionFactory<T> {
      * @param parentPosition
      * @return {@link RelativePosition}
      */
-    public <P> RelativePosition<P, T> of(Position.Readable<P> parentPosition) {
+    public <P extends PARENT> RelativePosition<P, TYPE> of(Position.Readable<P> parentPosition) {
         @SuppressWarnings("unchecked")
-        final RelativePosition<P, T> result =
-            (RelativePosition<P, T>) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                gatherInterfaces(), new RelativePositionInvocationHandler<P>(parentPosition, mixins));
+        final RelativePosition<P, TYPE> result =
+            (RelativePosition<P, TYPE>) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                gatherInterfaces(), new RelativePositionInvocationHandler(parentPosition, mixins));
         return result;
     }
 
