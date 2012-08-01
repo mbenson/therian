@@ -1,5 +1,4 @@
-Morph 2 is a "next-generation Java Object transformation library."
-It is the successor to the Morph project at http://morph.sourceforge.net .
+Therian is a "next-generation Java Object transformation library."
 
 This codebase is currently under development.  Some features and priorities:
 

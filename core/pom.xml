@@ -2,13 +2,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>net.morph</groupId>
-      <artifactId>morph2-parent</artifactId>
+      <groupId>therian</groupId>
+      <artifactId>therian-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>morph2</artifactId>
-    <name>morph2</name>
+    <artifactId>therian</artifactId>
+    <name>therian</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.morph</groupId>
+            <groupId>therian</groupId>
             <artifactId>uelbox</artifactId>
         </dependency>
         <dependency>

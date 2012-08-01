@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.morph</groupId>
-    <artifactId>morph2-parent</artifactId>
+    <groupId>therian</groupId>
+    <artifactId>therian-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>morph2-parent</name>
+    <name>therian-parent</name>
     <description>Next-generation Java Object transformation library</description>
 
     <properties>
@@ -29,13 +29,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>net.morph</groupId>
+                <groupId>therian</groupId>
                 <artifactId>uelbox</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.morph</groupId>
-                <artifactId>morph2</artifactId>
+                <groupId>therian</groupId>
+                <artifactId>therian</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
