@@ -39,7 +39,7 @@ public abstract class ELContextWrapper extends ELContext {
      * @param wrapped
      */
     protected ELContextWrapper(ELContext wrapped) {
-        this.wrapped = Validate.notNull(wrapped);
+        this.wrapped = Validate.notNull(wrapped, "wrapped ELContext");
         this.elResolver = Validate.notNull(wrap(wrapped.getELResolver()));
         this.variableMapper = new SimpleVariableMapper() {
             @Override

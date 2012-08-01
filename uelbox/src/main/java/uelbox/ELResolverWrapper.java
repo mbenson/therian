@@ -20,6 +20,8 @@ import java.util.Iterator;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * Wraps an {@link ELResolver}.
  */
@@ -32,7 +34,7 @@ public class ELResolverWrapper extends ELResolver {
      * @param wrapped
      */
     public ELResolverWrapper(ELResolver wrapped) {
-        this.wrapped = wrapped;
+        this.wrapped = Validate.notNull(wrapped, "wrapped ELResolver");
     }
 
     @Override
