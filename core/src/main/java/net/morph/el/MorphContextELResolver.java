@@ -21,10 +21,12 @@ import java.util.Iterator;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import net.morph.Operator;
+
 /**
  * Special ELResolver that:
  * <ul>
- * <li>Helps implement operators</li>
+ * <li>Helps implement {@link Operator}s</li>
  * <li>Provides our conversion facilities to {@link #setValue(javax.el.ELContext, Object, Object, Object)}</li>
  * </ul>
  */
@@ -57,7 +59,7 @@ public class MorphContextELResolver extends ELResolver {
 
     @Override
     public Object getValue(ELContext context, Object base, Object property) {
-        // TODO record stuff
+        // TODO record stuff?
         return delegate.getValue(context, base, property);
     }
 
@@ -68,8 +70,15 @@ public class MorphContextELResolver extends ELResolver {
 
     @Override
     public void setValue(ELContext context, Object base, Object property, Object value) {
-        // TODO possibly record stuff?, also force conversions through our
-        // facilities
+        // coerce value; record stuff?
         delegate.setValue(context, base, property, value);
     }
+    
+    @Override
+    public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
+        // TODO coerce parameters
+        return super.invoke(context, base, method, paramTypes, params);
+    }
+
+
 }
