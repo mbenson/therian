@@ -18,6 +18,7 @@ package net.morph;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import javax.el.CompositeELResolver;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
@@ -55,7 +56,12 @@ public class MorphContext extends ELContextWrapper {
 
     @Override
     protected ELResolver wrap(ELResolver elResolver) {
-        return new MorphContextELResolver(elResolver);
+        final CompositeELResolver compositeResolver = new CompositeELResolver();
+        compositeResolver.add(elResolver);
+        for (ELResolver configuredELResolver : getTypedContext(Morph.class).getElResolvers()) {
+            compositeResolver.add(configuredELResolver);
+        }
+        return new MorphContextELResolver(compositeResolver);
     }
 
     /**

@@ -15,12 +15,15 @@
  */
 package net.morph;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELContextEvent;
 import javax.el.ELContextListener;
+import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 
 import uelbox.SimpleELContext;
@@ -34,18 +37,24 @@ public class Morph {
     private static final Morph STANDARD = Morph.usingModules(DEFAULT_MODULE);
 
     private final MorphModule[] modules;
-    //TODO sort by type/params
+    // TODO sort by type/params
     private final Set<Operator<?>> operators = new LinkedHashSet<Operator<?>>();
+    private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
 
     private Morph(MorphModule... modules) {
         this.modules = modules == null ? new MorphModule[0] : modules;
         for (MorphModule module : modules) {
             Collections.addAll(operators, module.getOperators());
+            Collections.addAll(elResolvers, module.getElResolvers());
         }
     }
 
     Set<Operator<?>> getOperators() {
         return operators;
+    }
+
+    List<ELResolver> getElResolvers() {
+        return elResolvers;
     }
 
     public MorphContext context() {
