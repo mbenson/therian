@@ -21,6 +21,7 @@ import static org.junit.Assert.assertSame;
 import net.morph.Morph;
 import net.morph.MorphContext;
 import net.morph.MorphModule;
+import net.morph.OperationException;
 import net.morph.TypeLiteral;
 import net.morph.operator.DefaultImmutableChecker;
 import net.morph.position.Ref;
@@ -35,6 +36,13 @@ public class ConvertTest {
     @Before
     public void setup() {
         morphContext = Morph.usingModules(MorphModule.create().withOperators(new DefaultImmutableChecker())).context();
+    }
+
+    @Test(expected=OperationException.class)
+    public void tesConverttUsingNullModules() {
+        Morph morph = Morph.usingModules((MorphModule[])null);
+        MorphContext morphContext = morph.context();
+        assertEquals(null, morphContext.eval(Convert.to(String.class, Ref.to(""))));
     }
 
     @Test

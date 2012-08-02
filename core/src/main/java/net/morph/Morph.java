@@ -39,7 +39,7 @@ public class Morph {
 
     private Morph(MorphModule... modules) {
         this.modules = modules == null ? new MorphModule[0] : modules;
-        for (MorphModule module : modules) {
+        for (MorphModule module : this.modules) {
             Collections.addAll(operators, module.getOperators());
         }
     }
