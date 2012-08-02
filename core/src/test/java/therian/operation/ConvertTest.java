@@ -22,11 +22,11 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
+import therian.OperationException;
 import therian.Therian;
 import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
-import therian.operation.Convert;
 import therian.operator.DefaultImmutableChecker;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
@@ -37,6 +37,13 @@ public class ConvertTest {
     @Before
     public void setup() {
         therianContext = Therian.usingModules(TherianModule.create().withOperators(new DefaultImmutableChecker())).context();
+    }
+
+    @Test(expected=OperationException.class)
+    public void tesConverttUsingNullModules() {
+        Therian therian = Therian.usingModules((TherianModule[])null);
+        TherianContext therianContext = therian.context();
+        therianContext.eval(Convert.to(String.class, Ref.to("")));
     }
 
     @Test
