@@ -46,7 +46,7 @@ public class Therian {
 
     private Therian(TherianModule... modules) {
         this.modules = modules == null ? new TherianModule[0] : modules;
-        for (TherianModule module : modules) {
+        for (TherianModule module : this.modules) {
             Collections.addAll(operators, module.getOperators());
             Collections.addAll(elResolvers, module.getElResolvers());
         }
