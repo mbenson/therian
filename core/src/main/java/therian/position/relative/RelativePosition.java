@@ -25,8 +25,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import therian.position.Position;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.Validate;
 
+import therian.TherianContext;
+import therian.position.Position;
 
 /**
  * {@link Position} relative to some other {@link Position.Readable}.
@@ -72,7 +75,7 @@ public interface RelativePosition<P, T> extends Position<T> {
             public <T> Class<? extends Position<?>>[] getImplementedTypes(Mixin<T> mixin) {
                 final HashSet<Class<? extends Position<?>>> set = new HashSet<Class<? extends Position<?>>>();
                 addImplementedInterfacesTo(set, mixin.getClass());
-                for (Class<?> iface : mixin.getClass().getInterfaces()) {
+                for (Class<?> iface : ClassUtils.getAllInterfaces(mixin.getClass())) {
                     addImplementedInterfacesTo(set, iface);
                 }
                 @SuppressWarnings("unchecked")
@@ -87,8 +90,7 @@ public interface RelativePosition<P, T> extends Position<T> {
                 final RelativePosition.Implements annotation = type.getAnnotation(RelativePosition.Implements.class);
                 if (annotation != null) {
                     @SuppressWarnings("unchecked")
-                    final Class<? extends Position<?>>[] classes =
-                        (Class<? extends Position<?>>[]) annotation.value();
+                    final Class<? extends Position<?>>[] classes = (Class<? extends Position<?>>[]) annotation.value();
                     Collections.addAll(target, classes);
                 }
                 addImplementedInterfacesTo(target, type.getSuperclass());
@@ -102,6 +104,32 @@ public interface RelativePosition<P, T> extends Position<T> {
             }
         }
 
+        public static class ELValue<TYPE> implements GetValue<TYPE>, SetValue<TYPE> {
+            private final Object property;
+
+            public ELValue(Object property) {
+                super();
+                this.property = property;
+            }
+
+            public <P> TYPE getValue(Position.Readable<? extends P> parentPosition) {
+                final TherianContext context = TherianContext.getInstance();
+                final Object value = context.getELResolver().getValue(context, parentPosition.getValue(), property);
+                Validate.validState(context.isPropertyResolved(), "could not get value %s from %s", property,
+                    parentPosition);
+                @SuppressWarnings("unchecked")
+                final TYPE result = (TYPE) value;
+                return result;
+            }
+
+            public <P> void setValue(Position.Readable<? extends P> parentPosition, TYPE value) {
+                final TherianContext context = TherianContext.getInstance();
+                context.getELResolver().setValue(context, parentPosition.getValue(), property, value);
+                Validate.validState(context.isPropertyResolved(), "could not set value %s onto %s from %s", value,
+                    property, parentPosition);
+            }
+
+        }
     }
 
     /**
