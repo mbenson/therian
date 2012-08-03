@@ -17,9 +17,9 @@ package therian;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
@@ -41,7 +41,7 @@ public class Therian {
 
     private final TherianModule[] modules;
     // TODO sort by type/params
-    private final Set<Operator<?>> operators = new LinkedHashSet<Operator<?>>();
+    private final Set<Operator<?>> operators = new TreeSet<Operator<?>>(Operators.comparator());
     private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
 
     private Therian(TherianModule... modules) {

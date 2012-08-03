@@ -16,18 +16,20 @@
 package therian;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.junit.Test;
 
-import therian.Operation;
-import therian.Operator;
-import therian.OperatorDefinitionException;
-import therian.Operators;
+import therian.operator.DefaultImmutableChecker;
+import therian.operator.ELCoercionConverter;
+import therian.operator.EnumToNumberConverter;
 
 public class OperatorsTest {
     public enum Success {
@@ -60,6 +62,29 @@ public class OperatorsTest {
         }
     }
 
+    public static class TonsilSurgeon extends Surgeon<Tonsillectomy> {
+
+    }
+
+    public static class AppendixSurgeon extends Surgeon<Appendectomy> {
+
+    }
+
+    public static class MasterSurgeon extends Surgeon<Surgery> {
+
+    }
+
+    public static class SuccessOperator implements Operator<Operation<Success>> {
+
+        public void perform(Operation<Success> operation) {
+        }
+
+        public boolean supports(Operation<Success> operation) {
+            return true;
+        }
+
+    }
+
     @Test
     public void testSupporting() {
         @SuppressWarnings("unchecked")
@@ -85,5 +110,32 @@ public class OperatorsTest {
     @Test(expected = OperatorDefinitionException.class)
     public void testValidationImplementationError() {
         Operators.validateImplementation(new Surgeon<Tonsillectomy>());
+    }
+
+    @Test
+    public void testComparatorSimple() {
+        assertTrue(Operators.comparator().compare(new EnumToNumberConverter(), new ELCoercionConverter()) < 0);
+    }
+
+    @Test
+    public void testComparatorEquality() {
+        assertEquals(0, Operators.comparator().compare(new DefaultImmutableChecker(), new DefaultImmutableChecker()));
+    }
+
+    @Test
+    public void testComparatorComplex() {
+        final ArrayList<Operator<?>> expected = new ArrayList<Operator<?>>();
+        expected.add(new AppendixSurgeon());
+        expected.add(new TonsilSurgeon());
+        expected.add(new MasterSurgeon());
+        expected.add(new SuccessOperator());
+        expected.add(new ELCoercionConverter());
+        expected.add(new DefaultImmutableChecker());
+
+        final TreeSet<Operator<?>> actual = new TreeSet<Operator<?>>(Operators.comparator());
+        actual.addAll(expected);
+
+        assertEquals(expected, new ArrayList<Operator<?>>(actual));
+
     }
 }
