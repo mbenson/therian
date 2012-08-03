@@ -40,7 +40,7 @@ public class ConvertTest {
     }
 
     @Test(expected=OperationException.class)
-    public void tesConverttUsingNullModules() {
+    public void tesConvertUsingNullModules() {
         Therian therian = Therian.usingModules((TherianModule[])null);
         TherianContext therianContext = therian.context();
         therianContext.eval(Convert.to(String.class, Ref.to("")));
