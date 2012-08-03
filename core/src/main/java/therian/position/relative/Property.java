@@ -22,10 +22,8 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -35,6 +33,7 @@ import javax.el.ELResolver;
 
 import org.apache.commons.functor.UnaryPredicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
+import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -42,119 +41,112 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.TherianContext;
 import therian.el.ELConstants;
 import therian.position.Position;
+import therian.util.Types;
 
 public class Property {
     private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
-    public static class PropertyFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
+    private static class GetTypeMixin<T> implements RelativePosition.GetType<T> {
+        enum FeatureExtractionStrategy {
+            GENERIC_TYPE_ATTRIBUTE {
 
-        private static class GetTypeMixin<T> implements RelativePosition.GetType<T> {
-            enum FeatureExtractionStrategy {
-                GENERIC_TYPE_ATTRIBUTE {
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    return Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+                }
+            },
+            PROPERTY_DESCRIPTOR {
 
-                    @Override
-                    Type getType(FeatureDescriptor feature) {
-                        return Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-                    }
-                },
-                PROPERTY_DESCRIPTOR {
-
-                    @Override
-                    Type getType(FeatureDescriptor feature) {
-                        if (feature instanceof PropertyDescriptor) {
-                            PropertyDescriptor pd = (PropertyDescriptor) feature;
-                            Method readMethod = pd.getReadMethod();
-                            if (readMethod != null) {
-                                return readMethod.getGenericReturnType();
-                            }
-                            Method writeMethod = pd.getWriteMethod();
-                            if (writeMethod != null) {
-                                final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
-                                return writeMethod.getGenericParameterTypes()[arg];
-                            }
-
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    if (feature instanceof PropertyDescriptor) {
+                        PropertyDescriptor pd = (PropertyDescriptor) feature;
+                        Method readMethod = pd.getReadMethod();
+                        if (readMethod != null) {
+                            return readMethod.getGenericReturnType();
                         }
-                        return null;
-                    }
-                },
-                TYPE_ATTRIBUTE {
-
-                    @Override
-                    Type getType(FeatureDescriptor feature) {
-                        return Class.class.cast(feature.getValue(ELResolver.TYPE));
-                    }
-                };
-                abstract Type getType(FeatureDescriptor feature);
-            }
-
-            final String propertyName;
-
-            GetTypeMixin(String propertyName) {
-                super();
-                this.propertyName = propertyName;
-            }
-
-            public <P> Type getType(final Position.Readable<? extends P> parentPosition) {
-                // TODO unroll from parentPosition type
-                return this.<P> getBasicType(parentPosition);
-            }
-
-            private <P> Type getBasicType(final Position.Readable<? extends P> parentPosition) {
-                final TherianContext context = TherianContext.getInstance();
-                final P parent = parentPosition.getValue();
-                final UnaryPredicate<FeatureDescriptor> filter = new UnaryPredicate<FeatureDescriptor>() {
-                    public boolean test(FeatureDescriptor obj) {
-                        return propertyName.equals(obj.getName());
-                    }
-                };
-
-                final Iterable<FeatureDescriptor> featureDescriptors =
-                    parent == null ? Collections.<FeatureDescriptor> emptyList() : FilteredIterable.of(
-                        cache(context.getELResolver().getFeatureDescriptors(context, parent))).retain(filter);
-
-                for (FeatureDescriptor feature : featureDescriptors) {
-                    Type fromGenericTypeAttribute = FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(feature);
-                    if (fromGenericTypeAttribute != null) {
-                        return fromGenericTypeAttribute;
-                    }
-                }
-                final Type parentType = parentPosition.getType();
-                final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
-                try {
-                    final List<PropertyDescriptor> beanPropertyDescriptors =
-                        Arrays.asList(Introspector.getBeanInfo(rawParentType).getPropertyDescriptors());
-                    for (PropertyDescriptor pd : FilteredIterable.of(beanPropertyDescriptors).retain(filter)) {
-                        Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
-                        if (fromPropertyDescriptor != null) {
-                            return fromPropertyDescriptor;
+                        Method writeMethod = pd.getWriteMethod();
+                        if (writeMethod != null) {
+                            final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
+                            return writeMethod.getGenericParameterTypes()[arg];
                         }
-                    }
-                } catch (IntrospectionException e) {
-                    if (LOG.isLoggable(Level.WARNING)) {
-                        LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
-                    }
-                }
-                for (FeatureDescriptor feature : featureDescriptors) {
-                    Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
-                    if (fromTypeAttribute != null) {
-                        return fromTypeAttribute;
-                    }
-                }
-                final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
-                Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s", propertyName,
-                    parentPosition);
-                return type;
-            }
 
-            private <FD extends FeatureDescriptor> Iterable<FD> cache(Iterator<FD> iterator) {
-                final ArrayList<FD> result = new ArrayList<FD>();
-                while (iterator.hasNext()) {
-                    result.add(iterator.next());
+                    }
+                    return null;
                 }
-                return result;
-            }
+            },
+            TYPE_ATTRIBUTE {
 
+                @Override
+                Type getType(FeatureDescriptor feature) {
+                    return Class.class.cast(feature.getValue(ELResolver.TYPE));
+                }
+            };
+            abstract Type getType(FeatureDescriptor feature);
         }
+
+        final String propertyName;
+
+        GetTypeMixin(String propertyName) {
+            super();
+            this.propertyName = propertyName;
+        }
+
+        public <P> Type getType(final Position.Readable<? extends P> parentPosition) {
+            return Types.refine(getBasicType(parentPosition), parentPosition.getType());
+        }
+
+        private <P> Type getBasicType(final Position.Readable<? extends P> parentPosition) {
+            final TherianContext context = TherianContext.getInstance();
+            final P parent = parentPosition.getValue();
+            final UnaryPredicate<FeatureDescriptor> filter = new UnaryPredicate<FeatureDescriptor>() {
+                public boolean test(FeatureDescriptor obj) {
+                    return propertyName.equals(obj.getName());
+                }
+            };
+
+            final Iterable<FeatureDescriptor> featureDescriptors =
+                parent == null ? Collections.<FeatureDescriptor> emptyList() : FilteredIterable.of(
+                    IteratorToGeneratorAdapter.adapt(context.getELResolver().getFeatureDescriptors(context, parent))
+                        .toCollection()).retain(filter);
+
+            for (FeatureDescriptor feature : featureDescriptors) {
+                Type fromGenericTypeAttribute = FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(feature);
+                if (fromGenericTypeAttribute != null) {
+                    return fromGenericTypeAttribute;
+                }
+            }
+            final Type parentType = parentPosition.getType();
+            final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
+            try {
+                final List<PropertyDescriptor> beanPropertyDescriptors =
+                    Arrays.asList(Introspector.getBeanInfo(rawParentType).getPropertyDescriptors());
+                for (PropertyDescriptor pd : FilteredIterable.of(beanPropertyDescriptors).retain(filter)) {
+                    Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
+                    if (fromPropertyDescriptor != null) {
+                        return fromPropertyDescriptor;
+                    }
+                }
+            } catch (IntrospectionException e) {
+                if (LOG.isLoggable(Level.WARNING)) {
+                    LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
+                }
+            }
+            for (FeatureDescriptor feature : featureDescriptors) {
+                Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
+                if (fromTypeAttribute != null) {
+                    return fromTypeAttribute;
+                }
+            }
+            final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
+            Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s", propertyName,
+                parentPosition);
+            return type;
+        }
+
+    }
+
+    public static class PropertyFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
 
         private final String propertyName;
 
