@@ -15,15 +15,20 @@
  */
 package therian.operator;
 
+import java.beans.PropertyEditorManager;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import javax.el.ELException;
 import javax.el.ExpressionFactory;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.TherianContext;
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Convert;
-
 
 /**
  * Special operator that handles conversions by applying EL coercion rules. Quintessential example of a "converter" that
@@ -38,7 +43,7 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
             value =
                 TherianContext.getRequiredInstance().getTypedContext(ExpressionFactory.class)
                     .coerceToType(operation.getSourcePosition().getValue(), getRawTargetType(operation));
-        } catch (ELException e) {
+        } catch (final ELException e) {
             return;
         }
         @SuppressWarnings("unchecked")
@@ -49,12 +54,34 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
 
     public boolean supports(Convert<?, ?> operation) {
         final Class<?> rawTargetType = getRawTargetType(operation);
-        // TODO check for actual cases enumerated by the EL spec
-        return rawTargetType != null;
+        final Class<?> useTargetType =
+            ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);
+
+        // per UEL spec v2.2 section 1.18:
+        if (String.class.equals(useTargetType)) {
+            return true;
+        }
+        final Object source = operation.getSourcePosition().getValue();
+
+        if (BigDecimal.class.equals(useTargetType) || BigInteger.class.equals(useTargetType)
+            || Number.class.isAssignableFrom(useTargetType) && ClassUtils.wrapperToPrimitive(useTargetType) != null) {
+            return source == null || source instanceof String || source instanceof Character
+                || source instanceof Number;
+        }
+        if (Character.class.equals(useTargetType)) {
+            return source == null || source instanceof String || source instanceof Number;
+        }
+        if (Boolean.class.equals(useTargetType)) {
+            return source == null || source instanceof String;
+        }
+        if (Enum.class.isAssignableFrom(useTargetType)) {
+            return source == null || source instanceof String;
+        }
+        return source == null || "".equals(source) || source instanceof String
+            && PropertyEditorManager.findEditor(useTargetType) != null;
     }
 
     private static Class<?> getRawTargetType(Convert<?, ?> operation) {
-        // TODO is this enough?
         return TypeUtils.getRawType(operation.getTargetPosition().getType(), null);
     }
 }
