@@ -3,6 +3,7 @@ package therian.position.relative;
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.functor.UnaryPredicate;
@@ -38,6 +39,13 @@ public class Keyed {
             return (ReadWrite<P, V>) super.of(parentPosition);
         }
 
+        @Override
+        public int hashCode() {
+            int result = 53 << 4;
+            result |= this.key.hashCode();
+            return result;
+        }
+        
         @Override
         public boolean equals(Object obj) {
             if (obj == this) {
