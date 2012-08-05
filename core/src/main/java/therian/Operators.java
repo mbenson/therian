@@ -26,7 +26,9 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import therian.operator.BeanCopier;
 import therian.operator.ConvertingCopier;
+import therian.operator.DefaultCopyingConverter;
 import therian.operator.DefaultImmutableChecker;
 import therian.operator.ELCoercionConverter;
 
@@ -43,7 +45,9 @@ public class Operators {
          */
         new ELCoercionConverter(),
         new ConvertingCopier(),
-        new DefaultImmutableChecker()
+        new DefaultImmutableChecker(),
+        new DefaultCopyingConverter(),
+        new BeanCopier(),
     };
     //@formatter:on
 
