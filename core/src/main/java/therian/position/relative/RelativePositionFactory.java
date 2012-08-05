@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeSet;
 
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -38,7 +37,8 @@ public class RelativePositionFactory<PARENT, TYPE> {
                 return MethodUtils.invokeMethod(mixin, method.getName(), ArrayUtils.add(args, 0, parentPosition));
             }
             if (method.equals(Object.class.getMethod("equals", Object.class))) {
-                return Proxy.getInvocationHandler(args[0]).equals(this);
+                return args[0] != null && Proxy.isProxyClass(args[0].getClass())
+                    && Proxy.getInvocationHandler(args[0]).equals(this);
             }
             if (method.equals(Object.class.getMethod("hashCode"))) {
                 int result = 61 << 4;
@@ -46,11 +46,24 @@ public class RelativePositionFactory<PARENT, TYPE> {
                 return result;
             }
             if (method.equals(Object.class.getMethod("toString"))) {
-                return String.format("Relative Position: %s of %s", RelativePositionFactory.this.getClass()
-                    .getSimpleName(), parentPosition);
+                return String.format("Relative Position: %s of %s", this, parentPosition);
             }
             throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType().getName(),
                 method.getName(), ArrayUtils.toString(args, "")));
+        }
+
+        @Override
+        public String toString() {
+            Class<?> clazz = getClass();
+            final StringBuilder buf = new StringBuilder();
+            while (clazz != null) {
+                buf.insert(0, clazz.getSimpleName());
+                clazz = clazz.getEnclosingClass();
+                if (clazz != null) {
+                    buf.insert(0, '.');
+                }
+            }
+            return buf.toString();
         }
 
         /**
