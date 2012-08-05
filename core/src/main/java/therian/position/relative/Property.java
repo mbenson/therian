@@ -146,12 +146,12 @@ public class Property {
 
     }
 
-    public static class PropertyFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
+    public static class PositionFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
 
         private final String propertyName;
 
         @SuppressWarnings("unchecked")
-        private PropertyFactory(final String propertyName) {
+        private PositionFactory(final String propertyName) {
             super(new GetTypeMixin<TYPE>(propertyName), new RelativePosition.Mixin.ELValue<TYPE>(propertyName));
             this.propertyName = propertyName;
         }
@@ -170,19 +170,24 @@ public class Property {
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof PropertyFactory == false) {
+            if (obj instanceof PositionFactory == false) {
                 return false;
             }
-            return StringUtils.equals(((PropertyFactory<?>) obj).propertyName, propertyName);
+            return StringUtils.equals(((PositionFactory<?>) obj).propertyName, propertyName);
         }
 
         @Override
         public int hashCode() {
             return (71 << 4) | propertyName.hashCode();
         }
+
+        @Override
+        public String toString() {
+            return String.format("Property %s", propertyName);
+        }
     }
 
-    public static <T> PropertyFactory<T> at(String propertyName) {
-        return new PropertyFactory<T>(Validate.notNull(propertyName, "propertyName"));
+    public static <T> PositionFactory<T> at(String propertyName) {
+        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"));
     }
 }

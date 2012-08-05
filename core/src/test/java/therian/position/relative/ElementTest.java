@@ -1,3 +1,18 @@
+/*
+ *  Copyright the original author or authors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package therian.position.relative;
 
 import static org.junit.Assert.*;
@@ -63,5 +78,17 @@ public class ElementTest {
         final String[] array = ArrayUtils.toArray("foo");
         Element.atArrayIndex(0).of(Ref.to(array)).setValue("bar");
         assertEquals("bar", array[0]);
+    }
+
+    @Test
+    public void testToString() {
+        final Ref<ArrayList<String>> listRef = Ref.to(new ArrayList<String>());
+        assertEquals(String.format("Relative Position: Element [0] of %s", listRef), Element.atIndex(0).of(listRef)
+            .toString());
+
+        final Ref<String[]> arrayRef = Ref.to(new String[0]);
+        assertEquals(String.format("Relative Position: Array Element [0] of %s", arrayRef),
+            Element.atArrayIndex(0).of(arrayRef).toString());
+
     }
 }

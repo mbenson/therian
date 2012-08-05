@@ -113,7 +113,7 @@ public class Element {
         protected abstract <P> Type evaluateElementType(Position<P> parentPosition);
     }
 
-    public static <T> PositionFactory<Object, T> atArrayIndex(int index) {
+    public static <T> PositionFactory<Object, T> atArrayIndex(final int index) {
         @SuppressWarnings("unchecked")
         final PositionFactory<Object, T> result = new PositionFactory<Object, T>(index, new GetTypeMixin<T>(index) {
 
@@ -128,11 +128,17 @@ public class Element {
                 Validate.isTrue(TypeUtils.isArrayType(parentType), "%s is not an array type", parentType);
                 return super.of(parentPosition);
             }
+
+            @Override
+            public String toString() {
+                return String.format("Array Element [%s]", index);
+            }
+
         };
         return result;
     }
 
-    public static <T> PositionFactory<Iterable<? extends T>, T> atIndex(int index) {
+    public static <T> PositionFactory<Iterable<? extends T>, T> atIndex(final int index) {
         @SuppressWarnings("unchecked")
         final PositionFactory<Iterable<? extends T>, T> result =
             new PositionFactory<Iterable<? extends T>, T>(index, new GetTypeMixin<T>(index) {
@@ -143,7 +149,13 @@ public class Element {
                         Iterable.class.getTypeParameters()[0]);
                 }
 
-            });
+            }) {
+                @Override
+                public String toString() {
+                    return String.format("Element [%s]", index);
+                }
+
+            };
         return result;
     }
 }

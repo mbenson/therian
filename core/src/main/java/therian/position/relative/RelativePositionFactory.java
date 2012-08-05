@@ -46,7 +46,7 @@ public class RelativePositionFactory<PARENT, TYPE> {
                 return result;
             }
             if (method.equals(Object.class.getMethod("toString"))) {
-                return String.format("Relative Position: %s of %s", this, parentPosition);
+                return String.format("Relative Position: %s of %s", RelativePositionFactory.this, parentPosition);
             }
             throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType().getName(),
                 method.getName(), ArrayUtils.toString(args, "")));

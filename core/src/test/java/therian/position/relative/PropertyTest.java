@@ -21,7 +21,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.junit.Test;
 
 import therian.TypeLiteral;
@@ -70,4 +69,10 @@ public class PropertyTest {
         assertEquals("66666", book.getAuthor().getAddresses().get(0).getZipCode());
     }
 
+    @Test
+    public void testToString() {
+        final Ref<Book> bookRef = Ref.to(new Book());
+        assertEquals(String.format("Relative Position: Property author of %s", bookRef),
+            Property.at("author").of(bookRef).toString());
+    }
 }
