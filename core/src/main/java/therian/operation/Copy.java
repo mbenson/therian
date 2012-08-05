@@ -15,6 +15,7 @@
  */
 package therian.operation;
 
+import therian.OperationException;
 import therian.position.Position;
 import therian.position.Position.Readable;
 
@@ -25,8 +26,32 @@ import therian.position.Position.Readable;
  * @param <TARGET>
  */
 public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Position.Readable<TARGET>> {
+    /**
+     * "Copy safely" operation.
+     * 
+     * @param <SOURCE>
+     * @param <TARGET>
+     */
+    public static class Safely<SOURCE, TARGET> extends Copy<SOURCE, TARGET> {
 
-    private Copy(Readable<SOURCE> sourcePosition, Readable<TARGET> targetPosition) {
+        private Safely(Readable<SOURCE> sourcePosition, Readable<TARGET> targetPosition) {
+            super(sourcePosition, targetPosition);
+        }
+
+        /**
+         * Suppresses {@link OperationException} for failed operation.
+         */
+        @Override
+        public Void getResult() {
+            return provideResult();
+        }
+
+        public static <S, T> Safely<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
+            return new Safely<S, T>(sourcePosition, targetPosition);
+        }
+    }
+
+    protected Copy(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
     }
 

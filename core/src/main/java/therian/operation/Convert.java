@@ -58,7 +58,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     private final Result result;
 
-    private Convert(Position.Readable<SOURCE> sourcePosition, Position.Writable<TARGET> targetPosition) {
+    protected Convert(Position.Readable<SOURCE> sourcePosition, Position.Writable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
         this.result = new Result();
     }

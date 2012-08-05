@@ -62,11 +62,6 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     }
 
     @Override
-    public final RESULT getResult() {
-        return super.getResult();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
