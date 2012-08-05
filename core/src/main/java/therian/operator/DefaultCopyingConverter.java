@@ -35,10 +35,6 @@ import therian.position.Position.Readable;
  * for non-abstract target types.
  */
 public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
-    private static final DefaultCopyingConverter INSTANCE = new DefaultCopyingConverter();
-
-    public DefaultCopyingConverter() {
-    }
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -70,7 +66,4 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
         return result == null ? ConstructorUtils.getAccessibleConstructor(rawTargetType) : result;
     }
 
-    public static DefaultCopyingConverter instance() {
-        return INSTANCE;
-    }
 }
