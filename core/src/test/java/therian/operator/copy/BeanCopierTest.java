@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package therian.operator;
+package therian.operator.copy;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +22,10 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Copy;
+import therian.operator.TransformerTest;
+import therian.operator.convert.DefaultCopyingConverter;
+import therian.operator.convert.ELCoercionConverter;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Ref;
 import therian.testfixture.Address;
 import therian.testfixture.Country;

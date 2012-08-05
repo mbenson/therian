@@ -1,12 +1,13 @@
-package therian.operator;
+package therian.operator.convert;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Convert;
+import therian.operator.TransformerTest;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
 

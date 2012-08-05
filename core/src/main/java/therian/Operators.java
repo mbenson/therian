@@ -26,11 +26,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import therian.operator.BeanCopier;
-import therian.operator.ConvertingCopier;
-import therian.operator.DefaultCopyingConverter;
-import therian.operator.DefaultImmutableChecker;
-import therian.operator.ELCoercionConverter;
+import therian.operator.convert.DefaultCopyingConverter;
+import therian.operator.convert.ELCoercionConverter;
+import therian.operator.copy.BeanCopier;
+import therian.operator.copy.ConvertingCopier;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 /**
  * Utility methods for Operators.

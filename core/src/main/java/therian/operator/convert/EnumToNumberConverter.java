@@ -1,4 +1,4 @@
-package therian.operator;
+package therian.operator.convert;
 
 import java.lang.reflect.Type;
 
