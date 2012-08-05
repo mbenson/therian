@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-package therian.operator;
+package therian.operator.copy;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,9 +25,9 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Copy;
-import therian.operator.ConvertingCopier;
-import therian.operator.DefaultImmutableChecker;
-import therian.operator.ELCoercionConverter;
+import therian.operator.TransformerTest;
+import therian.operator.convert.ELCoercionConverter;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Ref;
 import therian.position.relative.Property;
 import therian.position.relative.RelativePosition;

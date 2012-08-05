@@ -27,9 +27,9 @@ import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.junit.Test;
 
-import therian.operator.DefaultImmutableChecker;
-import therian.operator.ELCoercionConverter;
-import therian.operator.EnumToNumberConverter;
+import therian.operator.convert.ELCoercionConverter;
+import therian.operator.convert.EnumToNumberConverter;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 public class OperatorsTest {
     public enum Success {

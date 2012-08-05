@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package therian.operator;
+package therian.operator.copy;
 
 import java.beans.FeatureDescriptor;
 import java.util.HashSet;

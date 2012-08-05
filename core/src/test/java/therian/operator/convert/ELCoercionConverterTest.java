@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package therian.operator;
+package therian.operator.convert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Convert;
-import therian.operator.ELCoercionConverter;
+import therian.operator.TransformerTest;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
 

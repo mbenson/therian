@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package therian.operator;
+package therian.operator.convert;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;

@@ -27,7 +27,7 @@ import therian.Therian;
 import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
-import therian.operator.DefaultImmutableChecker;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
 
