@@ -40,7 +40,6 @@ public class Therian {
     private static final Therian STANDARD = Therian.usingModules(DEFAULT_MODULE);
 
     private final TherianModule[] modules;
-    // TODO sort by type/params
     private final Set<Operator<?>> operators = new TreeSet<Operator<?>>(Operators.comparator());
     private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
 
