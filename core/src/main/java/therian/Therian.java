@@ -18,8 +18,6 @@ package therian;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
@@ -42,18 +40,20 @@ public class Therian {
     private static final Therian STANDARD = Therian.usingModules(DEFAULT_MODULE);
 
     private final TherianModule[] modules;
-    private final Set<Operator<?>> operators = new TreeSet<Operator<?>>(Operators.comparator());
+    private final List<Operator<?>> operators = new ArrayList<Operator<?>>();
     private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
 
     private Therian(TherianModule... modules) {
         this.modules = modules == null ? new TherianModule[0] : modules;
+
         for (TherianModule module : this.modules) {
             Collections.addAll(operators, module.getOperators());
             Collections.addAll(elResolvers, module.getElResolvers());
         }
+        Collections.sort(operators, Operators.comparator());
     }
 
-    Set<Operator<?>> getOperators() {
+    Iterable<Operator<?>> getOperators() {
         return operators;
     }
 
