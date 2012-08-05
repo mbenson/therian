@@ -93,15 +93,16 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
-     * Performs the specified operation by invoking any compatible operator until the operation is marked as successful,
-     * then returns the result.
+     * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
+     * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
+     * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
      * 
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
      * @return result if available
-     * @throws IllegalArgumentException
-     *             if no operators are successful
+     * @throws OperationException
+     *             potentially, via {@link Operation#getResult()}
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation) {
         final TherianContext originalContext = getCurrentInstance();
@@ -110,7 +111,13 @@ public class TherianContext extends ELContextWrapper {
         }
         try {
             if (operations.contains(operation)) {
-                // TODO handle better, e.g. copy of recursive graph
+                for (Operation<?> op : operations) {
+                    if (op.equals(operation) && op.isSuccessful()) {
+                        @SuppressWarnings("unchecked")
+                        RESULT result = (RESULT) op.getResult();
+                        return result;
+                    }
+                }
                 throw new OperationException(operation, "recursive operation detected");
             }
             operations.push(operation);
@@ -134,13 +141,11 @@ public class TherianContext extends ELContextWrapper {
                     "operation stack out of whack; found %s where %s was expected", opOnPop, operation);
             }
         } finally {
-            // javadoc not clear on whether set(null) is truly equivalent to
-            // remove():
+            // javadoc not clear on whether set(null) is truly equivalent to remove():
             if (originalContext == null) {
                 CURRENT_INSTANCE.remove();
             } else if (originalContext != this) {
-                // restore original context in the unlikely event that multiple
-                // contexts are being used on the same
+                // restore original context in the unlikely event that multiple contexts are being used on the same
                 // thread:
                 CURRENT_INSTANCE.set(originalContext);
             }
@@ -165,9 +170,13 @@ public class TherianContext extends ELContextWrapper {
         RESULT result;
         Operation<?> owner = operations.peek();
         try {
-            Validate.isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner,
-                operation);
-            result = eval(operation);
+            if (operation.isSuccessful()) {
+                result = operation.getResult();
+            } else {
+                Validate.isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner,
+                    operation);
+                result = eval(operation);
+            }
         } finally {
             owner.setSuccessful(operation.isSuccessful());
         }
