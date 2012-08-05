@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.functor.UnaryPredicate;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -131,12 +132,14 @@ public class Operators {
     public static UnaryPredicate<Operator<?>> supporting(final Operation<?> operation) {
         return new UnaryPredicate<Operator<?>>() {
             public boolean test(Operator<?> operator) {
-                final Map<TypeVariable<?>, Type> typeArguments =
-                    TypeUtils.getTypeArguments(operator.getClass(), Operator.class);
-                if (TypeUtils.isInstance(operation, typeArguments.get(Operator.class.getTypeParameters()[0]))) {
-                    @SuppressWarnings({ "rawtypes", "unchecked" })
-                    final boolean result = ((Operator) operator).supports(operation);
-                    return result;
+                if (operation != null) {
+                    final Map<TypeVariable<?>, Type> typeArguments =
+                        TypeUtils.getTypeArguments(operator.getClass(), Operator.class);
+                    if (TypeUtils.isInstance(operation, typeArguments.get(Operator.class.getTypeParameters()[0]))) {
+                        @SuppressWarnings({ "rawtypes", "unchecked" })
+                        final boolean result = ((Operator) operator).supports(operation);
+                        return result;
+                    }
                 }
                 return false;
             }
@@ -144,7 +147,7 @@ public class Operators {
     }
 
     /**
-     * Validate an Operator implementation.
+     * Validate an {@link Operator} implementation.
      * 
      * @param operator
      * @param <OPERATOR>
@@ -153,7 +156,7 @@ public class Operators {
      *             on invalid operator
      */
     public static <OPERATOR extends Operator<?>> OPERATOR validateImplementation(OPERATOR operator) {
-        if (operator.getClass().getTypeParameters().length > 0) {
+        if (Validate.notNull(operator, "operator").getClass().getTypeParameters().length > 0) {
             throw new OperatorDefinitionException(operator, TYPE_PARAMS_DETECTED);
         }
         return operator;
