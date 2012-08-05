@@ -18,6 +18,8 @@
  */
 package therian.testfixture;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 public class Country {
     private String name;
     private String ISO2Code;
@@ -45,5 +47,34 @@ public class Country {
 
     public void setISO3Code(String ISO3Code) {
         this.ISO3Code = ISO3Code;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Country == false) {
+            return false;
+        }
+        Country other = (Country) obj;
+        return ObjectUtils.equals(getName(), other.getName()) && ObjectUtils.equals(getISO2Code(), other.getISO2Code())
+            && ObjectUtils.equals(getISO3Code(), other.getISO3Code());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 67 << 4;
+        result |= ObjectUtils.hashCode(getName());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getISO2Code());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getISO3Code());
+        return result;
     }
 }

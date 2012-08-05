@@ -18,6 +18,8 @@
  */
 package therian.testfixture;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 public class Address implements ZipCodeCityCarrier {
     private String addressline1;
     private String addressline2;
@@ -65,4 +67,33 @@ public class Address implements ZipCodeCityCarrier {
         this.country = country;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Address == false) {
+            return false;
+        }
+        Address other = (Address) obj;
+        return ObjectUtils.equals(getAddressline1(), other.getAddressline1())
+            && ObjectUtils.equals(getAddressline2(), other.getAddressline2())
+            && ObjectUtils.equals(getCity(), other.getCity()) && ObjectUtils.equals(getZipCode(), other.getZipCode())
+            && ObjectUtils.equals(getCountry(), other.getCountry());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 71 << 4;
+        result |= ObjectUtils.hashCode(getAddressline1());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getAddressline2());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getCity());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getZipCode());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getCountry());
+        return result;
+    }
 }
