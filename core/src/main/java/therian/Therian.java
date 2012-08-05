@@ -28,6 +28,8 @@ import javax.el.ELContextListener;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 
+import org.apache.commons.functor.core.collection.FilteredIterable;
+
 import therian.uelbox.ELContextWrapper;
 import therian.uelbox.SimpleELContext;
 
@@ -86,6 +88,10 @@ public class Therian {
             }
         }
         return result;
+    }
+
+    public boolean supports(Operation<?> operation) {
+        return FilteredIterable.of(getOperators()).retain(Operators.supporting(operation)).iterator().hasNext();
     }
 
     public static Therian usingModules(TherianModule... modules) {
