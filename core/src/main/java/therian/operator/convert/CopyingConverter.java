@@ -22,9 +22,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import therian.Operation;
+import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Convert;
 import therian.operation.Copy;
+import therian.position.Box;
 import therian.position.Position;
 
 /**
@@ -53,6 +55,13 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
         };
         TherianContext.getRequiredInstance().forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
+    }
+
+    @Override
+    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
+        return super.supports(convert)
+            && TherianContext.getInstance().getTypedContext(Therian.class)
+                .supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()), convert.getSourcePosition()));
     }
 
     /**
