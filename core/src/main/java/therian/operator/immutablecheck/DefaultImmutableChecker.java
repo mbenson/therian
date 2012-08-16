@@ -16,6 +16,12 @@
 package therian.operator.immutablecheck;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.ClassUtils;
 
@@ -23,27 +29,39 @@ import org.apache.commons.lang3.ClassUtils;
  * Checks for types universally known to be immutable.
  */
 public class DefaultImmutableChecker extends ImmutableChecker {
+    private static final Set<Class<?>> KNOWN_IMMUTABLE_TYPES;
+
+    static {
+        final HashSet<Class<?>> s = new HashSet<Class<?>>();
+        s.addAll(Arrays.<Class<?>> asList(String.class, Enum.class, Annotation.class));
+        s.add(Collections.emptySet().getClass());
+        s.add(Collections.unmodifiableSet(Collections.emptySet()).getClass());
+        s.add(Collections.emptyList().getClass());
+        s.add(Collections.unmodifiableList(Collections.emptyList()).getClass());
+        s.add(Collections.unmodifiableSortedSet(new TreeSet<Object>()).getClass());
+        s.add(Collections.emptyMap().getClass());
+        s.add(Collections.unmodifiableMap(Collections.emptyMap()).getClass());
+        s.add(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).getClass());
+        KNOWN_IMMUTABLE_TYPES = Collections.unmodifiableSet(s);
+    }
+
     @Override
     protected boolean isImmutable(Object object) {
         if (object == null) {
             return true;
         }
-        if (object instanceof String) {
-            return true;
-        }
-        if (object instanceof Enum) {
-            return true;
-        }
-        if (object instanceof Annotation) {
-            return true;
-        }
-        Class<?> cls = object.getClass();
+        final Class<?> cls = object.getClass();
         if (cls.isPrimitive()) {
             return true;
         }
         if (ClassUtils.wrapperToPrimitive(cls) != null) {
             return true;
         }
-        return false;
+        for (final Class<?> type : KNOWN_IMMUTABLE_TYPES) {
+            if (type.isInstance(object)) {
+                return true;
+            }
+        }
+        return cls.equals(Object.class);
     }
 }
