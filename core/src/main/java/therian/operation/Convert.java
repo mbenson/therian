@@ -17,11 +17,8 @@ package therian.operation;
 
 import java.lang.reflect.Type;
 
-
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.TherianContext;
 import therian.TypeLiteral;
 import therian.position.Position;
 
@@ -81,19 +78,6 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
                 return targetType.toString();
             }
         });
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        if (TypeUtils.isAssignable(getSourcePosition().getType(), super.getTargetPosition().getType())) {
-            if (TherianContext.getRequiredInstance().eval(ImmutableCheck.of(getSourcePosition())).booleanValue()) {
-                @SuppressWarnings("unchecked")
-                final TARGET value = (TARGET) getSourcePosition().getValue();
-                getTargetPosition().setValue(value);
-                setSuccessful(true);
-            }
-        }
     }
 
     @Override

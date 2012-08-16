@@ -123,15 +123,12 @@ public class TherianContext extends ELContextWrapper {
             operations.push(operation);
 
             try {
-                operation.init();
-                if (!operation.isSuccessful()) {
-                    for (Operator<?> operator : FilteredIterable.of(getTypedContext(Therian.class).getOperators())
-                        .retain(Operators.supporting(operation))) {
-                        // already determined that operator supports operation:
-                        evalRaw(operation, operator);
-                        if (operation.isSuccessful()) {
-                            break;
-                        }
+                for (Operator<?> operator : FilteredIterable.of(getTypedContext(Therian.class).getOperators()).retain(
+                    Operators.supporting(operation))) {
+                    // already determined that operator supports operation:
+                    evalRaw(operation, operator);
+                    if (operation.isSuccessful()) {
+                        break;
                     }
                 }
                 return operation.getResult();
@@ -154,7 +151,7 @@ public class TherianContext extends ELContextWrapper {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void evalRaw(Operation operation, Operator operator) {
-        Operators.validateImplementation(operator).perform(operation);
+        operator.perform(operation);
     }
 
     /**

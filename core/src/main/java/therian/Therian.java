@@ -26,7 +26,9 @@ import javax.el.ELContextListener;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 
+import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.functor.core.collection.FilteredIterable;
+import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 
 import therian.uelbox.ELContextWrapper;
 import therian.uelbox.SimpleELContext;
@@ -51,6 +53,12 @@ public class Therian {
             Collections.addAll(elResolvers, module.getElResolvers());
         }
         Collections.sort(operators, Operators.comparator());
+        IteratorToGeneratorAdapter.adapt(operators.iterator()).run(new UnaryProcedure<Operator<?>>() {
+
+            public void run(Operator<?> obj) {
+                Operators.validateImplementation(obj);
+            }
+        });
     }
 
     Iterable<Operator<?>> getOperators() {

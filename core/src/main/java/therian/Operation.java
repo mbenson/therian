@@ -38,16 +38,6 @@ public abstract class Operation<RESULT> {
         return provideResult();
     }
 
-    final void invokeInit() {
-        init();
-    }
-
-    /**
-     * Initialize the operation with an available {@link TherianContext}.
-     */
-    protected void init() {
-    }
-
     /**
      * Template method; must be implemented unless {@link #getResult()} is overridden.
      * 

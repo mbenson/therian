@@ -27,6 +27,7 @@ import therian.Therian;
 import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
+import therian.operator.convert.NOPConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
@@ -36,12 +37,14 @@ public class ConvertTest {
 
     @Before
     public void setup() {
-        therianContext = Therian.usingModules(TherianModule.create().withOperators(new DefaultImmutableChecker())).context();
+        therianContext =
+            Therian.usingModules(
+                TherianModule.create().withOperators(new NOPConverter(), new DefaultImmutableChecker())).context();
     }
 
-    @Test(expected=OperationException.class)
+    @Test(expected = OperationException.class)
     public void tesConvertUsingNullModules() {
-        Therian therian = Therian.usingModules((TherianModule[])null);
+        Therian therian = Therian.usingModules((TherianModule[]) null);
         TherianContext therianContext = therian.context();
         therianContext.eval(Convert.to(String.class, Ref.to("")));
     }

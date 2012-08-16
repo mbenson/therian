@@ -28,6 +28,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
+import therian.operator.convert.NOPConverter;
 import therian.operator.copy.BeanCopier;
 import therian.operator.copy.ConvertingCopier;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
@@ -47,6 +48,7 @@ public class Operators {
         new ConvertingCopier(),
         new DefaultImmutableChecker(),
         new DefaultCopyingConverter(),
+        new NOPConverter(),
         new BeanCopier(),
     };
     //@formatter:on
