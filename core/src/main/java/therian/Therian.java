@@ -18,6 +18,7 @@ package therian;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
@@ -31,15 +32,18 @@ import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 
 import therian.uelbox.ELContextWrapper;
+import therian.uelbox.IterableELResolver;
 import therian.uelbox.SimpleELContext;
 
 /**
  * Therian entry point.
  */
 public class Therian {
-    private static final TherianModule DEFAULT_MODULE = TherianModule.create().withOperators(Operators.standard());
+    private static final TherianModule DEFAULT_MODULE = TherianModule.create().withOperators(Operators.standard())
+        .withELResolvers(new IterableELResolver());
 
     private static final Therian STANDARD = Therian.usingModules(DEFAULT_MODULE);
+    private static Therian usingDiscoveredModules;
 
     private final TherianModule[] modules;
     private final List<Operator<?>> operators = new ArrayList<Operator<?>>();
@@ -100,6 +104,25 @@ public class Therian {
 
     public boolean supports(Operation<?> operation) {
         return FilteredIterable.of(getOperators()).retain(Operators.supporting(operation)).iterator().hasNext();
+    }
+
+    /**
+     * Return an instance configured as {@link Therian#STANDARD} +
+     * {@link TherianModule}s discovered using the {@link ServiceLoader}
+     * mechanism.
+     * 
+     * @return Therian
+     */
+    public static synchronized Therian usingDiscoveredModules() {
+        if (usingDiscoveredModules == null) {
+            final List<TherianModule> modules = new ArrayList<TherianModule>();
+            modules.add(DEFAULT_MODULE);
+            for (TherianModule module : ServiceLoader.load(TherianModule.class)) {
+                modules.add(module);
+            }
+            usingDiscoveredModules = new Therian(modules.toArray(new TherianModule[modules.size()]));
+        }
+        return usingDiscoveredModules;
     }
 
     public static Therian usingModules(TherianModule... modules) {
