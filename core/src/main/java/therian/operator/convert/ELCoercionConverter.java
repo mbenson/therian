@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.el.ELException;
-import javax.el.ExpressionFactory;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,6 +28,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.Operator;
 import therian.TherianContext;
 import therian.operation.Convert;
+import therian.uelbox.UEL;
 
 /**
  * Special operator that handles conversions by applying EL coercion rules. Quintessential example of a "converter" that
@@ -41,8 +41,8 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
         final Object value;
         try {
             value =
-                TherianContext.getRequiredInstance().getTypedContext(ExpressionFactory.class)
-                    .coerceToType(operation.getSourcePosition().getValue(), getRawTargetType(operation));
+                UEL.coerceToType(TherianContext.getRequiredInstance(), getRawTargetType(operation), operation
+                    .getSourcePosition().getValue());
         } catch (final ELException e) {
             return;
         }

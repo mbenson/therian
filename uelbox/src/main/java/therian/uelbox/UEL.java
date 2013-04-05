@@ -16,6 +16,7 @@
 package therian.uelbox;
 
 import javax.el.ELContext;
+import javax.el.ELException;
 import javax.el.ExpressionFactory;
 
 /**
@@ -77,5 +78,20 @@ public class UEL {
             expression = expression.substring(2, expression.length() - 1);
         }
         return new StringBuilder(String.format("{%s}", expression)).insert(0, trigger).toString();
+    }
+
+    /**
+     * Use EL specification coercion facilities to coerce an object to the specified type.
+     * 
+     * @param context
+     * @param toType
+     * @param object
+     * @return T
+     * @throws ELException if the coercion fails.
+     */
+    public static <T> T coerceToType(ELContext context, Class<T> toType, Object object) {
+        @SuppressWarnings("unchecked")
+        T result = (T) getExpressionFactory(context).coerceToType(object, toType);
+        return result;
     }
 }
