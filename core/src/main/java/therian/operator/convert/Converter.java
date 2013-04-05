@@ -19,24 +19,31 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Map;
 
-
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import therian.Operator;
 import therian.operation.Convert;
+import therian.util.Types;
 
 /**
  * {@link Convert} {@link Operator} superclass.
  * 
  * @param <SOURCE>
- * @param <DEST>
+ * @param <TARGET>
  */
-public abstract class Converter<SOURCE, DEST> implements Operator<Convert<? extends SOURCE, ? super DEST>> {
+public abstract class Converter<SOURCE, TARGET> implements Operator<Convert<? extends SOURCE, ? super TARGET>> {
     private static final TypeVariable<?>[] TYPE_PARAMS = Converter.class.getTypeParameters();
 
-    public boolean supports(Convert<? extends SOURCE, ? super DEST> convert) {
+    /**
+     * {@link Logger} instance.
+     */
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
-        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), typeArguments.get(TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(typeArguments.get(TYPE_PARAMS[1]), convert.getTargetPosition().getType());
+        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.get(typeArguments, TYPE_PARAMS[0]))
+            && TypeUtils.isAssignable(Types.get(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition().getType());
     }
 }
