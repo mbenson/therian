@@ -17,7 +17,9 @@ package therian.position;
 
 import java.lang.reflect.Type;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
  * Portable read/write {@link Position}.
@@ -35,6 +37,7 @@ public class Box<T> implements Position.ReadWrite<T> {
     public Box(Type type, T value) {
         super();
         this.type = Validate.notNull(type, "type");
+        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, type);
         this.value = value;
     }
 
@@ -48,6 +51,32 @@ public class Box<T> implements Position.ReadWrite<T> {
 
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Box == false) {
+            return false;
+        }
+        Box<?> other = (Box<?>) obj;
+        return other.getType().equals(type) && ObjectUtils.equals(other.getValue(), value);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 43 << 4;
+        result |= type.hashCode();
+        result <<= 4;
+        result |= ObjectUtils.hashCode(value);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Box<%s>(%s)", type, value);
     }
 
 }
