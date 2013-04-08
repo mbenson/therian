@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Copy;
-import therian.operator.TransformerTest;
+import therian.operator.OperatorTest;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Ref;
@@ -33,7 +33,7 @@ import therian.position.relative.Property;
 import therian.position.relative.RelativePosition;
 import therian.testfixture.Address;
 
-public class ConvertingCopierTest extends TransformerTest {
+public class ConvertingCopierTest extends OperatorTest {
 
     @Override
     protected TherianModule[] modules() {

@@ -28,12 +28,12 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.ImmutableCheck;
-import therian.operator.TransformerTest;
+import therian.operator.OperatorTest;
 import therian.position.Position;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
 
-public class DefaultImmutableCheckerTest extends TransformerTest {
+public class DefaultImmutableCheckerTest extends OperatorTest {
     @Override
     protected TherianModule[] modules() {
         return new TherianModule[] { TherianModule.create().withOperators(new DefaultImmutableChecker()) };

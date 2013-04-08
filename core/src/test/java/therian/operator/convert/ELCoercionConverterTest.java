@@ -25,12 +25,12 @@ import org.junit.Test;
 
 import therian.TherianModule;
 import therian.operation.Convert;
-import therian.operator.TransformerTest;
+import therian.operator.OperatorTest;
 import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
 
 
-public class ELCoercionConverterTest extends TransformerTest {
+public class ELCoercionConverterTest extends OperatorTest {
 
     @Override
     protected TherianModule[] modules() {
