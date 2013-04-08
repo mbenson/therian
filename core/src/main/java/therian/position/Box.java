@@ -16,6 +16,9 @@
 package therian.position;
 
 import java.lang.reflect.Type;
+import java.util.AbstractList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -23,10 +26,33 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
  * Portable read/write {@link Position}.
- *
+ * 
  * @param <T>
  */
 public class Box<T> implements Position.ReadWrite<T> {
+    /**
+     * {@link Box} that skips assignability checking of {@code value} to {@code type}. Use with care. Example: In the
+     * Oracle implementation, {@link Collections#unmodifiableList(java.util.List)} returns a class at runtime that
+     * actually extends {@link AbstractList}&lt;Object&gt; and which therefore is not truly assignable to some more
+     * narrowly parameterized {@link List}, even though in practice no runtime assignability problems are possible.
+     * 
+     * @param <T>
+     */
+    public static final class Unchecked<T> extends Box<T> {
+
+        public Unchecked(Type type, T value) {
+            super(type, value);
+        }
+
+        public Unchecked(Type type) {
+            super(type);
+        }
+
+        @Override
+        protected void check(Type type, T value) {
+        }
+    }
+
     private final Type type;
     private T value;
 
@@ -37,8 +63,12 @@ public class Box<T> implements Position.ReadWrite<T> {
     public Box(Type type, T value) {
         super();
         this.type = Validate.notNull(type, "type");
-        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, type);
         this.value = value;
+        check(type, value);
+    }
+
+    protected void check(Type type, T value) {
+        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, type);
     }
 
     public void setValue(T value) {
