@@ -15,7 +15,10 @@
  */
 package therian.operation;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import therian.Operation;
+import therian.BindTypeVariable;
 import therian.position.Position;
 import therian.position.Position.Readable;
 
@@ -31,6 +34,7 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
         this.position = position;
     }
 
+    @BindTypeVariable
     public Position.Readable<T> getPosition() {
         return position;
     }
@@ -41,6 +45,32 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
     @Override
     public Boolean getResult() {
         return isSuccessful();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        ImmutableCheck<?> other = (ImmutableCheck<?>) obj;
+        return ObjectUtils.equals(other.getPosition(), getPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 53 << 4;
+        result |= getClass().hashCode();
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getPosition());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Immutable check of %s", getPosition());
     }
 
     /**

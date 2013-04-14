@@ -43,7 +43,7 @@ public abstract class Converter<SOURCE, TARGET> implements Operator<Convert<? ex
 
     public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
-        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.get(typeArguments, TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(Types.get(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition().getType());
+        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
+            && TypeUtils.isAssignable(Types.unrollVariables(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition().getType());
     }
 }

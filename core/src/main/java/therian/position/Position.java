@@ -15,20 +15,14 @@
  */
 package therian.position;
 
-import java.lang.reflect.Type;
+import therian.Typed;
 
 /**
  * Object position.
  * 
  * @param <T>
  */
-public interface Position<T> {
-    /**
-     * Get the type represented by this position.
-     * 
-     * @return Type
-     */
-    Type getType();
+public interface Position<T> extends Typed<T> {
 
     /**
      * Readable position.

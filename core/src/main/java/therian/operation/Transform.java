@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
 import therian.Operation;
+import therian.BindTypeVariable;
 import therian.position.Position;
 
 
@@ -48,6 +49,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
      * 
      * @return Position.Readable<SOURCE>
      */
+    @BindTypeVariable
     public Position.Readable<SOURCE> getSourcePosition() {
         return sourcePosition;
     }
@@ -57,6 +59,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
      * 
      * @return TARGET_POSITION
      */
+    @BindTypeVariable
     public TARGET_POSITION getTargetPosition() {
         return targetPosition;
     }

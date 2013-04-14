@@ -20,10 +20,12 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operation;
 import therian.Therian;
 import therian.TherianContext;
+import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.position.Box;
@@ -33,6 +35,45 @@ import therian.position.Position;
  * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}.
  */
 public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
+
+    /**
+     * Intermediate step in fluent interface.
+     * 
+     * @param <TARGET>
+     */
+    public static class Implementing<TARGET> {
+        private final Type targetType;
+
+        private Implementing(Type targetType) {
+            super();
+            this.targetType = targetType;
+        }
+
+        public <C extends TARGET> CopyingConverter<Object, TARGET> with(Class<C> concreteType) {
+            return new Fluent<TARGET>(targetType, requireDefaultConstructor(concreteType)) {};
+        }
+    }
+
+    private static abstract class Fluent<TARGET> extends CopyingConverter<Object, TARGET> {
+        private final Type targetType;
+        private final Constructor<? extends TARGET> constructor;
+
+        protected Fluent(Type targetType, Constructor<? extends TARGET> constructor) {
+            super();
+            this.targetType = targetType;
+            this.constructor = constructor;
+        }
+
+        @Override
+        protected TARGET createCopyDestination(Position.Readable<? extends Object> readable) throws Exception {
+            return constructor.newInstance();
+        }
+
+        @Override
+        public boolean supports(Convert<? extends Object, ? super TARGET> convert) {
+            return super.supports(convert) && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
+        }
+    }
 
     public final void perform(final Convert<? extends SOURCE, ? super TARGET> convert) {
         final TARGET target;
@@ -65,31 +106,48 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     }
 
     /**
-     * Create copy destination from source object.
+     * Create copy destination object from source position.
      * 
-     * @param readable
-     *            object
+     * @param readable object
      * @return TARGET
      */
     protected abstract TARGET createCopyDestination(Position.Readable<? extends SOURCE> readable) throws Exception;
 
+    private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {
+        return Validate.notNull(ConstructorUtils.getAccessibleConstructor(type),
+            "Could not find default constructor for %s", type);
+    }
+
     /**
-     * Create a CopyingConverter instance that instantiates the target type using the default constructor.
+     * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
      * 
-     * @param targetType
-     *            , must have an accessible no-arg constructor
+     * @param targetType which must have an accessible no-arg constructor
      * @param <TARGET>
      * @return CopyingConverter instance
      */
     public static <TARGET> CopyingConverter<Object, TARGET> forTargetType(Class<TARGET> targetType) {
-        final Constructor<TARGET> constructor = Validate.notNull(ConstructorUtils.getAccessibleConstructor(targetType));
+        return new Fluent<TARGET>(targetType, requireDefaultConstructor(targetType)) {};
+    }
 
-        return new CopyingConverter<Object, TARGET>() {
+    /**
+     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
+     * target type using the default constructor of a specific implementation.
+     * 
+     * @param targetType
+     * @return {@link Implementing} step
+     */
+    public static <TARGET> Implementing<TARGET> implementing(Class<TARGET> targetType) {
+        return new Implementing<TARGET>(targetType);
+    }
 
-            @Override
-            protected TARGET createCopyDestination(Position.Readable<? extends Object> readable) throws Exception {
-                return constructor.newInstance();
-            }
-        };
+    /**
+     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
+     * target type using the default constructor of a specific implementation.
+     * 
+     * @param targetType
+     * @return {@link Implementing} step
+     */
+    public static <TARGET> Implementing<TARGET> implementing(TypeLiteral<TARGET> targetType) {
+        return new Implementing<TARGET>(targetType.value);
     }
 }

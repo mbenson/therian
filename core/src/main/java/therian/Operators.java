@@ -17,41 +17,81 @@ package therian;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.core.Constant;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import therian.operator.add.AddToCollection;
+import therian.operator.convert.CopyingConverter;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.convert.NOPConverter;
 import therian.operator.copy.BeanCopier;
 import therian.operator.copy.ConvertingCopier;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
+import therian.operator.size.DefaultSizeOperator;
+import therian.operator.size.SizeOfCollection;
+import therian.operator.size.SizeOfIterable;
+import therian.operator.size.SizeOfIterator;
+import therian.operator.size.SizeOfMap;
 
 /**
  * Utility methods for Operators.
  */
 public class Operators {
     private static final String TYPE_PARAMS_DETECTED = "Should not instantiate parameterized Operator types";
+    private static final ThreadLocal<Deque<Pair<Operation<?>, Operator<?>>>> STACK =
+        new ThreadLocal<Deque<Pair<Operation<?>, Operator<?>>>>();
+    private static final Logger LOG = LoggerFactory.getLogger(Operators.class);
 
-    //@formatter:off
+    // @formatter:off
     private static final Operator<?>[] STANDARD_OPERATORS = {
         /*
-         * TODO add
+         * TODO add more
          */
         new ELCoercionConverter(),
         new ConvertingCopier(),
         new DefaultImmutableChecker(),
         new DefaultCopyingConverter(),
+        new AddToCollection(),
+
+        // these can't actually work until a mechanism for copying to target
+        // interfaces is in place:
+        CopyingConverter.implementing(List.class).with(ArrayList.class),
+        CopyingConverter.implementing(Map.class).with(HashMap.class),
+        CopyingConverter.implementing(Set.class).with(HashSet.class),
+        CopyingConverter.implementing(SortedSet.class).with(TreeSet.class),
+        CopyingConverter.implementing(SortedMap.class).with(TreeMap.class),
+
         new NOPConverter(),
         new BeanCopier(),
-    };
-    //@formatter:on
+
+        new SizeOfMap(),
+        new SizeOfCollection(),
+        new SizeOfIterable(),
+        new SizeOfIterator(),
+        new DefaultSizeOperator() };
+    // @formatter:on
 
     private static final Comparator<Operator<?>> COMPARATOR = new Comparator<Operator<?>>() {
 
@@ -81,10 +121,8 @@ public class Operators {
         /**
          * Compare types
          * 
-         * @param p1
-         *            first pair of type, assigning type
-         * @param p2
-         *            second pair of type, assigning type
+         * @param p1 first pair of type, assigning type
+         * @param p2 second pair of type, assigning type
          * @return int
          */
         private int compareTypes(ImmutablePair<? extends Type, ? extends Type> p1,
@@ -135,16 +173,36 @@ public class Operators {
      * @param operation
      * @return {@link UnaryPredicate}
      */
-    public static UnaryPredicate<Operator<?>> supporting(final Operation<?> operation) {
+    public static UnaryPredicate<? super Operator<?>> supporting(final Operation<?> operation) {
+        if (operation == null) {
+            return Constant.falsePredicate();
+        }
         return new UnaryPredicate<Operator<?>>() {
             public boolean test(Operator<?> operator) {
-                if (operation != null) {
-                    final Map<TypeVariable<?>, Type> typeArguments =
-                        TypeUtils.getTypeArguments(operator.getClass(), Operator.class);
-                    if (TypeUtils.isInstance(operation, typeArguments.get(Operator.class.getTypeParameters()[0]))) {
+                final Pair<Operation<?>, Operator<?>> pair =
+                    ImmutablePair.<Operation<?>, Operator<?>> of(operation, operator);
+                Deque<Pair<Operation<?>, Operator<?>>> stack = Operators.STACK.get();
+
+                if (stack != null && stack.contains(pair)) {
+                    return false;
+                }
+                
+                LOG.debug("testing whether Operator {0} supports {1}", operator, operation);
+                if (operation.matches(operator)) {
+                    if (stack == null) {
+                        stack = new LinkedList<Pair<Operation<?>, Operator<?>>>();
+                        Operators.STACK.set(stack);
+                    }
+                    stack.push(pair);
+                    try {
                         @SuppressWarnings({ "rawtypes", "unchecked" })
                         final boolean result = ((Operator) operator).supports(operation);
                         return result;
+                    } finally {
+                        Validate.validState(stack.pop() == pair, "Operator test stack out of whack");
+                        if (stack.isEmpty()) {
+                            Operators.STACK.remove();
+                        }
                     }
                 }
                 return false;
@@ -158,8 +216,7 @@ public class Operators {
      * @param operator
      * @param <OPERATOR>
      * @return {@code operator}
-     * @throws OperatorDefinitionException
-     *             on invalid operator
+     * @throws OperatorDefinitionException on invalid operator
      */
     public static <OPERATOR extends Operator<?>> OPERATOR validateImplementation(OPERATOR operator) {
         if (Validate.notNull(operator, "operator").getClass().getTypeParameters().length > 0) {

@@ -17,28 +17,34 @@ package therian.operation;
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import therian.Operation;
+import therian.BindTypeVariable;
 import therian.position.Position;
 
 /**
- * "Add" transformation.
- * 
- * @param <SOURCE>
- * @param <TARGET>
+ * Size {@link Operation}.
  */
-public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
-    private boolean result;
+public class Size<T> extends Operation<Integer> {
+    private final Position.Readable<T> position;
+    private int result = -1;
 
-    protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
-        super(sourcePosition, targetPosition);
+    private Size(Position.Readable<T> position) {
+        super();
+        this.position = position;
     }
 
-    public void setResult(boolean result) {
+    @BindTypeVariable
+    public Position.Readable<T> getPosition() {
+        return position;
+    }
+
+    public void setResult(int result) {
         this.result = result;
     }
 
     @Override
-    protected Boolean provideResult() {
-        return Boolean.valueOf(result);
+    protected Integer provideResult() {
+        return Integer.valueOf(result);
     }
 
     @Override
@@ -49,29 +55,26 @@ public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Posi
         if (!obj.getClass().equals(getClass())) {
             return false;
         }
-        Add<?, ?> other = (Add<?, ?>) obj;
-        return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
-            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+        Size<?> other = (Size<?>) obj;
+        return ObjectUtils.equals(other.getPosition(), getPosition());
     }
 
     @Override
     public int hashCode() {
-        int result = 51 << 4;
+        int result = 43 << 4;
         result |= getClass().hashCode();
         result <<= 4;
-        result |= ObjectUtils.hashCode(getSourcePosition());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getTargetPosition());
+        result |= ObjectUtils.hashCode(getPosition());
         return result;
     }
 
     @Override
     public String toString() {
-        return String.format("Add %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
+        return String.format("Size of %s", getPosition());
     }
 
-    public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
-        Position.Readable<SOURCE> sourcePosition) {
-        return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
+    public static <T> Size<T> of(Position.Readable<T> position) {
+        return new Size<T>(position);
     }
+
 }

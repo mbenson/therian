@@ -14,15 +14,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import therian.Typed;
 import therian.position.Position;
 
 public class RelativePositionFactory<PARENT, TYPE> {
     private class RelativePositionInvocationHandler implements InvocationHandler {
         final Position.Readable<? extends PARENT> parentPosition;
-        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins;
+        final Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins;
 
         protected RelativePositionInvocationHandler(Position.Readable<? extends PARENT> parentPosition,
-            Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins) {
+            Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins) {
             super();
             this.parentPosition = parentPosition;
             this.mixins = mixins;
@@ -105,12 +106,11 @@ public class RelativePositionFactory<PARENT, TYPE> {
         }
     };
 
-    private final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> mixins;
+    private final Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins;
 
     protected RelativePositionFactory(RelativePosition.Mixin<TYPE>... mixins) {
         super();
-        final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> m =
-            new HashMap<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>>();
+        final Map<Class<?>, RelativePosition.Mixin<TYPE>> m = new HashMap<Class<?>, RelativePosition.Mixin<TYPE>>();
         for (RelativePosition.Mixin<TYPE> mixin : mixins) {
             addTo(m, mixin);
         }
@@ -120,7 +120,7 @@ public class RelativePositionFactory<PARENT, TYPE> {
         this.mixins = Collections.unmodifiableMap(m);
     }
 
-    private void addTo(final Map<Class<? extends Position<?>>, RelativePosition.Mixin<TYPE>> target,
+    private void addTo(final Map<Class<?>, RelativePosition.Mixin<TYPE>> target,
         final RelativePosition.Mixin<TYPE> mixin) {
         for (Class<? extends Position<?>> positionType : RelativePosition.Mixin.HELPER.getImplementedTypes(mixin)) {
             if (target.containsKey(positionType)) {
@@ -128,6 +128,10 @@ public class RelativePositionFactory<PARENT, TYPE> {
                     mixins));
             }
             target.put(positionType, mixin);
+            if (Position.class.equals(positionType)) {
+                // this is a hack; this class is already all about Positions, so KMA
+                target.put(Typed.class, mixin);
+            }
         }
     }
 

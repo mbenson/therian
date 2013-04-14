@@ -15,11 +15,13 @@
  */
 package therian.operation;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import therian.position.Position;
 
 /**
  * "Add all" transformation.
- *
+ * 
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -33,12 +35,41 @@ public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, P
     public void setResult(boolean result) {
         this.result = result;
     }
-    
+
     @Override
     protected Boolean provideResult() {
         return Boolean.valueOf(result);
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        AddAll<?, ?> other = (AddAll<?, ?>) obj;
+        return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
+            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 47 << 4;
+        result |= getClass().hashCode();
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getSourcePosition());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getTargetPosition());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Add all %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
+    }
+
     public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
         Position.Readable<SOURCE> sourcePosition) {
         return new AddAll<SOURCE, TARGET>(sourcePosition, targetPosition);

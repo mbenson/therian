@@ -17,11 +17,12 @@ package therian.position;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
+
+import therian.util.Types;
 
 /**
  * Reference to a given value.
@@ -41,12 +42,8 @@ public class Ref<T> implements Position.Readable<T> {
      */
     protected Ref(T value) {
         this.value = value;
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Ref.class);
-        if (typeArguments.containsKey(TYPE_PARAMS[0])) {
-            this.type = typeArguments.get(TYPE_PARAMS[0]);
-        } else {
-            this.type = Validate.notNull(value).getClass();
-        }
+        final Type type = Types.unrollVariables(TypeUtils.getTypeArguments(getClass(), Ref.class), TYPE_PARAMS[0]);
+        this.type = type == null ? Validate.notNull(value).getClass() : type;
     }
 
     public Type getType() {

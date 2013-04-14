@@ -21,6 +21,8 @@ import java.util.Deque;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.functor.UnaryProcedure;
+import org.apache.commons.functor.core.NoOp;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -46,7 +48,7 @@ public class TherianContext extends ELContextWrapper {
 
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
 
-    private Deque<Operation<?>> operations = new ArrayDeque<Operation<?>>();
+    private final Deque<Operation<?>> operations = new ArrayDeque<Operation<?>>();
 
     TherianContext(ELContext wrapped) {
         super(wrapped);
@@ -70,8 +72,7 @@ public class TherianContext extends ELContextWrapper {
      * Require current thread-bound instance.
      * 
      * @return {@link TherianContext}
-     * @throws IllegalStateException
-     *             if unavailable
+     * @throws IllegalStateException if unavailable
      */
     public static TherianContext getRequiredInstance() {
         final TherianContext result = getCurrentInstance();
@@ -101,8 +102,7 @@ public class TherianContext extends ELContextWrapper {
      * @param <RESULT>
      * @param <OPERATION>
      * @return result if available
-     * @throws OperationException
-     *             potentially, via {@link Operation#getResult()}
+     * @throws OperationException potentially, via {@link Operation#getResult()}
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation) {
         final TherianContext originalContext = getCurrentInstance();
@@ -162,7 +162,21 @@ public class TherianContext extends ELContextWrapper {
      * @param <OPERATION>
      * @return operation's result
      */
-    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(OPERATION operation) {
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(final OPERATION operation) {
+        return forwardTo(operation, NoOp.<RESULT> unaryInstance());
+    }
+
+    /**
+     * Delegate the success of the current operation to that of another.
+     * 
+     * @param operation
+     * @param callback for result
+     * @param <RESULT>
+     * @param <OPERATION>
+     * @return operation's result
+     */
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(final OPERATION operation,
+        final UnaryProcedure<RESULT> callback) {
         Validate.validState(!operations.isEmpty(), "cannot delegate without an ongoing operation");
         RESULT result;
         Operation<?> owner = operations.peek();
@@ -173,6 +187,7 @@ public class TherianContext extends ELContextWrapper {
                 Validate.isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner,
                     operation);
                 result = eval(operation);
+                callback.run(result);
             }
         } finally {
             owner.setSuccessful(operation.isSuccessful());
