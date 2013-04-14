@@ -57,7 +57,7 @@ public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends 
             return false;
         }
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Copier.class);
-        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), Types.get(typeArguments, TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), Types.get(typeArguments, TYPE_PARAMS[1]));
+        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
+            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), Types.unrollVariables(typeArguments, TYPE_PARAMS[1]));
     }
 }
