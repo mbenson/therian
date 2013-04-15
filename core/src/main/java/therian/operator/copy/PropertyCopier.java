@@ -69,7 +69,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
                 "both from and to cannot be empty for a single @Mapping.Value");
         }
-        // TODO go ahead and process the mapping to RelativePositionFactory instances i.e. Property.at()
     }
 
     public void perform(Copy<? extends SOURCE, ? extends TARGET> copy) {
