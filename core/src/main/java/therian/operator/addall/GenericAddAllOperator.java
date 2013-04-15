@@ -3,6 +3,7 @@ package therian.operator.addall;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 
+import therian.Operator;
 import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Add;
@@ -10,7 +11,7 @@ import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.position.Ref;
 
-public class GenericAddAllOperator implements therian.Operator<AddAll<?, ?>> {
+public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
     private static class NullRef extends Ref<Object> {
         private final Type type;
 
