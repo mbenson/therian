@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import therian.OperationException;
-import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Copy;
 import therian.position.Position;
@@ -96,6 +95,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (!super.supports(copy)) {
             return false;
         }
+        final TherianContext context = TherianContext.getInstance();
         for (Mapping.Value v : mapping.value()) {
             Position.Readable<?> target = copy.getTargetPosition();
             final String to = StringUtils.trimToEmpty(v.to());
@@ -107,7 +107,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             if (!from.isEmpty()) {
                 source = Property.at(from).of(source);
             }
-            if (!TherianContext.getInstance().getTypedContext(Therian.class).supports(Copy.to(target, source))) {
+            if (!context.supports(Copy.to(target, source))) {
                 return false;
             }
         }

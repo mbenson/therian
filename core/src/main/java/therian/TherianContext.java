@@ -93,6 +93,25 @@ public class TherianContext extends ELContextWrapper {
         return Therian.standard().context();
     }
 
+    public boolean supports(Operation<?> operation) {
+        final TherianContext originalContext = getCurrentInstance();
+        if (originalContext != this) {
+            CURRENT_INSTANCE.set(this);
+        }
+        try {
+            return FilteredIterable.of(getTypedContext(Therian.class).getOperators())
+                .retain(Operators.supporting(operation)).iterator().hasNext();
+        } finally {
+            if (originalContext == null) {
+                CURRENT_INSTANCE.remove();
+            } else if (originalContext != this) {
+                // restore original context in the unlikely event that multiple contexts are being used on the same
+                // thread:
+                CURRENT_INSTANCE.set(originalContext);
+            }
+        }
+    }
+
     /**
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
@@ -138,7 +157,6 @@ public class TherianContext extends ELContextWrapper {
                     "operation stack out of whack; found %s where %s was expected", opOnPop, operation);
             }
         } finally {
-            // javadoc not clear on whether set(null) is truly equivalent to remove():
             if (originalContext == null) {
                 CURRENT_INSTANCE.remove();
             } else if (originalContext != this) {

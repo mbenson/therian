@@ -23,7 +23,6 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operation;
-import therian.Therian;
 import therian.TherianContext;
 import therian.TypeLiteral;
 import therian.operation.Convert;
@@ -101,8 +100,8 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     @Override
     public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
         return super.supports(convert)
-            && TherianContext.getInstance().getTypedContext(Therian.class)
-                .supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()), convert.getSourcePosition()));
+            && TherianContext.getInstance().supports(
+                Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()), convert.getSourcePosition()));
     }
 
     /**

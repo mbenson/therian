@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 import java.util.Iterator;
 
 import therian.Operator;
-import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Add;
 import therian.operation.AddAll;
@@ -40,10 +39,9 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
 
     public boolean supports(AddAll<?, ?> operation) {
         final TherianContext context = TherianContext.getInstance();
-        final Therian therian = context.getTypedContext(Therian.class);
         @SuppressWarnings("rawtypes")
         Convert<?, Iterator> toIterator = Convert.to(Iterator.class, operation.getSourcePosition());
-        if (!therian.supports(toIterator)) {
+        if (!context.supports(toIterator)) {
             return false;
         }
         // @formatter:off
@@ -53,7 +51,7 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
             // if null, use a raw reference
             @SuppressWarnings({ "rawtypes", "unchecked" })
             final Ref<?> ref = element == null ? new Ref(null) {} : Ref.to(element);
-            if (!therian.supports(Add.to(operation.getTargetPosition(), ref))) {
+            if (!context.supports(Add.to(operation.getTargetPosition(), ref))) {
                 return false;
             }
         }

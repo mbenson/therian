@@ -16,7 +16,6 @@
 package therian.operator.copy;
 
 import therian.Operator;
-import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Convert;
 import therian.operation.Copy;
@@ -39,8 +38,8 @@ public class ConvertingCopier implements Operator<Copy<?, ?>> {
         if (copy.getTargetPosition() instanceof Position.Writable) {
             final TherianContext context = TherianContext.getInstance();
             return context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()
-                && context.getTypedContext(Therian.class).supports(
-                    Convert.to((Position.Writable<?>) copy.getTargetPosition(), copy.getSourcePosition()));
+                && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(),
+                    copy.getSourcePosition()));
         }
         return false;
     }

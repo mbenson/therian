@@ -29,7 +29,6 @@ import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.apache.commons.functor.generator.TransformedGenerator;
 import org.apache.commons.lang3.ArrayUtils;
 
-import therian.Therian;
 import therian.TherianContext;
 import therian.operation.Copy;
 import therian.position.Position;
@@ -56,6 +55,7 @@ public class BeanCopier extends Copier<Object, Object> {
         });
     }
 
+    @Override
     public boolean supports(Copy<?, ?> copy) {
         return super.supports(copy)
             && !propertyCopyGenerator(copy.getSourcePosition(), copy.getTargetPosition()).toCollection().isEmpty();
@@ -78,7 +78,7 @@ public class BeanCopier extends Copier<Object, Object> {
             }), new UnaryPredicate<Copy<?, ?>>() {
 
             public boolean test(Copy<?, ?> obj) {
-                return context.getTypedContext(Therian.class).supports(obj);
+                return context.supports(obj);
             }
         });
     }

@@ -28,7 +28,6 @@ import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 
 import org.apache.commons.functor.UnaryProcedure;
-import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 
 import therian.uelbox.ELContextWrapper;
@@ -102,14 +101,9 @@ public class Therian {
         return result;
     }
 
-    public boolean supports(Operation<?> operation) {
-        return FilteredIterable.of(getOperators()).retain(Operators.supporting(operation)).iterator().hasNext();
-    }
-
     /**
-     * Return an instance configured as {@link Therian#STANDARD} +
-     * {@link TherianModule}s discovered using the {@link ServiceLoader}
-     * mechanism.
+     * Return an instance configured as {@link Therian#STANDARD} + {@link TherianModule}s discovered using the
+     * {@link ServiceLoader} mechanism.
      * 
      * @return Therian
      */
