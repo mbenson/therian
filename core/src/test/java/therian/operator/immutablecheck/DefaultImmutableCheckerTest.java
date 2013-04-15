@@ -105,9 +105,6 @@ public class DefaultImmutableCheckerTest extends OperatorTest {
     @Test
     public void testJavaUtilCollectionsFactoryTypes() {
         assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyList()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyList().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyList().listIterator())))
-            .booleanValue());
         assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptySet()))).booleanValue());
         assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptySet().iterator()))).booleanValue());
         assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap()))).booleanValue());
