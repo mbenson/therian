@@ -22,6 +22,7 @@ public class GenericCollectionCopier implements Operator<Copy<?, ?>> {
 
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
         // TODO Auto-generated method stub
+        // revisit
         if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()) {
             return copy.getTargetPosition() instanceof Position.Writable
                 && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(),
