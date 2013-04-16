@@ -18,16 +18,17 @@ package therian.operator.size;
 import org.apache.commons.lang3.StringUtils;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Size;
 
 public class SizeOfCharSequence implements Operator<Size<CharSequence>> {
 
-    public void perform(Size<CharSequence> operation) {
+    public void perform(TherianContext context, Size<CharSequence> operation) {
         operation.setResult(StringUtils.length(operation.getPosition().getValue()));
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Size<CharSequence> operation) {
+    public boolean supports(TherianContext context, Size<CharSequence> operation) {
         return true;
     }
 

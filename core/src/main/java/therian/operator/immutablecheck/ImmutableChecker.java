@@ -16,17 +16,18 @@
 package therian.operator.immutablecheck;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.ImmutableCheck;
 
 /**
  * {@link ImmutableCheck} {@link Operator}.
  */
 public abstract class ImmutableChecker implements Operator<ImmutableCheck<?>> {
-    public final void perform(ImmutableCheck<?> immutableCheck) {
+    public final void perform(TherianContext context, ImmutableCheck<?> immutableCheck) {
         immutableCheck.setSuccessful(isImmutable(immutableCheck.getPosition().getValue()));
     }
 
-    public boolean supports(ImmutableCheck<?> immutableCheck) {
+    public boolean supports(TherianContext context, ImmutableCheck<?> immutableCheck) {
         return true;
     }
 

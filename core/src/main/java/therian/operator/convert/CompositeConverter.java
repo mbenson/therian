@@ -16,6 +16,7 @@
 package therian.operator.convert;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Convert;
 
 /**
@@ -36,7 +37,7 @@ public class CompositeConverter implements Operator<Convert<?, ?>> {
         this.following = following;
     }
 
-    public void perform(Convert<?, ?> operation) {
+    public void perform(TherianContext context, Convert<?, ?> operation) {
         Convert<?, ?> convert;
         if (preceding == null) {
             convert = operation;
@@ -44,14 +45,14 @@ public class CompositeConverter implements Operator<Convert<?, ?>> {
             // TODO
             convert = null;
         }
-        following.perform(convert);
+        following.perform(null, convert);
 
         if (convert != operation) {
             operation.setSuccessful(convert.isSuccessful());
         }
     }
 
-    public boolean supports(Convert<?, ?> operation) {
+    public boolean supports(TherianContext context, Convert<?, ?> operation) {
         // TODO
         throw new UnsupportedOperationException();
     }

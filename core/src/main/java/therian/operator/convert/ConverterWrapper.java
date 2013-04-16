@@ -16,6 +16,7 @@
 package therian.operator.convert;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Convert;
 
 public abstract class ConverterWrapper<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
@@ -28,13 +29,13 @@ public abstract class ConverterWrapper<SOURCE, TARGET> extends Converter<SOURCE,
     }
 
     @SuppressWarnings("unchecked")
-    public void perform(Convert<? extends SOURCE, ? super TARGET> operation) {
-        wrapped.perform(operation);
+    public void perform(TherianContext context, Convert<? extends SOURCE, ? super TARGET> operation) {
+        wrapped.perform(null, operation);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
-        return super.supports(convert) && wrapped.supports(convert);
+    public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
+        return super.supports(context, convert) && convert.matches(wrapped) && wrapped.supports(context, convert);
     }
 }

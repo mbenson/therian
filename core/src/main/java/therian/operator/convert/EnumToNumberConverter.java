@@ -16,12 +16,12 @@ import therian.position.Ref;
  */
 public class EnumToNumberConverter implements Operator<Convert<Enum<?>, ?>> {
 
-    public void perform(Convert<Enum<?>, ?> operation) {
-        TherianContext.getRequiredInstance().forwardTo(
-            Convert.to(operation.getTargetPosition(), Ref.to(operation.getSourcePosition().getValue().ordinal())));
+    public void perform(TherianContext context, Convert<Enum<?>, ?> operation) {
+        context.forwardTo(Convert.to(operation.getTargetPosition(),
+            Ref.to(operation.getSourcePosition().getValue().ordinal())));
     }
 
-    public boolean supports(Convert<Enum<?>, ?> operation) {
+    public boolean supports(TherianContext context, Convert<Enum<?>, ?> operation) {
         if (!TypeUtils.isAssignable(operation.getSourcePosition().getType(), Enum.class)) {
             return false;
         }

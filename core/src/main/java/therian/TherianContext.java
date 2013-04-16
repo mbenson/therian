@@ -21,11 +21,14 @@ import java.util.Deque;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.functor.UnaryPredicate;
 import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.functor.core.NoOp;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import therian.el.TherianContextELResolver;
 import therian.uelbox.ELContextWrapper;
@@ -35,6 +38,29 @@ import therian.util.ReadOnlyUtils;
  * Therian context.
  */
 public class TherianContext extends ELContextWrapper {
+    private class OperatorFilter implements UnaryPredicate<Operator<?>> {
+        private final Operation<?> operation;
+
+        private OperatorFilter(Operation<?> operation) {
+            this.operation = Validate.notNull(operation);
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        public boolean test(Operator operator) {
+            final Pair<Operation<?>, Operator<?>> pair =
+                ImmutablePair.<Operation<?>, Operator<?>> of(operation, operator);
+            if (!supportChecks.contains(pair) && operation.matches(operator)) {
+                supportChecks.push(pair);
+                try {
+                    return operator.supports(TherianContext.this, operation);
+                } finally {
+                    Validate.validState(supportChecks.pop() == pair, "supportChecks out of whack");
+                }
+            }
+            return false;
+        }
+    }
+
     /**
      * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
      * "utility" {@link ELResolver} wrappers.
@@ -49,6 +75,8 @@ public class TherianContext extends ELContextWrapper {
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
 
     private final Deque<Operation<?>> operations = new ArrayDeque<Operation<?>>();
+    private final Deque<Pair<Operation<?>, Operator<?>>> supportChecks =
+        new ArrayDeque<Pair<Operation<?>, Operator<?>>>();
 
     TherianContext(ELContext wrapped) {
         super(wrapped);
@@ -64,20 +92,8 @@ public class TherianContext extends ELContextWrapper {
      * 
      * @return {@link TherianContext} or {@code null}
      */
-    public static TherianContext getCurrentInstance() {
+    private static TherianContext getCurrentInstance() {
         return CURRENT_INSTANCE.get();
-    }
-
-    /**
-     * Require current thread-bound instance.
-     * 
-     * @return {@link TherianContext}
-     * @throws IllegalStateException if unavailable
-     */
-    public static TherianContext getRequiredInstance() {
-        final TherianContext result = getCurrentInstance();
-        Validate.validState(result != null);
-        return result;
     }
 
     /**
@@ -93,14 +109,14 @@ public class TherianContext extends ELContextWrapper {
         return Therian.standard().context();
     }
 
-    public boolean supports(Operation<?> operation) {
+    public synchronized boolean supports(final Operation<?> operation) {
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
             CURRENT_INSTANCE.set(this);
         }
         try {
             return FilteredIterable.of(getTypedContext(Therian.class).getOperators())
-                .retain(Operators.supporting(operation)).iterator().hasNext();
+                .retain(new OperatorFilter(operation)).iterator().hasNext();
         } finally {
             if (originalContext == null) {
                 CURRENT_INSTANCE.remove();
@@ -143,8 +159,7 @@ public class TherianContext extends ELContextWrapper {
 
             try {
                 for (Operator<?> operator : FilteredIterable.of(getTypedContext(Therian.class).getOperators()).retain(
-                    Operators.supporting(operation))) {
-                    // already determined that operator supports operation:
+                    new OperatorFilter(operation))) {
                     evalRaw(operation, operator);
                     if (operation.isSuccessful()) {
                         break;
@@ -169,7 +184,7 @@ public class TherianContext extends ELContextWrapper {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void evalRaw(Operation operation, Operator operator) {
-        operator.perform(operation);
+        operator.perform(this, operation);
     }
 
     /**

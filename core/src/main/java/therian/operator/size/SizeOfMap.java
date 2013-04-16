@@ -18,6 +18,7 @@ package therian.operator.size;
 import java.util.Map;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Size;
 
 /**
@@ -25,13 +26,13 @@ import therian.operation.Size;
  */
 public class SizeOfMap implements Operator<Size<Map<?, ?>>> {
 
-    public void perform(Size<Map<?, ?>> operation) {
+    public void perform(TherianContext context, Size<Map<?, ?>> operation) {
         final Map<?, ?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Size<Map<?, ?>> operation) {
+    public boolean supports(TherianContext context, Size<Map<?, ?>> operation) {
         return true;
     }
 

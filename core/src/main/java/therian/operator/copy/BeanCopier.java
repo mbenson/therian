@@ -41,29 +41,15 @@ import therian.position.relative.Property;
 public class BeanCopier extends Copier<Object, Object> {
     public static final String[] SKIP_PROPERTIES = { "class" };
 
-    public void perform(final Copy<?, ?> copy) {
-        final TherianContext context = TherianContext.getRequiredInstance();
-
-        propertyCopyGenerator(copy.getSourcePosition(), copy.getTargetPosition()).run(new UnaryProcedure<Copy<?, ?>>() {
-
-            public void run(Copy<?, ?> propertyCopy) {
-                context.eval(propertyCopy);
-                if (propertyCopy.isSuccessful()) {
-                    copy.setSuccessful(true);
-                }
-            }
-        });
-    }
-
     @Override
-    public boolean supports(Copy<?, ?> copy) {
-        return super.supports(copy)
-            && !propertyCopyGenerator(copy.getSourcePosition(), copy.getTargetPosition()).toCollection().isEmpty();
+    public boolean supports(TherianContext context, Copy<?, ?> copy) {
+        return super.supports(context, copy)
+            && !propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).toCollection()
+                .isEmpty();
     }
 
-    private Generator<Copy<?, ?>> propertyCopyGenerator(final Position.Readable<?> source,
-        final Position.Readable<?> target) {
-        final TherianContext context = TherianContext.getInstance();
+    private Generator<Copy<?, ?>> propertyCopyGenerator(final TherianContext context,
+        final Position.Readable<?> source, final Position.Readable<?> target) {
 
         final Set<String> sourceProperties = getPropertyNames(context, source);
         final Set<String> targetProperties = getPropertyNames(context, target);
@@ -93,6 +79,19 @@ public class BeanCopier extends Copier<Object, Object> {
             }
         }
         return result;
+    }
+
+    public void perform(final TherianContext context, final Copy<?, ?> copy) {
+        propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).run(
+            new UnaryProcedure<Copy<?, ?>>() {
+
+                public void run(Copy<?, ?> propertyCopy) {
+                    context.eval(propertyCopy);
+                    if (propertyCopy.isSuccessful()) {
+                        copy.setSuccessful(true);
+                    }
+                }
+            });
     }
 
 }

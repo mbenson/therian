@@ -28,22 +28,21 @@ import therian.position.Ref;
  */
 public class SizeOfIterable implements Operator<Size<Iterable<?>>> {
 
-    public void perform(final Size<Iterable<?>> operation) {
+    public void perform(TherianContext context, final Size<Iterable<?>> operation) {
         final Iterable<?> value = operation.getPosition().getValue();
         if (value == null) {
             operation.setSuccessful(true);
             operation.setResult(0);
         } else {
-            TherianContext.getRequiredInstance().forwardTo(Size.of(Ref.to(value.iterator())),
-                new UnaryProcedure<Integer>() {
-                    public void run(Integer obj) {
-                        operation.setResult(obj);
-                    }
-                });
+            context.forwardTo(Size.of(Ref.to(value.iterator())), new UnaryProcedure<Integer>() {
+                public void run(Integer obj) {
+                    operation.setResult(obj);
+                }
+            });
         }
     }
 
-    public boolean supports(Size<Iterable<?>> operation) {
+    public boolean supports(TherianContext context, Size<Iterable<?>> operation) {
         return TypeUtils.isAssignable(operation.getPosition().getType(), Iterable.class);
     }
 

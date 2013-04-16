@@ -20,6 +20,7 @@ import java.lang.reflect.TypeVariable;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.TherianContext;
 import therian.operation.Convert;
 import therian.util.Types;
 
@@ -47,8 +48,8 @@ public abstract class ElementConverter<SOURCE, TARGET> extends Converter<SOURCE,
     }
 
     @Override
-    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
-        if (!super.supports(convert)) {
+    public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
+        if (!super.supports(context, convert)) {
             return false;
         }
         final Type targetComponentType =

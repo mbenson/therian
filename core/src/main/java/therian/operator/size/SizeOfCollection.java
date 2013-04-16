@@ -18,6 +18,7 @@ package therian.operator.size;
 import java.util.Collection;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Size;
 
 /**
@@ -27,13 +28,13 @@ import therian.operation.Size;
  */
 public class SizeOfCollection implements Operator<Size<Collection<?>>> {
 
-    public void perform(Size<Collection<?>> operation) {
+    public void perform(TherianContext context, Size<Collection<?>> operation) {
         Collection<?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Size<Collection<?>> operation) {
+    public boolean supports(TherianContext context, Size<Collection<?>> operation) {
         return true;
     }
 

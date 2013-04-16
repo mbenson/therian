@@ -27,7 +27,7 @@ import therian.position.Position;
  */
 public class NOPConverter implements therian.Operator<Convert<?, ?>> {
 
-    public void perform(Convert<?, ?> operation) {
+    public void perform(TherianContext context, Convert<?, ?> operation) {
         // silly anal ways to avoid suppressing warnings on the whole method:
         @SuppressWarnings("rawtypes")
         final Convert raw = operation;
@@ -41,9 +41,9 @@ public class NOPConverter implements therian.Operator<Convert<?, ?>> {
         return null;
     }
 
-    public boolean supports(Convert<?, ?> operation) {
+    public boolean supports(TherianContext context, Convert<?, ?> operation) {
         return TypeUtils.isAssignable(operation.getSourcePosition().getType(), operation.getTargetPosition().getType())
-            && TherianContext.getInstance().eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();
+            && context.eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();
     }
 
 }

@@ -19,12 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 
-import org.apache.commons.functor.core.collection.FilteredIterable;
-import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.junit.Test;
 
 import therian.operator.convert.ELCoercionConverter;
@@ -53,11 +49,11 @@ public class OperatorsTest {
 
     static class Surgeon<S extends Surgery> implements Operator<S> {
 
-        public void perform(S operation) {
+        public void perform(TherianContext context, S operation) {
             operation.result = Success.FAILURE;
         }
 
-        public boolean supports(S operation) {
+        public boolean supports(TherianContext context, S operation) {
             return true;
         }
     }
@@ -76,30 +72,13 @@ public class OperatorsTest {
 
     public static class SuccessOperator implements Operator<Operation<Success>> {
 
-        public void perform(Operation<Success> operation) {
+        public void perform(TherianContext context, Operation<Success> operation) {
         }
 
-        public boolean supports(Operation<Success> operation) {
+        public boolean supports(TherianContext context, Operation<Success> operation) {
             return true;
         }
 
-    }
-
-    @Test
-    public void testSupporting() {
-        @SuppressWarnings("unchecked")
-        final List<Surgeon<? extends Surgery>> surgeons =
-            Arrays.asList(new Surgeon<Appendectomy>() {}, new Surgeon<Tonsillectomy>() {});
-        assertEquals(
-            1,
-            IteratorToGeneratorAdapter
-                .adapt(FilteredIterable.of(surgeons).retain(Operators.supporting(new Appendectomy())).iterator())
-                .toCollection().size());
-        assertEquals(
-            1,
-            IteratorToGeneratorAdapter
-                .adapt(FilteredIterable.of(surgeons).retain(Operators.supporting(new Tonsillectomy())).iterator())
-                .toCollection().size());
     }
 
     @Test

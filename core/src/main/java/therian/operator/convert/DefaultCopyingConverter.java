@@ -23,6 +23,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Convert;
 import therian.position.Position.Readable;
 
@@ -38,7 +39,7 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void perform(final Convert<?, ?> convert) {
+    public void perform(TherianContext context, final Convert<?, ?> convert) {
         new CopyingConverter() {
 
             @Override
@@ -48,10 +49,10 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
                     .newInstance(readable.getValue());
             }
 
-        }.perform(convert);
+        }.perform(context, convert);
     }
 
-    public boolean supports(Convert<?, ?> convert) {
+    public boolean supports(TherianContext context, Convert<?, ?> convert) {
         return getConstructor(convert) != null;
     }
 

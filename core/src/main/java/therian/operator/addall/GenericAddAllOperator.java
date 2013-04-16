@@ -25,9 +25,8 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
         }
     }
 
-    public void perform(AddAll<?, ?> operation) {
+    public void perform(TherianContext context, AddAll<?, ?> operation) {
         // TODO Auto-generated method stub
-        final TherianContext context = TherianContext.getRequiredInstance();
         for (@SuppressWarnings("rawtypes")
         final Iterator iter = context.eval(Convert.to(Iterator.class, operation.getSourcePosition())); iter.hasNext();) {
             final Object element = iter.next();
@@ -37,8 +36,7 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
         }
     }
 
-    public boolean supports(AddAll<?, ?> operation) {
-        final TherianContext context = TherianContext.getInstance();
+    public boolean supports(TherianContext context, AddAll<?, ?> operation) {
         @SuppressWarnings("rawtypes")
         Convert<?, Iterator> toIterator = Convert.to(Iterator.class, operation.getSourcePosition());
         if (!context.supports(toIterator)) {

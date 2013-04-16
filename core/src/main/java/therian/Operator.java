@@ -27,17 +27,18 @@ public interface Operator<OPERATION extends Operation<?>> {
     /**
      * Perform the specified operation.
      * 
-     * @param operation
-     *            to perform
+     * @param context active
+     * @param operation to perform
      */
-    void perform(OPERATION operation);
+    void perform(TherianContext context, OPERATION operation);
 
     /**
      * Learn whether an operation is supported.
      * 
-     * @param operation
-     *            to check
+     * @param context active
+     * @param operation to check
+     * 
      * @return true if supported
      */
-    boolean supports(OPERATION operation);
+    boolean supports(TherianContext context, OPERATION operation);
 }

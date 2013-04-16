@@ -37,12 +37,10 @@ import therian.uelbox.UEL;
  */
 public class ELCoercionConverter implements Operator<Convert<?, ?>> {
 
-    public void perform(Convert<?, ?> operation) {
+    public void perform(TherianContext context, Convert<?, ?> operation) {
         final Object value;
         try {
-            value =
-                UEL.coerceToType(TherianContext.getRequiredInstance(), getRawTargetType(operation), operation
-                    .getSourcePosition().getValue());
+            value = UEL.coerceToType(context, getRawTargetType(operation), operation.getSourcePosition().getValue());
         } catch (final ELException e) {
             return;
         }
@@ -52,7 +50,7 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Convert<?, ?> operation) {
+    public boolean supports(TherianContext context, Convert<?, ?> operation) {
         final Class<?> rawTargetType = getRawTargetType(operation);
         final Class<?> useTargetType =
             ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);

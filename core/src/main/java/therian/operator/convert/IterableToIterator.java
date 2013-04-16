@@ -17,6 +17,7 @@ package therian.operator.convert;
 
 import java.util.Iterator;
 
+import therian.TherianContext;
 import therian.operation.Convert;
 
 /**
@@ -29,7 +30,7 @@ public class IterableToIterator extends ElementConverter<Iterable<?>, Iterator> 
         super(Iterable.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);
     }
 
-    public void perform(Convert<? extends Iterable<?>, ? super Iterator> operation) {
+    public void perform(TherianContext context, Convert<? extends Iterable<?>, ? super Iterator> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().iterator());
         operation.setSuccessful(true);
     }

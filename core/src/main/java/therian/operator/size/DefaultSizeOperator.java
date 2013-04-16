@@ -18,6 +18,7 @@ package therian.operator.size;
 import java.lang.reflect.Array;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Size;
 
 /**
@@ -26,14 +27,14 @@ import therian.operation.Size;
  */
 public class DefaultSizeOperator implements Operator<Size<?>> {
 
-    public void perform(Size<?> operation) {
+    public void perform(TherianContext context, Size<?> operation) {
         final Object value = operation.getPosition().getValue();
         final int result = value == null ? 0 : value.getClass().isArray() ? Array.getLength(value) : 1;
         operation.setResult(result);
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Size<?> operation) {
+    public boolean supports(TherianContext context, Size<?> operation) {
         return true;
     }
 

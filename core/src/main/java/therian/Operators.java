@@ -19,10 +19,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,15 +29,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.functor.UnaryPredicate;
-import org.apache.commons.functor.core.Constant;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import therian.operator.add.AddToCollection;
 import therian.operator.convert.CopyingConverter;
@@ -60,9 +53,6 @@ import therian.operator.size.SizeOfMap;
  */
 public class Operators {
     private static final String TYPE_PARAMS_DETECTED = "Should not instantiate parameterized Operator types";
-    private static final ThreadLocal<Deque<Pair<Operation<?>, Operator<?>>>> STACK =
-        new ThreadLocal<Deque<Pair<Operation<?>, Operator<?>>>>();
-    private static final Logger LOG = LoggerFactory.getLogger(Operators.class);
 
     // @formatter:off
     private static final Operator<?>[] STANDARD_OPERATORS = {
@@ -165,49 +155,6 @@ public class Operators {
      */
     public static Operator<?>[] standard() {
         return STANDARD_OPERATORS;
-    }
-
-    /**
-     * Get a {@link UnaryPredicate} to match {@link Operator}s that support {@code Operation}.
-     * 
-     * @param operation
-     * @return {@link UnaryPredicate}
-     */
-    public static UnaryPredicate<? super Operator<?>> supporting(final Operation<?> operation) {
-        if (operation == null) {
-            return Constant.falsePredicate();
-        }
-        return new UnaryPredicate<Operator<?>>() {
-            public boolean test(Operator<?> operator) {
-                final Pair<Operation<?>, Operator<?>> pair =
-                    ImmutablePair.<Operation<?>, Operator<?>> of(operation, operator);
-                Deque<Pair<Operation<?>, Operator<?>>> stack = Operators.STACK.get();
-
-                if (stack != null && stack.contains(pair)) {
-                    return false;
-                }
-                
-                LOG.debug("testing whether Operator {0} supports {1}", operator, operation);
-                if (operation.matches(operator)) {
-                    if (stack == null) {
-                        stack = new LinkedList<Pair<Operation<?>, Operator<?>>>();
-                        Operators.STACK.set(stack);
-                    }
-                    stack.push(pair);
-                    try {
-                        @SuppressWarnings({ "rawtypes", "unchecked" })
-                        final boolean result = ((Operator) operator).supports(operation);
-                        return result;
-                    } finally {
-                        Validate.validState(stack.pop() == pair, "Operator test stack out of whack");
-                        if (stack.isEmpty()) {
-                            Operators.STACK.remove();
-                        }
-                    }
-                }
-                return false;
-            }
-        };
     }
 
     /**

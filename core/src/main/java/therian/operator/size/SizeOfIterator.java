@@ -21,6 +21,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operation;
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Size;
 
 /**
@@ -30,7 +31,7 @@ import therian.operation.Size;
  */
 public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
 
-    public void perform(Size<Iterator<?>> operation) {
+    public void perform(TherianContext context, Size<Iterator<?>> operation) {
         final Iterator<? extends Object> value = operation.getPosition().getValue();
         int result = 0;
         for (; value != null && value.hasNext(); result++) {
@@ -40,7 +41,7 @@ public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Size<Iterator<?>> operation) {
+    public boolean supports(TherianContext context, Size<Iterator<?>> operation) {
         return TypeUtils.isAssignable(operation.getPosition().getType(), Iterator.class);
     }
 

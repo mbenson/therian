@@ -69,12 +69,13 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         }
 
         @Override
-        public boolean supports(Convert<? extends Object, ? super TARGET> convert) {
-            return super.supports(convert) && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
+        public boolean supports(TherianContext context, Convert<? extends Object, ? super TARGET> convert) {
+            return super.supports(context, convert)
+                && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
         }
     }
 
-    public final void perform(final Convert<? extends SOURCE, ? super TARGET> convert) {
+    public final void perform(final TherianContext context, final Convert<? extends SOURCE, ? super TARGET> convert) {
         final TARGET target;
         try {
             target = createCopyDestination(convert.getSourcePosition());
@@ -94,14 +95,14 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
             }
 
         };
-        TherianContext.getRequiredInstance().forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
+        context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
     }
 
     @Override
-    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
-        return super.supports(convert)
-            && TherianContext.getInstance().supports(
-                Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()), convert.getSourcePosition()));
+    public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
+        return super.supports(context, convert)
+            && context.supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()),
+                convert.getSourcePosition()));
     }
 
     /**

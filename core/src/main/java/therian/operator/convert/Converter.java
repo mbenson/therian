@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import therian.Operator;
+import therian.TherianContext;
 import therian.operation.Convert;
 import therian.util.Types;
 
@@ -41,7 +42,7 @@ public abstract class Converter<SOURCE, TARGET> implements Operator<Convert<? ex
      */
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    public boolean supports(Convert<? extends SOURCE, ? super TARGET> convert) {
+    public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
         return TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
             && TypeUtils.isAssignable(Types.unrollVariables(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition().getType());

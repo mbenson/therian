@@ -70,7 +70,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
     }
 
-    public void perform(Copy<? extends SOURCE, ? extends TARGET> copy) {
+    public void perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
         for (Mapping.Value v : mapping.value()) {
             Position.Readable<?> target = copy.getTargetPosition();
             final String to = StringUtils.trimToEmpty(v.to());
@@ -83,7 +83,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                 source = Property.at(from).of(source);
             }
             final Copy<?, ?> nested = Copy.to(target, source);
-            TherianContext.getRequiredInstance().eval(nested);
+            context.eval(nested);
             if (!nested.isSuccessful()) {
                 throw new OperationException(copy, "nested %s was unsuccessful", nested);
             }
@@ -91,11 +91,10 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
     }
 
     @Override
-    public boolean supports(Copy<? extends SOURCE, ? extends TARGET> copy) {
-        if (!super.supports(copy)) {
+    public boolean supports(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
+        if (!super.supports(context, copy)) {
             return false;
         }
-        final TherianContext context = TherianContext.getInstance();
         for (Mapping.Value v : mapping.value()) {
             Position.Readable<?> target = copy.getTargetPosition();
             final String to = StringUtils.trimToEmpty(v.to());

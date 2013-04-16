@@ -18,6 +18,7 @@ package therian.operator.convert;
 import java.util.Collection;
 import java.util.Map;
 
+import therian.TherianContext;
 import therian.operation.Convert;
 
 /**
@@ -31,7 +32,7 @@ public class MapToValues extends ElementConverter<Map<?, ?>, Collection> {
         super(Map.class.getTypeParameters()[1], Iterable.class.getTypeParameters()[0]);
     }
 
-    public void perform(Convert<? extends Map<?, ?>, ? super Collection> operation) {
+    public void perform(TherianContext context, Convert<? extends Map<?, ?>, ? super Collection> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().values());
         operation.setSuccessful(true);
     }

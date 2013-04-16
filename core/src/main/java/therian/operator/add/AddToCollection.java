@@ -31,23 +31,24 @@ import therian.util.Types;
 public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void perform(Add<?, Collection<?>> operation) {
+    public void perform(TherianContext context, Add<?, Collection<?>> operation) {
         operation.setResult(((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition()
             .getValue()));
         operation.setSuccessful(true);
     }
 
-    public boolean supports(Add<?, Collection<?>> operation) {
+    public boolean supports(TherianContext context, Add<?, Collection<?>> operation) {
         // cannot add to immutable types
-        if (Boolean.TRUE.equals(TherianContext.getRequiredInstance().eval(
-            ImmutableCheck.of(operation.getTargetPosition())))) {
+        if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
             return false;
         }
         if (!TypeUtils.isAssignable(operation.getTargetPosition().getType(), Collection.class)) {
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class), Collection.class.getTypeParameters()[0]);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
+                Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection

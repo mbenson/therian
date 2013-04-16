@@ -32,10 +32,10 @@ import therian.util.Types;
 public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
     @SuppressWarnings("unchecked")
-    public void perform(Add<?, ListIterator<?>> operation) {
+    public void perform(TherianContext context, Add<?, ListIterator<?>> operation) {
         @SuppressWarnings("rawtypes")
         final ListIterator listIterator = operation.getTargetPosition().getValue();
-        
+
         int mark = 0;
         while (listIterator.hasNext()) {
             listIterator.next();
@@ -46,7 +46,7 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
             operation.setResult(true);
             operation.setSuccessful(true);
         } catch (UnsupportedOperationException e) {
-            //ignore and let someone else have a go if they like
+            // ignore and let someone else have a go if they like
         } finally {
             for (; mark >= 0; mark--) {
                 listIterator.previous();
@@ -55,16 +55,18 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
     }
 
-    public boolean supports(Add<?, ListIterator<?>> operation) {
+    public boolean supports(TherianContext context, Add<?, ListIterator<?>> operation) {
         // cannot add to immutable types
-        if (TherianContext.getRequiredInstance().eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
+        if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
             return false;
         }
         if (!TypeUtils.isAssignable(operation.getTargetPosition().getType(), ListIterator.class)) {
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class), ListIterator.class.getTypeParameters()[0]);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
+                ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw
