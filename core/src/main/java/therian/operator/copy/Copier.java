@@ -17,6 +17,7 @@ package therian.operator.copy;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -31,6 +32,17 @@ import therian.util.Types;
 
 /**
  * {@link Copy} {@link Operator} superclass.
+ * 
+ * Note the assignability constraints:
+ * <ul>
+ * <li>SOURCE assignable from source type</li>
+ * <li>TARGET assignable from target type</li>
+ * </ul>
+ * 
+ * For example, a {@link Copier} of {@link CharSequence} to {@link Number} (not that this is a realistic operation, but
+ * play along for the sake of discussion) could handle a copy of {@link String} to {@link Integer} as well as
+ * {@link StringBuilder} to {@link BigDecimal}. Thus it is best that your {@link Copier} implementations parameterize
+ * both SOURCE and TARGET as widely as possible.
  * 
  * @param <SOURCE>
  * @param <TARGET>
