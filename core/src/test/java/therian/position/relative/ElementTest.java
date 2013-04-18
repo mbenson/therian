@@ -15,7 +15,8 @@
  */
 package therian.position.relative;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +90,5 @@ public class ElementTest {
         final Ref<String[]> arrayRef = Ref.to(new String[0]);
         assertEquals(String.format("Relative Position: Array Element [0] of %s", arrayRef),
             Element.atArrayIndex(0).of(arrayRef).toString());
-
     }
 }
