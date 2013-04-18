@@ -30,7 +30,9 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
 import therian.el.ELConstants;
+import therian.operation.Add;
 import therian.position.Position;
+import therian.uelbox.IterableELResolver;
 import therian.util.Types;
 
 /**
@@ -38,9 +40,11 @@ import therian.util.Types;
  * <ul>
  * <li>array elements</li>
  * <li> {@link List} elements</li>
- * <li>{@link Iterable} elements (requires TODO IterableELResolver)</li>
+ * <li>{@link Iterable} elements (requires {@link IterableELResolver})</li>
  * </ul>
- * Does not handle growing lists/collections; probably this functionality will be implemented elsewhere/how.
+ * Because this implementation uses unified EL facilities, growing lists/collections is not supported.
+ * 
+ * @see Add
  */
 public class Element {
     public static class PositionFactory<PARENT, TYPE> extends RelativePositionFactory<PARENT, TYPE> {
@@ -70,7 +74,7 @@ public class Element {
 
         @Override
         public int hashCode() {
-            return (71 << 4) | index;
+            return 71 << 4 | index;
         }
     }
 
