@@ -109,7 +109,15 @@ public class TherianContext extends ELContextWrapper {
         return Therian.standard().context();
     }
 
+    /**
+     * Learn whether {@code operation} is supported by this context.
+     * 
+     * @param operation
+     * @return boolean
+     * @throws NullPointerException on {@code null} input
+     */
     public synchronized boolean supports(final Operation<?> operation) {
+        Validate.notNull(operation, "operation");
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
             CURRENT_INSTANCE.set(this);
@@ -129,6 +137,60 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
+     * Evaluates {@code operation} if supported; otherwise returns {@code null}. You may distinguish between a
+     * {@code null} result and "not supported" by calling {@link #supports(Operation)} and {@link #eval(Operation)}
+     * independently.
+     * 
+     * @param operation
+     * @return RESULT or {@code null}
+     * @throws NullPointerException on {@code null} input
+     * @throws OperationException potentially, via {@link Operation#getResult()}
+     */
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT evalIfSupported(OPERATION operation) {
+        return supports(operation) ? eval(operation) : null;
+    }
+
+    /**
+     * Evaluates {@code operation} if supported; otherwise returns {@code defaultValue}.
+     * 
+     * @param operation
+     * @param defaultValue
+     * @return RESULT or {@code null}
+     * @throws NullPointerException on {@code null} input
+     * @throws OperationException potentially, via {@link Operation#getResult()}
+     */
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT evalIfSupported(OPERATION operation,
+        RESULT defaultValue) {
+        return supports(operation) ? eval(operation) : defaultValue;
+    }
+
+    /**
+     * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
+     * 
+     * @param operation
+     * @return boolean
+     * @throws NullPointerException on {@code null} input
+     * @throws OperationException potentially, via {@link Operation#getResult()}
+     */
+    public final synchronized boolean evalSuccess(Operation<?> operation) {
+        eval(operation);
+        return operation.isSuccessful();
+    }
+
+    /**
+     * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
+     * 
+     * @param operation
+     * @return boolean
+     * @throws NullPointerException on {@code null} input
+     * @throws OperationException potentially, via {@link Operation#getResult()}
+     * @see #supports(Operation)
+     */
+    public final synchronized boolean evalSuccessIfSupported(Operation<?> operation) {
+        return supports(operation) && evalSuccess(operation);
+    }
+
+    /**
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
      * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
@@ -137,9 +199,11 @@ public class TherianContext extends ELContextWrapper {
      * @param <RESULT>
      * @param <OPERATION>
      * @return result if available
+     * @throws NullPointerException on {@code null} input
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation) {
+        Validate.notNull(operation, "operation");
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
             CURRENT_INSTANCE.set(this);
