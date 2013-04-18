@@ -23,7 +23,7 @@ import therian.TypeLiteral;
 import therian.position.Position;
 
 /**
- * Convert operation. An attempt to convert an immutable value to an assignable type automatically succeeds.
+ * Convert operation.
  * 
  * @param <SOURCE>
  * @param <TARGET>
