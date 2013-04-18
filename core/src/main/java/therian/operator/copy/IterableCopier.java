@@ -20,8 +20,10 @@ import therian.position.Ref;
 import therian.util.Types;
 
 /**
- * Tries to convert source and target to iterables and copy source elements onto corresponding target elements,
- * then to add remaining elements to target.
+ * Tries to convert source and target to {@link Iterable}s, copy source elements onto corresponding target elements,
+ * then to add remaining elements to target. If elements cannot be added but target position is writable, fallback
+ * strategy is to add all target elements to a new array of target element type, and attempt to convert that to target
+ * position.
  */
 public class IterableCopier implements Operator<Copy<?, ?>> {
 
@@ -100,13 +102,13 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
                 allElements.add(t);
             }
             // add target elements converted from source objects
-            for (Object s : ((Object[]) targetElements.getValue())) {
+            for (Object s : (Object[]) targetElements.getValue()) {
                 allElements.add(s);
             }
             ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
                 TypeUtils.getRawType(targetElements.getType(), null), allElements.size())));
 
-            final Position.Writable<?> convertTarget = ((Position.Writable<?>) copy.getTargetPosition());
+            final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
 
             context.forwardTo(Convert.to(convertTarget, targetElements));
         }
@@ -206,7 +208,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(rawTargetElementType,
             allElements.size())));
 
-        return context.supports(Convert.to(((Position.Writable<?>) copy.getTargetPosition()), targetElements));
+        return context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), targetElements));
     }
 
 }
