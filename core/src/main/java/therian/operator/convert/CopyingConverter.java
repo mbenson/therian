@@ -37,7 +37,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Intermediate step in fluent interface.
-     * 
+     *
      * @param <TARGET>
      */
     public static class Implementing<TARGET> {
@@ -75,14 +75,14 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         }
     }
 
-    public final void perform(final TherianContext context, final Convert<? extends SOURCE, ? super TARGET> convert) {
+    public final boolean perform(final TherianContext context, final Convert<? extends SOURCE, ? super TARGET> convert) {
         final TARGET target;
         try {
             target = createCopyDestination(convert.getSourcePosition());
             // make result available to any concurrent equivalent conversions:
             convert.getTargetPosition().setValue(target);
         } catch (Exception e) {
-            return;
+            return false;
         }
         final Position.Readable<TARGET> targetPosition;
         if (convert.getTargetPosition() instanceof Position.Readable<?>) {
@@ -104,7 +104,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
             };
         }
-        context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
+        return context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create copy destination object from source position.
-     * 
+     *
      * @param readable object
      * @return TARGET
      */
@@ -129,7 +129,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
-     * 
+     *
      * @param targetType which must have an accessible no-arg constructor
      * @param <TARGET>
      * @return CopyingConverter instance
@@ -141,7 +141,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     * 
+     *
      * @param targetType
      * @return {@link Implementing} step
      */
@@ -152,7 +152,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     * 
+     *
      * @param targetType
      * @return {@link Implementing} step
      */

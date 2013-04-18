@@ -10,10 +10,10 @@ import therian.util.Types;
 @SuppressWarnings("rawtypes")
 public class GetIterableElementType implements Operator<GetElementType<Iterable>> {
 
-    public void perform(TherianContext context, GetElementType<Iterable> op) {
+    public boolean perform(TherianContext context, GetElementType<Iterable> op) {
         op.setResult(Types.unrollVariables(TypeUtils.getTypeArguments(op.getTypeHost().getType(), Iterable.class),
             Iterable.class.getTypeParameters()[0]));
-        op.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, GetElementType<Iterable> op) {

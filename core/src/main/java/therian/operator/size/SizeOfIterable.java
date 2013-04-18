@@ -15,7 +15,6 @@
  */
 package therian.operator.size;
 
-import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
@@ -28,18 +27,14 @@ import therian.position.Ref;
  */
 public class SizeOfIterable implements Operator<Size<Iterable<?>>> {
 
-    public void perform(TherianContext context, final Size<Iterable<?>> operation) {
+    public boolean perform(TherianContext context, final Size<Iterable<?>> operation) {
         final Iterable<?> value = operation.getPosition().getValue();
         if (value == null) {
-            operation.setSuccessful(true);
             operation.setResult(0);
         } else {
-            context.forwardTo(Size.of(Ref.to(value.iterator())), new UnaryProcedure<Integer>() {
-                public void run(Integer obj) {
-                    operation.setResult(obj);
-                }
-            });
+            operation.setResult(context.eval(Size.of(Ref.to(value.iterator()))));
         }
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<Iterable<?>> operation) {

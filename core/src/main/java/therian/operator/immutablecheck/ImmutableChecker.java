@@ -23,8 +23,8 @@ import therian.operation.ImmutableCheck;
  * {@link ImmutableCheck} {@link Operator}.
  */
 public abstract class ImmutableChecker implements Operator<ImmutableCheck<?>> {
-    public final void perform(TherianContext context, ImmutableCheck<?> immutableCheck) {
-        immutableCheck.setSuccessful(isImmutable(immutableCheck.getPosition().getValue()));
+    public final boolean perform(TherianContext context, ImmutableCheck<?> immutableCheck) {
+        return isImmutable(immutableCheck.getPosition().getValue());
     }
 
     public boolean supports(TherianContext context, ImmutableCheck<?> immutableCheck) {

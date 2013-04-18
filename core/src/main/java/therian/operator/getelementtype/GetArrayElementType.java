@@ -8,9 +8,9 @@ import therian.operation.GetElementType;
 
 public class GetArrayElementType implements Operator<GetElementType<Object>> {
 
-    public void perform(TherianContext context, GetElementType<Object> op) {
+    public boolean perform(TherianContext context, GetElementType<Object> op) {
         op.setResult(TypeUtils.getArrayComponentType(op.getTypeHost().getType()));
-        op.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, GetElementType<Object> op) {

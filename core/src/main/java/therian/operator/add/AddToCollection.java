@@ -31,10 +31,10 @@ import therian.util.Types;
 public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void perform(TherianContext context, Add<?, Collection<?>> operation) {
-        operation.setResult(((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition()
-            .getValue()));
-        operation.setSuccessful(true);
+    public boolean perform(TherianContext context, Add<?, Collection<?>> operation) {
+        ((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition().getValue());
+        operation.setResult(Boolean.TRUE);
+        return true;
     }
 
     public boolean supports(TherianContext context, Add<?, Collection<?>> operation) {
@@ -46,9 +46,9 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(
-                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
-                Collection.class.getTypeParameters()[0]);
+                Types.unrollVariables(
+                    TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
+                    Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection

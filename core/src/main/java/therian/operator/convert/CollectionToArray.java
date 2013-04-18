@@ -16,7 +16,7 @@ import therian.util.Types;
 public class CollectionToArray implements Operator<Convert<? extends Collection, ?>> {
 
     @SuppressWarnings("unchecked")
-    public void perform(TherianContext context, Convert<? extends Collection, ?> convert) {
+    public boolean perform(TherianContext context, Convert<? extends Collection, ?> convert) {
         final Type targetComponentType = TypeUtils.getArrayComponentType(convert.getTargetPosition().getType());
         ((Position.Writable) convert.getTargetPosition()).setValue(convert
             .getSourcePosition()
@@ -24,7 +24,7 @@ public class CollectionToArray implements Operator<Convert<? extends Collection,
             .toArray(
                 (Object[]) Array.newInstance(TypeUtils.getRawType(targetComponentType, null), convert
                     .getSourcePosition().getValue().size())));
-        convert.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Convert<? extends Collection, ?> convert) {

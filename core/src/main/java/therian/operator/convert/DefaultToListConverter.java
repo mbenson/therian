@@ -34,7 +34,7 @@ import therian.operation.GetElementType;
 @SuppressWarnings("rawtypes")
 public class DefaultToListConverter extends Converter<Object, List> {
 
-    public void perform(TherianContext context, Convert<? extends Object, ? super List> convert) {
+    public boolean perform(TherianContext context, Convert<? extends Object, ? super List> convert) {
         final List<?> list;
         if (TypeUtils.isArrayType(convert.getSourcePosition().getType())) {
             final Object[] array;
@@ -55,7 +55,7 @@ public class DefaultToListConverter extends Converter<Object, List> {
             list = Collections.singletonList(convert.getSourcePosition().getValue());
         }
         convert.getTargetPosition().setValue(list);
-        convert.setSuccessful(true);
+        return true;
     }
 
     @Override

@@ -26,10 +26,10 @@ import therian.operation.Size;
  */
 public class SizeOfMap implements Operator<Size<Map<?, ?>>> {
 
-    public void perform(TherianContext context, Size<Map<?, ?>> operation) {
+    public boolean perform(TherianContext context, Size<Map<?, ?>> operation) {
         final Map<?, ?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<Map<?, ?>> operation) {

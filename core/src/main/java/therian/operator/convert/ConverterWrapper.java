@@ -29,8 +29,8 @@ public abstract class ConverterWrapper<SOURCE, TARGET> extends Converter<SOURCE,
     }
 
     @SuppressWarnings("unchecked")
-    public void perform(TherianContext context, Convert<? extends SOURCE, ? super TARGET> operation) {
-        wrapped.perform(null, operation);
+    public boolean perform(TherianContext context, Convert<? extends SOURCE, ? super TARGET> operation) {
+        return wrapped.perform(context, operation);
     }
 
     @SuppressWarnings("unchecked")

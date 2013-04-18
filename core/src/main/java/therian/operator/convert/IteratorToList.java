@@ -31,13 +31,13 @@ public class IteratorToList extends ElementConverter<Iterator<?>, List> {
         super(Iterator.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Iterator<?>, ? super List> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Iterator<?>, ? super List> operation) {
         final List<Object> result = new ArrayList<Object>();
         for (Iterator<?> iter = operation.getSourcePosition().getValue(); iter != null && iter.hasNext();) {
             result.add(iter.next());
         }
         operation.getTargetPosition().setValue(result);
-        operation.setSuccessful(true);
+        return true;
     }
 
 }

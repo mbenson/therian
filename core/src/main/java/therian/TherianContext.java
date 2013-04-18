@@ -22,8 +22,6 @@ import javax.el.ELContext;
 import javax.el.ELResolver;
 
 import org.apache.commons.functor.UnaryPredicate;
-import org.apache.commons.functor.UnaryProcedure;
-import org.apache.commons.functor.core.NoOp;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -89,7 +87,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get current thread-bound instance.
-     * 
+     *
      * @return {@link TherianContext} or {@code null}
      */
     private static TherianContext getCurrentInstance() {
@@ -98,7 +96,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get some usable {@link TherianContext} instance.
-     * 
+     *
      * @return current thread-bound instance or {@code Therian.standard().context()}
      */
     public static TherianContext getInstance() {
@@ -111,7 +109,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Learn whether {@code operation} is supported by this context.
-     * 
+     *
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
@@ -140,7 +138,7 @@ public class TherianContext extends ELContextWrapper {
      * Evaluates {@code operation} if supported; otherwise returns {@code null}. You may distinguish between a
      * {@code null} result and "not supported" by calling {@link #supports(Operation)} and {@link #eval(Operation)}
      * independently.
-     * 
+     *
      * @param operation
      * @return RESULT or {@code null}
      * @throws NullPointerException on {@code null} input
@@ -152,7 +150,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Evaluates {@code operation} if supported; otherwise returns {@code defaultValue}.
-     * 
+     *
      * @param operation
      * @param defaultValue
      * @return RESULT or {@code null}
@@ -166,7 +164,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
+     *
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
@@ -179,7 +177,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
+     *
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
@@ -194,7 +192,7 @@ public class TherianContext extends ELContextWrapper {
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
      * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
-     * 
+     *
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -224,8 +222,8 @@ public class TherianContext extends ELContextWrapper {
             try {
                 for (Operator<?> operator : FilteredIterable.of(getTypedContext(Therian.class).getOperators()).retain(
                     new OperatorFilter(operation))) {
-                    evalRaw(operation, operator);
-                    if (operation.isSuccessful()) {
+                    if (evalRaw(operation, operator)) {
+                        operation.setSuccessful(true);
                         break;
                     }
                 }
@@ -247,54 +245,30 @@ public class TherianContext extends ELContextWrapper {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void evalRaw(Operation operation, Operator operator) {
-        operator.perform(this, operation);
+    private boolean evalRaw(Operation operation, Operator operator) {
+        return operator.perform(this, operation);
     }
 
     /**
      * Delegate the success of the current operation to that of another.
-     * 
+     *
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
      * @return operation's result
      */
-    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(final OPERATION operation) {
-        return forwardTo(operation, NoOp.<RESULT> unaryInstance());
-    }
-
-    /**
-     * Delegate the success of the current operation to that of another.
-     * 
-     * @param operation
-     * @param callback for result
-     * @param <RESULT>
-     * @param <OPERATION>
-     * @return operation's result
-     */
-    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT forwardTo(final OPERATION operation,
-        final UnaryProcedure<RESULT> callback) {
-        Validate.validState(!operations.isEmpty(), "cannot delegate without an ongoing operation");
-        RESULT result;
-        Operation<?> owner = operations.peek();
-        try {
-            if (operation.isSuccessful()) {
-                result = operation.getResult();
-            } else {
-                Validate.isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner,
-                    operation);
-                result = eval(operation);
-                callback.run(result);
-            }
-        } finally {
-            owner.setSuccessful(operation.isSuccessful());
-        }
-        return result;
+    public final synchronized boolean forwardTo(final Operation<?> operation) {
+        Validate.validState(!operations.isEmpty(), "cannot forward without an ongoing operation");
+        final Operation<?> owner = operations.peek();
+        Validate
+            .isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner, operation);
+        eval(operation);
+        return operation.isSuccessful();
     }
 
     /**
      * Return a read-only view of the current operations stack.
-     * 
+     *
      * @return Deque<Operation<?>>
      */
     public Deque<Operation<?>> getOperations() {

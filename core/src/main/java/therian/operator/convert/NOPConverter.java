@@ -28,15 +28,15 @@ import therian.operation.ImmutableCheck;
 public class NOPConverter implements Operator<Convert<?, ?>> {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void perform(TherianContext context, Convert<?, ?> operation) {
+    public boolean perform(TherianContext context, Convert<?, ?> operation) {
         final Convert raw = operation;
         raw.getTargetPosition().setValue(raw.getSourcePosition().getValue());
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Convert<?, ?> operation) {
         return TypeUtils.isInstance(operation.getSourcePosition().getValue(), operation.getTargetPosition().getType())
-            && context.eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();
+                && context.eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();
     }
 
 }

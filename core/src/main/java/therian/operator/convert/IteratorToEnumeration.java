@@ -30,7 +30,7 @@ public class IteratorToEnumeration extends ElementConverter<Iterator<?>, Enumera
         super(Iterator.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Iterator<?>, ? super Enumeration> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Iterator<?>, ? super Enumeration> operation) {
         final Iterator<?> iter = operation.getSourcePosition().getValue();
 
         operation.getTargetPosition().setValue(new Enumeration<Object>() {
@@ -44,7 +44,7 @@ public class IteratorToEnumeration extends ElementConverter<Iterator<?>, Enumera
             }
 
         });
-        operation.setSuccessful(true);
+        return true;
     }
 
 }

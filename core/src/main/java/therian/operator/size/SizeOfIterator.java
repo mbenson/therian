@@ -31,14 +31,14 @@ import therian.operation.Size;
  */
 public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
 
-    public void perform(TherianContext context, Size<Iterator<?>> operation) {
+    public boolean perform(TherianContext context, Size<Iterator<?>> operation) {
         final Iterator<? extends Object> value = operation.getPosition().getValue();
         int result = 0;
         for (; value != null && value.hasNext(); result++) {
             value.next();
         }
         operation.setResult(result);
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<Iterator<?>> operation) {

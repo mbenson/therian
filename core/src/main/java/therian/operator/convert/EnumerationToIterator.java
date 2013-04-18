@@ -31,9 +31,9 @@ public class EnumerationToIterator extends ElementConverter<Enumeration<?>, Iter
         super(Enumeration.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Enumeration<?>, ? super Iterator> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Enumeration<?>, ? super Iterator> operation) {
         final Iterable iterable = context.eval(Convert.to(Iterable.class, operation.getSourcePosition()));
-        context.forwardTo(Convert.to(Iterator.class, Ref.to(iterable)));
+        return context.forwardTo(Convert.to(Iterator.class, Ref.to(iterable)));
     }
 
 }

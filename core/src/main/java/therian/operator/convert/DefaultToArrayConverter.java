@@ -37,7 +37,7 @@ import therian.util.Types;
  */
 public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
 
-    public void perform(TherianContext context, final Convert<?, ?> convert) {
+    public boolean perform(TherianContext context, final Convert<?, ?> convert) {
 
         // if element type not available, assume we're wrapping an arbitrary object as a singleton
         final Type sourceElementType =
@@ -50,7 +50,7 @@ public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
 
         final Convert<?, Iterable<?>> sourceToIterable = Convert.to(sourceIterable, convert.getSourcePosition());
         if (!context.evalSuccessIfSupported(sourceToIterable)) {
-            return;
+            return false;
         }
         final Type targetElementType = TypeUtils.getArrayComponentType(convert.getTargetPosition().getType());
 
@@ -62,12 +62,12 @@ public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
         final Convert<Iterable<?>, Collection<?>> sourceIterableToTargetElementCollection =
             Convert.to(targetElementCollection, sourceIterable);
         if (!context.evalSuccessIfSupported(sourceIterableToTargetElementCollection)) {
-            return;
+            return false;
         }
         // finally, convert that collection to an array now that its size has stabilized
         final Convert<Collection<?>, ?> targetElementCollectionToArray =
             Convert.to(convert.getTargetPosition(), targetElementCollection);
-        convert.setSuccessful(context.evalSuccessIfSupported(targetElementCollectionToArray));
+        return context.evalSuccessIfSupported(targetElementCollectionToArray);
     }
 
     public boolean supports(TherianContext context, Convert<?, ?> convert) {

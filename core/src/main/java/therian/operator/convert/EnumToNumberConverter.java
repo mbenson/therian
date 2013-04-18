@@ -16,8 +16,8 @@ import therian.position.Ref;
  */
 public class EnumToNumberConverter implements Operator<Convert<Enum<?>, ?>> {
 
-    public void perform(TherianContext context, Convert<Enum<?>, ?> operation) {
-        context.forwardTo(Convert.to(operation.getTargetPosition(),
+    public boolean perform(TherianContext context, Convert<Enum<?>, ?> operation) {
+        return context.forwardTo(Convert.to(operation.getTargetPosition(),
             Ref.to(operation.getSourcePosition().getValue().ordinal())));
     }
 

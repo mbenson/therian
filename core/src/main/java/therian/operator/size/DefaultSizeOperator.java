@@ -27,11 +27,11 @@ import therian.operation.Size;
  */
 public class DefaultSizeOperator implements Operator<Size<?>> {
 
-    public void perform(TherianContext context, Size<?> operation) {
+    public boolean perform(TherianContext context, Size<?> operation) {
         final Object value = operation.getPosition().getValue();
         final int result = value == null ? 0 : value.getClass().isArray() ? Array.getLength(value) : 1;
         operation.setResult(result);
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<?> operation) {

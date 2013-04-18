@@ -25,15 +25,17 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
         }
     }
 
-    public void perform(TherianContext context, AddAll<?, ?> operation) {
-        // TODO Auto-generated method stub
+    public boolean perform(TherianContext context, AddAll<?, ?> operation) {
         for (@SuppressWarnings("rawtypes")
         final Iterator iter = context.eval(Convert.to(Iterator.class, operation.getSourcePosition())); iter.hasNext();) {
             final Object element = iter.next();
             // if null, use a raw reference
             final Ref<?> ref = element == null ? new NullRef(null) {} : Ref.to(element);
-            context.eval(Add.to(operation.getTargetPosition(), ref));
+            if (!context.evalSuccess(Add.to(operation.getTargetPosition(), ref))) {
+                return false;
+            }
         }
+        return true;
     }
 
     public boolean supports(TherianContext context, AddAll<?, ?> operation) {

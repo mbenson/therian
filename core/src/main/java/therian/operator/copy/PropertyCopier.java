@@ -66,11 +66,11 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
         for (Mapping.Value v : mapping.value()) {
             Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
-                "both from and to cannot be empty for a single @Mapping.Value");
+                    "both from and to cannot be empty for a single @Mapping.Value");
         }
     }
 
-    public void perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
+    public boolean perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
         for (Mapping.Value v : mapping.value()) {
             Position.Readable<?> target = copy.getTargetPosition();
             final String to = StringUtils.trimToEmpty(v.to());
@@ -83,11 +83,11 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                 source = Property.at(from).of(source);
             }
             final Copy<?, ?> nested = Copy.to(target, source);
-            context.eval(nested);
-            if (!nested.isSuccessful()) {
+            if (!context.evalSuccessIfSupported(nested)) {
                 throw new OperationException(copy, "nested %s was unsuccessful", nested);
             }
         }
+        return true;
     }
 
     @Override

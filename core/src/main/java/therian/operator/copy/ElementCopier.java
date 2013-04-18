@@ -21,17 +21,17 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
         ReadWrite<?> element(int index);
     }
 
-    public void perform(TherianContext context, Copy<?, ?> copy) {
+    public boolean perform(TherianContext context, Copy<?, ?> copy) {
         final ElementFactory sourceElementFactory = createElementFactory(copy.getSourcePosition());
         final ElementFactory targetElementFactory = createElementFactory(copy.getTargetPosition());
         for (int i = 0, sz = context.eval(Size.of(copy.getSourcePosition())); i < sz; i++) {
             if (context
-                .evalSuccessIfSupported(Copy.to(targetElementFactory.element(i), sourceElementFactory.element(i)))) {
+                    .evalSuccessIfSupported(Copy.to(targetElementFactory.element(i), sourceElementFactory.element(i)))) {
                 continue;
             }
-            return;
+            return false;
         }
-        copy.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
@@ -39,7 +39,7 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
         final int targetSize = context.eval(Size.of(copy.getTargetPosition()));
 
         return sourceSize <= targetSize && createElementFactory(copy.getSourcePosition()) != null
-            && createElementFactory(copy.getTargetPosition()) != null;
+                && createElementFactory(copy.getTargetPosition()) != null;
     }
 
     private static ElementFactory createElementFactory(final Position.Readable<?> source) {

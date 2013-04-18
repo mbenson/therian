@@ -30,9 +30,9 @@ public class IterableToIterator extends ElementConverter<Iterable<?>, Iterator> 
         super(Iterable.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Iterable<?>, ? super Iterator> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Iterable<?>, ? super Iterator> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().iterator());
-        operation.setSuccessful(true);
+        return true;
     }
 
 }

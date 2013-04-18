@@ -18,7 +18,7 @@ package therian;
 /**
  * Implements an {@link Operation}. Note that a concrete {@link Operator} implementation should host no direct type
  * variables.
- * 
+ *
  * @param <OPERATION>
  * @see Operators#validateImplementation(Operator)
  */
@@ -26,21 +26,21 @@ public interface Operator<OPERATION extends Operation<?>> {
 
     /**
      * Perform the specified operation.
-     * 
+     *
      * @param context active
      * @param operation to perform
+     * @return whether the evaluation was successful
      */
-    // TODO return boolean; this way no operator can forget to set success and the framework can set it on the operation
-    void perform(TherianContext context, OPERATION operation);
+    boolean perform(TherianContext context, OPERATION operation);
 
     /**
      * Learn whether an operation is supported. This check can be fairly perfunctory as the evaluation of a given
      * {@link Operation} sets an associated success status, thus just because an {@link Operation} is deemed to be
      * "supported" does not <em>guarantee</em> it will be successfully evaluated.
-     * 
+     *
      * @param context active
      * @param operation to check
-     * 
+     *
      * @return true if supported
      */
     boolean supports(TherianContext context, OPERATION operation);

@@ -49,8 +49,9 @@ public class OperatorsTest {
 
     static class Surgeon<S extends Surgery> implements Operator<S> {
 
-        public void perform(TherianContext context, S operation) {
+        public boolean perform(TherianContext context, S operation) {
             operation.result = Success.FAILURE;
+            return true;
         }
 
         public boolean supports(TherianContext context, S operation) {
@@ -72,7 +73,8 @@ public class OperatorsTest {
 
     public static class SuccessOperator implements Operator<Operation<Success>> {
 
-        public void perform(TherianContext context, Operation<Success> operation) {
+        public boolean perform(TherianContext context, Operation<Success> operation) {
+            return true;
         }
 
         public boolean supports(TherianContext context, Operation<Success> operation) {

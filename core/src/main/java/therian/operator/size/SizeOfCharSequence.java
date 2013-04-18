@@ -23,9 +23,9 @@ import therian.operation.Size;
 
 public class SizeOfCharSequence implements Operator<Size<CharSequence>> {
 
-    public void perform(TherianContext context, Size<CharSequence> operation) {
+    public boolean perform(TherianContext context, Size<CharSequence> operation) {
         operation.setResult(StringUtils.length(operation.getPosition().getValue()));
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<CharSequence> operation) {

@@ -28,7 +28,7 @@ import therian.util.Types;
 public class IterableCopier implements Operator<Copy<?, ?>> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void perform(final TherianContext context, final Copy<?, ?> copy) {
+    public boolean perform(final TherianContext context, final Copy<?, ?> copy) {
         final GetElementType<?> getTargetElementType = GetElementType.of(copy.getTargetPosition());
         final Type targetElementType = context.eval(getTargetElementType);
 
@@ -62,15 +62,14 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
                 final Copy<?, ?> copyElement = Copy.to(Ref.to(targetElement), sourceElementPosition);
                 context.eval(copyElement);
                 if (!copyElement.isSuccessful()) {
-                    return;
+                    return false;
                 }
             }
         }
         if (!sourceIterator.hasNext()) {
             // at this point we have copied all source elements onto existing target elements without running out
             // of target elements to copy onto, so we're good
-            copy.setSuccessful(true);
-            return;
+            return true;
         }
         final List<Object> sourceElementsForConversion = new ArrayList<Object>();
         while (sourceIterator.hasNext()) {
@@ -79,39 +78,38 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
 
         final Box<?> targetElements = new Box(Types.genericArrayType(targetElementType));
         final Type sourceSubListType =
-            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+                sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
         final Box<?> sourceSubList = new Box<List<?>>(sourceSubListType, sourceElementsForConversion);
         final Convert<?, ?> toTargetElementArray = Convert.to(targetElements, sourceSubList);
         context.eval(toTargetElementArray);
         if (!toTargetElementArray.isSuccessful()) {
-            return;
+            return false;
         }
 
         final AddAll<?, ?> addAll = AddAll.to(copy.getTargetPosition(), targetElements);
         if (context.supports(addAll)) {
-            context.forwardTo(addAll);
-        } else {
-
-            // can't add new elements. last try: convert an array of the proper size to the target type and set value
-            if (copy.getTargetPosition() instanceof Position.Writable<?> == false) {
-                return;
-            }
-            final List<Object> allElements = new ArrayList<Object>();
-            // add original elements
-            for (Object t : targetIterable) {
-                allElements.add(t);
-            }
-            // add target elements converted from source objects
-            for (Object s : (Object[]) targetElements.getValue()) {
-                allElements.add(s);
-            }
-            ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
-                TypeUtils.getRawType(targetElements.getType(), null), allElements.size())));
-
-            final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
-
-            context.forwardTo(Convert.to(convertTarget, targetElements));
+            return context.forwardTo(addAll);
         }
+
+        // can't add new elements. last try: convert an array of the proper size to the target type and set value
+        if (!Position.Writable.class.isInstance(copy.getTargetPosition())) {
+            return false;
+        }
+        final List<Object> allElements = new ArrayList<Object>();
+        // add original elements
+        for (Object t : targetIterable) {
+            allElements.add(t);
+        }
+        // add target elements converted from source objects
+        for (Object s : (Object[]) targetElements.getValue()) {
+            allElements.add(s);
+        }
+        ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
+            TypeUtils.getRawType(targetElements.getType(), null), allElements.size())));
+
+        final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
+
+        return context.forwardTo(Convert.to(convertTarget, targetElements));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -177,7 +175,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         // can we convert these to an array?
         final Box<?> targetElements = new Box<Object>(Types.genericArrayType(targetElementType));
         final Type sourceSubListType =
-            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+                sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
         final Box<?> sourceSubList = new Box<List<?>>(sourceSubListType, sourceElementsForConversion);
         if (!context.supports(Convert.to(targetElements, sourceSubList))) {
             return false;

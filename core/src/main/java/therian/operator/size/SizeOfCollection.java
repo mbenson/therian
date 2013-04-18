@@ -28,10 +28,10 @@ import therian.operation.Size;
  */
 public class SizeOfCollection implements Operator<Size<Collection<?>>> {
 
-    public void perform(TherianContext context, Size<Collection<?>> operation) {
+    public boolean perform(TherianContext context, Size<Collection<?>> operation) {
         Collection<?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Size<Collection<?>> operation) {

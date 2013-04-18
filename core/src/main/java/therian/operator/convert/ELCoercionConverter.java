@@ -37,23 +37,23 @@ import therian.uelbox.UEL;
  */
 public class ELCoercionConverter implements Operator<Convert<?, ?>> {
 
-    public void perform(TherianContext context, Convert<?, ?> operation) {
+    public boolean perform(TherianContext context, Convert<?, ?> operation) {
         final Object value;
         try {
             value = UEL.coerceToType(context, getRawTargetType(operation), operation.getSourcePosition().getValue());
         } catch (final ELException e) {
-            return;
+            return false;
         }
         @SuppressWarnings("unchecked")
         final Convert<?, Object> raw = (Convert<?, Object>) operation;
         raw.getTargetPosition().setValue(value);
-        operation.setSuccessful(true);
+        return true;
     }
 
     public boolean supports(TherianContext context, Convert<?, ?> operation) {
         final Class<?> rawTargetType = getRawTargetType(operation);
         final Class<?> useTargetType =
-            ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);
+                ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);
 
         // per UEL spec v2.2 section 1.18:
         if (String.class.equals(useTargetType)) {
@@ -62,9 +62,9 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
         final Object source = operation.getSourcePosition().getValue();
 
         if (BigDecimal.class.equals(useTargetType) || BigInteger.class.equals(useTargetType)
-            || Number.class.isAssignableFrom(useTargetType) && ClassUtils.wrapperToPrimitive(useTargetType) != null) {
+                || Number.class.isAssignableFrom(useTargetType) && ClassUtils.wrapperToPrimitive(useTargetType) != null) {
             return source == null || source instanceof String || source instanceof Character
-                || source instanceof Number;
+                    || source instanceof Number;
         }
         if (Character.class.equals(useTargetType)) {
             return source == null || source instanceof String || source instanceof Number;
@@ -76,7 +76,7 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
             return source == null || source instanceof String;
         }
         return source == null || "".equals(source) || source instanceof String
-            && PropertyEditorManager.findEditor(useTargetType) != null;
+                && PropertyEditorManager.findEditor(useTargetType) != null;
     }
 
     private static Class<?> getRawTargetType(Convert<?, ?> operation) {

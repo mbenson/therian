@@ -32,7 +32,7 @@ import therian.util.Types;
 public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
     @SuppressWarnings("unchecked")
-    public void perform(TherianContext context, Add<?, ListIterator<?>> operation) {
+    public boolean perform(TherianContext context, Add<?, ListIterator<?>> operation) {
         @SuppressWarnings("rawtypes")
         final ListIterator listIterator = operation.getTargetPosition().getValue();
 
@@ -43,16 +43,15 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
         }
         try {
             listIterator.add(operation.getSourcePosition().getValue());
-            operation.setResult(true);
-            operation.setSuccessful(true);
+            operation.setResult(Boolean.TRUE);
+            return true;
         } catch (UnsupportedOperationException e) {
-            // ignore and let someone else have a go if they like
+            return false;
         } finally {
             for (; mark >= 0; mark--) {
                 listIterator.previous();
             }
         }
-
     }
 
     public boolean supports(TherianContext context, Add<?, ListIterator<?>> operation) {

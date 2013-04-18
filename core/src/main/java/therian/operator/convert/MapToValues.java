@@ -32,9 +32,9 @@ public class MapToValues extends ElementConverter<Map<?, ?>, Collection> {
         super(Map.class.getTypeParameters()[1], Iterable.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Map<?, ?>, ? super Collection> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Map<?, ?>, ? super Collection> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().values());
-        operation.setSuccessful(true);
+        return true;
     }
 
 }

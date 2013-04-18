@@ -31,13 +31,13 @@ public class EnumerationToList extends ElementConverter<Enumeration<?>, List> {
         super(Enumeration.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
     }
 
-    public void perform(TherianContext context, Convert<? extends Enumeration<?>, ? super List> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Enumeration<?>, ? super List> operation) {
         final List<Object> result = new ArrayList<Object>();
         for (Enumeration<?> e = operation.getSourcePosition().getValue(); e != null && e.hasMoreElements();) {
             result.add(e.nextElement());
         }
         operation.getTargetPosition().setValue(result);
-        operation.setSuccessful(true);
+        return true;
     }
 
 }

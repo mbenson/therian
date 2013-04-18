@@ -39,8 +39,8 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void perform(TherianContext context, final Convert<?, ?> convert) {
-        new CopyingConverter() {
+    public boolean perform(TherianContext context, final Convert<?, ?> convert) {
+        return new CopyingConverter() {
 
             @Override
             protected Object createCopyDestination(Readable readable) throws Exception {
