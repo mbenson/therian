@@ -34,7 +34,9 @@ public interface Operator<OPERATION extends Operation<?>> {
     void perform(TherianContext context, OPERATION operation);
 
     /**
-     * Learn whether an operation is supported.
+     * Learn whether an operation is supported. This check can be fairly perfunctory as the evaluation of a given
+     * {@link Operation} sets an associated success status, thus just because an {@link Operation} is deemed to be
+     * "supported" does not <em>guarantee</em> it will be successfully evaluated.
      * 
      * @param context active
      * @param operation to check
