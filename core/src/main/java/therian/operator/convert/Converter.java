@@ -31,6 +31,20 @@ import therian.util.Types;
 /**
  * {@link Convert} {@link Operator} superclass.
  * 
+ * Note the assignability constraints:
+ * <ul>
+ * <li>SOURCE assignable from source type</li>
+ * <li>TARGET assignable to target type</li>
+ * </ul>
+ * 
+ * For example, if you wanted to convert a {@link String} to a {@link Number},
+ * then a {@link Converter} of {@link CharSequence} to {@link Integer} would satisfy.
+ * The inverse is not necessarily true: a {@link Converter} declared to convert {@link String} to {@link Number} may not
+ * be able to handle the source value of, or produce a target value compatible with,
+ * a conversion requested from {@link CharSequence} to {@link Integer}. Thus it is best to define your
+ * domain APIs as widely as possible, and for your {@link Converter} implementations,
+ * parameterize SOURCE as widely as possible and TARGET as narrowly as possible.
+ * 
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -44,7 +58,9 @@ public abstract class Converter<SOURCE, TARGET> implements Operator<Convert<? ex
 
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
-        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(Types.unrollVariables(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition().getType());
+        return TypeUtils.isInstance(convert.getSourcePosition().getValue(),
+            Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
+            && TypeUtils.isAssignable(Types.unrollVariables(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition()
+                .getType());
     }
 }
