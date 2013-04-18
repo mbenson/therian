@@ -53,11 +53,13 @@ public abstract class ElementConverter<SOURCE, TARGET> extends Converter<SOURCE,
             return false;
         }
         final Type targetComponentType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(convert.getTargetPosition().getType(),
-        targetElementType.getGenericDeclaration()), targetElementType);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(convert.getTargetPosition().getType(),
+                    targetElementType.getGenericDeclaration()), targetElementType);
         final Type sourceComponentType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(convert.getSourcePosition().getType(),
-        sourceElementType.getGenericDeclaration()), sourceElementType);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(convert.getSourcePosition().getType(),
+                    sourceElementType.getGenericDeclaration()), sourceElementType);
         final boolean result =
             targetComponentType == null || sourceComponentType != null
                 && TypeUtils.isAssignable(sourceComponentType, targetComponentType);

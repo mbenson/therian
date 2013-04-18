@@ -21,6 +21,24 @@ import therian.BindTypeVariable;
 import therian.Typed;
 
 public class Types {
+    private static final class GenericArrayTypeImpl implements GenericArrayType {
+        private final Type componentType;
+
+        private GenericArrayTypeImpl(Type componentType) {
+            this.componentType = componentType;
+        }
+
+        public Type getGenericComponentType() {
+            return componentType;
+        }
+
+        @Override
+        public String toString() {
+            return Types.toString(this);
+        }
+
+    }
+
     private static final class ParameterizedTypeImpl implements ParameterizedType {
         private final Class<?> raw;
         private final Type useOwner;
@@ -117,7 +135,7 @@ public class Types {
                         args[i] = unrolled;
                     }
                 }
-                return parameterize((Class<?>) p.getRawType(), p.getOwnerType(), args);
+                return parameterizeWithOwner(p.getOwnerType(), (Class<?>) p.getRawType(), args);
             }
             if (type instanceof WildcardType) {
                 final WildcardType wild = (WildcardType) type;
@@ -179,18 +197,20 @@ public class Types {
      * @return ParameterizedType
      */
     public static final ParameterizedType parameterize(final Class<?> raw, final Type... typeArguments) {
-        return parameterize(raw, null, typeArguments);
+        return parameterizeWithOwner(null, raw, typeArguments);
     }
 
     /**
      * Create a parameterized type instance.
      * 
-     * @param raw
      * @param owner
+     * @param raw
      * @param typeArguments
+     * 
      * @return ParameterizedType
      */
-    public static final ParameterizedType parameterize(final Class<?> raw, Type owner, final Type... typeArguments) {
+    public static final ParameterizedType parameterizeWithOwner(Type owner, final Class<?> raw,
+        final Type... typeArguments) {
         Validate.notNull(raw, "raw class");
         final Type useOwner;
         if (raw.getEnclosingClass() == null) {
@@ -222,6 +242,16 @@ public class Types {
         Validate.noNullElements(lowerBounds, "lowerBounds contains null at index %s");
 
         return new WildcardTypeImpl(upperBounds, lowerBounds);
+    }
+
+    /**
+     * Create a generic array type instance.
+     * 
+     * @param componentType
+     * @return {@link GenericArrayType}
+     */
+    public static GenericArrayType genericArrayType(final Type componentType) {
+        return new GenericArrayTypeImpl(componentType);
     }
 
     /**
@@ -352,6 +382,7 @@ public class Types {
 
     /**
      * Present a given type as a Java-esque String.
+     * 
      * @param type
      * @return String
      */

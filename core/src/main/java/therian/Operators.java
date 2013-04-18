@@ -35,35 +35,57 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import therian.operator.add.AddToCollection;
+import therian.operator.add.AddToListIterator;
+import therian.operator.addall.GenericAddAllOperator;
 import therian.operator.convert.CopyingConverter;
 import therian.operator.convert.DefaultCopyingConverter;
+import therian.operator.convert.DefaultToIteratorConverter;
+import therian.operator.convert.DefaultToListConverter;
 import therian.operator.convert.ELCoercionConverter;
+import therian.operator.convert.EnumToNumberConverter;
+import therian.operator.convert.EnumerationToIterator;
+import therian.operator.convert.EnumerationToList;
+import therian.operator.convert.IterableToEnumeration;
+import therian.operator.convert.IterableToIterator;
+import therian.operator.convert.IteratorToEnumeration;
+import therian.operator.convert.IteratorToList;
+import therian.operator.convert.MapToValues;
 import therian.operator.convert.NOPConverter;
 import therian.operator.copy.BeanCopier;
 import therian.operator.copy.ConvertingCopier;
+import therian.operator.getelementtype.GetArrayElementType;
+import therian.operator.getelementtype.GetEnumerationElementType;
+import therian.operator.getelementtype.GetIterableElementType;
+import therian.operator.getelementtype.GetIteratorElementType;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.operator.size.DefaultSizeOperator;
+import therian.operator.size.SizeOfCharSequence;
 import therian.operator.size.SizeOfCollection;
 import therian.operator.size.SizeOfIterable;
 import therian.operator.size.SizeOfIterator;
 import therian.operator.size.SizeOfMap;
+import therian.util.Types;
 
 /**
  * Utility methods for Operators.
  */
 public class Operators {
-    private static final String TYPE_PARAMS_DETECTED = "Should not instantiate parameterized Operator types";
 
     // @formatter:off
     private static final Operator<?>[] STANDARD_OPERATORS = {
         /*
          * TODO add more
          */
-        new ELCoercionConverter(),
-        new ConvertingCopier(),
-        new DefaultImmutableChecker(),
-        new DefaultCopyingConverter(),
+        //Add
         new AddToCollection(),
+        new AddToListIterator(),
+
+        //AddAll
+        new GenericAddAllOperator(),
+        
+        //Convert
+        new ELCoercionConverter(),
+        new DefaultCopyingConverter(),
 
         // these can't actually work until a mechanism for copying to target
         // interfaces is in place:
@@ -73,14 +95,40 @@ public class Operators {
         CopyingConverter.implementing(SortedSet.class).with(TreeSet.class),
         CopyingConverter.implementing(SortedMap.class).with(TreeMap.class),
 
+        new DefaultToListConverter(),
+        new DefaultToIteratorConverter(),
+        new EnumerationToIterator(),
+        new EnumerationToList(),
+        new EnumToNumberConverter(),
+        new IterableToEnumeration(),
+        new IteratorToEnumeration(),
+        new IterableToIterator(),
+        new IterableToEnumeration(),
+        new IteratorToList(),
+        new MapToValues(),
         new NOPConverter(),
-        new BeanCopier(),
 
-        new SizeOfMap(),
+        //Copy
+        new BeanCopier(),
+        new ConvertingCopier(),
+
+        //GetElementType
+        new GetArrayElementType(),
+        new GetEnumerationElementType(),
+        new GetIterableElementType(),
+        new GetIteratorElementType(),
+        
+        //ImmutableCheck
+        new DefaultImmutableChecker(),
+
+        //Size
+        new DefaultSizeOperator(),
+        new SizeOfCharSequence(),
         new SizeOfCollection(),
         new SizeOfIterable(),
         new SizeOfIterator(),
-        new DefaultSizeOperator() };
+        new SizeOfMap()
+    };
     // @formatter:on
 
     private static final Comparator<Operator<?>> COMPARATOR = new Comparator<Operator<?>>() {
@@ -166,8 +214,11 @@ public class Operators {
      * @throws OperatorDefinitionException on invalid operator
      */
     public static <OPERATOR extends Operator<?>> OPERATOR validateImplementation(OPERATOR operator) {
-        if (Validate.notNull(operator, "operator").getClass().getTypeParameters().length > 0) {
-            throw new OperatorDefinitionException(operator, TYPE_PARAMS_DETECTED);
+        for (TypeVariable<?> var : Validate.notNull(operator, "operator").getClass().getTypeParameters()) {
+            if (Types.resolveAt(operator, var) == null) {
+                throw new OperatorDefinitionException(operator, "Could not resolve %s.%s against operator %s",
+                    var.getGenericDeclaration(), var.getName(), operator);
+            }
         }
         return operator;
     }
