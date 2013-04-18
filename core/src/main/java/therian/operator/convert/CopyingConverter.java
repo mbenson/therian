@@ -84,17 +84,26 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         } catch (Exception e) {
             return;
         }
-        final Position.Readable<TARGET> targetPosition = new Position.Readable<TARGET>() {
+        final Position.Readable<TARGET> targetPosition;
+        if (convert.getTargetPosition() instanceof Position.Readable<?>) {
+            // use readable target position directly in the copy delegate
+            @SuppressWarnings("unchecked")
+            final Position.Readable<TARGET> unchecked = (Position.Readable<TARGET>) convert.getTargetPosition();
+            targetPosition = unchecked;
+        } else {
+            // create a readable position
+            targetPosition = new Position.Readable<TARGET>() {
 
-            public Type getType() {
-                return convert.getTargetPosition().getType();
-            }
+                public Type getType() {
+                    return convert.getTargetPosition().getType();
+                }
 
-            public TARGET getValue() {
-                return target;
-            }
+                public TARGET getValue() {
+                    return target;
+                }
 
-        };
+            };
+        }
         context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
     }
 
