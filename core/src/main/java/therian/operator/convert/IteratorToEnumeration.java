@@ -1,0 +1,50 @@
+/*
+ *  Copyright the original author or authors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package therian.operator.convert;
+
+import java.util.Enumeration;
+import java.util.Iterator;
+
+import therian.TherianContext;
+import therian.operation.Convert;
+
+/**
+ * Implements simple conversion of a compatible {@link Iterator} to an {@link Enumeration}.
+ */
+@SuppressWarnings("rawtypes")
+public class IteratorToEnumeration extends ElementConverter<Iterator<?>, Enumeration> {
+    public IteratorToEnumeration() {
+        super(Iterator.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);
+    }
+
+    public void perform(TherianContext context, Convert<? extends Iterator<?>, ? super Enumeration> operation) {
+        final Iterator<?> iter = operation.getSourcePosition().getValue();
+
+        operation.getTargetPosition().setValue(new Enumeration<Object>() {
+
+            public boolean hasMoreElements() {
+                return iter.hasNext();
+            }
+
+            public Object nextElement() {
+                return iter.next();
+            }
+
+        });
+        operation.setSuccessful(true);
+    }
+
+}
