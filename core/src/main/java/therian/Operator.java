@@ -30,6 +30,7 @@ public interface Operator<OPERATION extends Operation<?>> {
      * @param context active
      * @param operation to perform
      */
+    // TODO return boolean; this way no operator can forget to set success and the framework can set it on the operation
     void perform(TherianContext context, OPERATION operation);
 
     /**
