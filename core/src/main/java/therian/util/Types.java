@@ -409,8 +409,8 @@ public class Types {
     private static String classToString(Class<?> c) {
         final StringBuilder buf = new StringBuilder();
 
-        if (c.getSuperclass() != null) {
-            buf.append(classToString(c.getSuperclass())).append('.').append(c.getSimpleName());
+        if (c.getEnclosingClass() != null) {
+            buf.append(classToString(c.getEnclosingClass())).append('.').append(c.getSimpleName());
         } else {
             buf.append(c.getName());
         }
