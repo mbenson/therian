@@ -21,6 +21,11 @@
             <artifactId>uelbox</artifactId>
         </dependency>
         <dependency>
+            <groupId>therian</groupId>
+            <artifactId>therian-build-weaver</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>

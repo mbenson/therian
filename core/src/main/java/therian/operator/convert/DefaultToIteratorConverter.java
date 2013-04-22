@@ -31,7 +31,7 @@ import therian.operation.GetElementType;
 public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
 
     public boolean perform(TherianContext context, Convert<? extends Object, ? super Iterator> convert) {
-        final Iterable<?> sourceIterable = context.eval(Convert.to(Iterable.class, convert.getSourcePosition()));
+        final Iterable sourceIterable = context.eval(Convert.to(Iterable.class, convert.getSourcePosition()));
         convert.getTargetPosition().setValue(sourceIterable.iterator());
         return true;
     }

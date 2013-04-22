@@ -35,9 +35,9 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         final Convert<?, Iterable> sourceToIterable = Convert.to(Iterable.class, copy.getSourcePosition());
         final Convert<?, Iterable> targetToIterable = Convert.to(Iterable.class, copy.getTargetPosition());
 
-        final Iterable<?> sourceIterable = context.eval(sourceToIterable);
+        final Iterable sourceIterable = context.eval(sourceToIterable);
         final Iterator<?> sourceIterator = sourceIterable.iterator();
-        final Iterable<?> targetIterable = context.eval(targetToIterable);
+        final Iterable targetIterable = context.eval(targetToIterable);
         final Iterator<?> targetIterator = targetIterable.iterator();
         final Type sourceElementType;
         final GetElementType<?> getSourceElementType = GetElementType.of(copy.getSourcePosition());
@@ -131,9 +131,9 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         if (!context.supports(targetToIterable)) {
             return false;
         }
-        final Iterable<?> sourceIterable = context.eval(sourceToIterable);
+        final Iterable sourceIterable = context.eval(sourceToIterable);
         final Iterator<?> sourceIterator = sourceIterable.iterator();
-        final Iterable<?> targetIterable = context.eval(targetToIterable);
+        final Iterable targetIterable = context.eval(targetToIterable);
         final Iterator<?> targetIterator = targetIterable.iterator();
 
         final Type sourceElementType;

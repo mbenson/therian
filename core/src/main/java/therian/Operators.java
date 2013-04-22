@@ -87,8 +87,6 @@ public class Operators {
         new ELCoercionConverter(),
         new DefaultCopyingConverter(),
 
-        // these can't actually work until a mechanism for copying to target
-        // interfaces is in place:
         CopyingConverter.implementing(List.class).with(ArrayList.class),
         CopyingConverter.implementing(Map.class).with(HashMap.class),
         CopyingConverter.implementing(Set.class).with(HashSet.class),
@@ -130,6 +128,11 @@ public class Operators {
         new SizeOfMap()
     };
     // @formatter:on
+    
+    {
+        final List<Operator<?>> standardOperators = new ArrayList<Operator<?>>();
+        
+    }
 
     private static final Comparator<Operator<?>> COMPARATOR = new Comparator<Operator<?>>() {
 
@@ -202,7 +205,8 @@ public class Operators {
      * @return Operator[]
      */
     public static Operator<?>[] standard() {
-        return STANDARD_OPERATORS;
+        //TODO throw exception and weave this method from found StandardOperator annotations ;P
+        return STANDARD_OPERATORS.clone();
     }
 
     /**
