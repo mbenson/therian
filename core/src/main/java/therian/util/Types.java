@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +29,7 @@ public class Types {
             this.componentType = componentType;
         }
 
+        @Override
         public Type getGenericComponentType() {
             return componentType;
         }
@@ -37,6 +39,18 @@ public class Types {
             return Types.toString(this);
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this || obj instanceof GenericArrayType
+                    && componentType.equals(((GenericArrayType) obj).getGenericComponentType());
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 67 << 4;
+            result |= componentType.hashCode();
+            return result;
+        }
     }
 
     private static final class ParameterizedTypeImpl implements ParameterizedType {
@@ -50,14 +64,17 @@ public class Types {
             this.typeArguments = typeArguments;
         }
 
+        @Override
         public Type getRawType() {
             return raw;
         }
 
+        @Override
         public Type getOwnerType() {
             return useOwner;
         }
 
+        @Override
         public Type[] getActualTypeArguments() {
             return typeArguments.clone();
         }
@@ -65,6 +82,30 @@ public class Types {
         @Override
         public String toString() {
             return Types.toString(this);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj instanceof ParameterizedType == false) {
+                return false;
+            }
+            final ParameterizedType other = (ParameterizedType) obj;
+            return raw.equals(other.getRawType()) && ObjectUtils.equals(useOwner, other.getOwnerType())
+                    && Arrays.equals(typeArguments, other.getActualTypeArguments());
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 71 << 4;
+            result |= raw.hashCode();
+            result <<= 4;
+            result |= ObjectUtils.hashCode(useOwner);
+            result <<= 8;
+            result |= Arrays.hashCode(typeArguments);
+            return result;
         }
     }
 
@@ -77,10 +118,12 @@ public class Types {
             this.lowerBounds = lowerBounds;
         }
 
+        @Override
         public Type[] getUpperBounds() {
             return upperBounds.clone();
         }
 
+        @Override
         public Type[] getLowerBounds() {
             return lowerBounds.clone();
         }
@@ -89,10 +132,25 @@ public class Types {
         public String toString() {
             return Types.toString(this);
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            // TODO Auto-generated method stub
+            return super.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 73 << 8;
+            result |= Arrays.hashCode(upperBounds);
+            result <<= 8;
+            result |= Arrays.hashCode(lowerBounds);
+            return result;
+        }
     }
 
     private static final Map<Class<?>, Map<TypeVariable<?>, Method>> TYPED_GETTERS =
-        new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
+            new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
 
     /**
      * A wildcard instance matching {@code ?}.
@@ -109,8 +167,7 @@ public class Types {
     /**
      * Get a type representing {@code type} with variable assignments "unrolled."
      * 
-     * @param typeArguments
-     *            as from {@link TypeUtils#getTypeArguments(Type, Class)}
+     * @param typeArguments as from {@link TypeUtils#getTypeArguments(Type, Class)}
      * @param type
      * @return Type
      */
@@ -184,7 +241,7 @@ public class Types {
         if (type instanceof WildcardType) {
             WildcardType wild = (WildcardType) type;
             return containsTypeVariables(TypeUtils.getImplicitLowerBounds(wild)[0])
-                || containsTypeVariables(TypeUtils.getImplicitUpperBounds(wild)[0]);
+                    || containsTypeVariables(TypeUtils.getImplicitUpperBounds(wild)[0]);
         }
         return false;
     }
@@ -224,7 +281,7 @@ public class Types {
             useOwner = owner;
         }
         Validate.isTrue(raw.getTypeParameters().length == Validate.noNullElements(typeArguments,
-            "null type argument at index %s").length);
+                "null type argument at index %s").length);
 
         return new ParameterizedTypeImpl(raw, useOwner, typeArguments);
     }
@@ -255,8 +312,8 @@ public class Types {
     }
 
     /**
-     * Tries to "read" a {@link TypeVariable} from an object instance,
-     * taking into account {@link BindTypeVariable} and {@link Typed} before falling back to basic type
+     * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
+     * {@link Typed} before falling back to basic type
      * 
      * @param o
      * @param var
@@ -335,12 +392,12 @@ public class Types {
             Validate.isTrue(Typed.class.isAssignableFrom(m.getReturnType()), "%s must return %s", ms,
                 Typed.class.getName());
             final Type param =
-                TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class).get(
-                    Typed.class.getTypeParameters()[0]);
+                    TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class).get(
+                        Typed.class.getTypeParameters()[0]);
             Validate.isTrue(param instanceof TypeVariable<?>
-                && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
-                "%s should bind a class type parameter to %s.<%s>", ms, Typed.class.getName(),
-                Typed.class.getTypeParameters()[0].getName());
+            && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
+            "%s should bind a class type parameter to %s.<%s>", ms, Typed.class.getName(),
+            Typed.class.getTypeParameters()[0].getName());
             result.put((TypeVariable<?>) param, m);
         }
         return result.isEmpty() ? Collections.<TypeVariable<?>, Method> emptyMap() : Collections
@@ -356,20 +413,24 @@ public class Types {
     public static Iterable<Class<?>> hierarchy(final Class<?> type) {
         return new Iterable<Class<?>>() {
 
+            @Override
             public Iterator<Class<?>> iterator() {
                 final MutableObject<Class<?>> next = new MutableObject<Class<?>>(type);
                 return new Iterator<Class<?>>() {
 
+                    @Override
                     public boolean hasNext() {
                         return next.getValue() != null;
                     }
 
+                    @Override
                     public Class<?> next() {
                         final Class<?> result = next.getValue();
                         next.setValue(result.getSuperclass());
                         return result;
                     }
 
+                    @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
@@ -378,6 +439,66 @@ public class Types {
             }
 
         };
+    }
+
+    /**
+     * Check equality of types.
+     * 
+     * @param t1
+     * @param t2
+     * @return boolean
+     */
+    public static boolean equals(Type t1, Type t2) {
+        if (ObjectUtils.equals(t1, t2)) {
+            return true;
+        }
+        if (t1 instanceof ParameterizedType) {
+            return equals((ParameterizedType) t1, t2);
+        }
+        if (t1 instanceof GenericArrayType) {
+            return equals((GenericArrayType) t1, t2);
+        }
+        if (t1 instanceof WildcardType) {
+            return equals((WildcardType) t1, t2);
+        }
+        return false;
+    }
+
+    private static boolean equals(ParameterizedType p, Type t) {
+        if (t instanceof ParameterizedType) {
+            final ParameterizedType other = (ParameterizedType) t;
+            if (equals(p.getRawType(), other.getRawType()) && equals(p.getOwnerType(), other.getOwnerType())) {
+                return equals(p.getActualTypeArguments(), other.getActualTypeArguments());
+            }
+        }
+        return false;
+    }
+
+    private static boolean equals(GenericArrayType a, Type t) {
+        return t instanceof GenericArrayType
+                && equals(a.getGenericComponentType(), ((GenericArrayType) t).getGenericComponentType());
+    }
+
+    private static boolean equals(WildcardType w, Type t) {
+        if (t instanceof WildcardType) {
+            final WildcardType other = (WildcardType) t;
+            return equals(TypeUtils.getImplicitLowerBounds(w), TypeUtils.getImplicitLowerBounds(other))
+                    && equals(TypeUtils.getImplicitUpperBounds(w), TypeUtils.getImplicitUpperBounds(other));
+
+        }
+        return true;
+    }
+
+    private static boolean equals(Type[] t1, Type[] t2) {
+        if (t1.length == t2.length) {
+            for (int i = 0; i < t1.length; i++) {
+                if (!equals(t1[i], t2[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
