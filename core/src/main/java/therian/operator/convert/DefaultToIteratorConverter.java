@@ -46,7 +46,7 @@ public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
         }
         final Convert<?, Iterable> toIterable = Convert.to(Iterable.class, convert.getSourcePosition());
 
-        if (context.supports(toIterable)) {
+        if (!context.supports(toIterable)) {
             return false;
         }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
