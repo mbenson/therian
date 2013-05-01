@@ -25,7 +25,6 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -37,7 +36,7 @@ import therian.uelbox.UEL;
  * conversions (aka coercions) when other approaches have been exhausted.
  */
 @StandardOperator
-public class ELCoercionConverter implements Operator<Convert<?, ?>> {
+public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean perform(TherianContext context, Convert<?, ?> operation) {
