@@ -42,7 +42,7 @@ public class Types {
         @Override
         public boolean equals(Object obj) {
             return obj == this || obj instanceof GenericArrayType
-                    && componentType.equals(((GenericArrayType) obj).getGenericComponentType());
+                && componentType.equals(((GenericArrayType) obj).getGenericComponentType());
         }
 
         @Override
@@ -94,7 +94,7 @@ public class Types {
             }
             final ParameterizedType other = (ParameterizedType) obj;
             return raw.equals(other.getRawType()) && ObjectUtils.equals(useOwner, other.getOwnerType())
-                    && Arrays.equals(typeArguments, other.getActualTypeArguments());
+                && Arrays.equals(typeArguments, other.getActualTypeArguments());
         }
 
         @Override
@@ -150,7 +150,7 @@ public class Types {
     }
 
     private static final Map<Class<?>, Map<TypeVariable<?>, Method>> TYPED_GETTERS =
-            new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
+        new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
 
     /**
      * A wildcard instance matching {@code ?}.
@@ -166,7 +166,7 @@ public class Types {
 
     /**
      * Get a type representing {@code type} with variable assignments "unrolled."
-     * 
+     *
      * @param typeArguments as from {@link TypeUtils#getTypeArguments(Type, Class)}
      * @param type
      * @return Type
@@ -219,7 +219,7 @@ public class Types {
 
     /**
      * Learn, recursively, whether any of the type parameters associated with {@code type} are bound to variables.
-     * 
+     *
      * @param type
      * @return boolean
      */
@@ -241,14 +241,14 @@ public class Types {
         if (type instanceof WildcardType) {
             WildcardType wild = (WildcardType) type;
             return containsTypeVariables(TypeUtils.getImplicitLowerBounds(wild)[0])
-                    || containsTypeVariables(TypeUtils.getImplicitUpperBounds(wild)[0]);
+                || containsTypeVariables(TypeUtils.getImplicitUpperBounds(wild)[0]);
         }
         return false;
     }
 
     /**
      * Create a parameterized type instance.
-     * 
+     *
      * @param raw
      * @param typeArguments
      * @return ParameterizedType
@@ -259,11 +259,11 @@ public class Types {
 
     /**
      * Create a parameterized type instance.
-     * 
+     *
      * @param owner
      * @param raw
      * @param typeArguments
-     * 
+     *
      * @return ParameterizedType
      */
     public static final ParameterizedType parameterizeWithOwner(Type owner, final Class<?> raw,
@@ -281,14 +281,14 @@ public class Types {
             useOwner = owner;
         }
         Validate.isTrue(raw.getTypeParameters().length == Validate.noNullElements(typeArguments,
-                "null type argument at index %s").length);
+            "null type argument at index %s").length);
 
         return new ParameterizedTypeImpl(raw, useOwner, typeArguments);
     }
 
     /**
      * Create a wildcard type instance.
-     * 
+     *
      * @param upperBounds
      * @param lowerBounds
      * @return WildcardType
@@ -303,7 +303,7 @@ public class Types {
 
     /**
      * Create a generic array type instance.
-     * 
+     *
      * @param componentType
      * @return {@link GenericArrayType}
      */
@@ -314,7 +314,7 @@ public class Types {
     /**
      * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
      * {@link Typed} before falling back to basic type
-     * 
+     *
      * @param o
      * @param var
      * @return Type resolved or {@code null}
@@ -392,12 +392,12 @@ public class Types {
             Validate.isTrue(Typed.class.isAssignableFrom(m.getReturnType()), "%s must return %s", ms,
                 Typed.class.getName());
             final Type param =
-                    TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class).get(
-                        Typed.class.getTypeParameters()[0]);
+                TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class).get(
+                    Typed.class.getTypeParameters()[0]);
             Validate.isTrue(param instanceof TypeVariable<?>
-            && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
-            "%s should bind a class type parameter to %s.<%s>", ms, Typed.class.getName(),
-            Typed.class.getTypeParameters()[0].getName());
+                && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
+                "%s should bind a class type parameter to %s.<%s>", ms, Typed.class.getName(),
+                Typed.class.getTypeParameters()[0].getName());
             result.put((TypeVariable<?>) param, m);
         }
         return result.isEmpty() ? Collections.<TypeVariable<?>, Method> emptyMap() : Collections
@@ -406,7 +406,7 @@ public class Types {
 
     /**
      * Get an {@link Iterable} that can iterate over a class hierarchy in ascending (subclass to superclass) order.
-     * 
+     *
      * @param type
      * @return Iterable
      */
@@ -443,7 +443,7 @@ public class Types {
 
     /**
      * Check equality of types.
-     * 
+     *
      * @param t1
      * @param t2
      * @return boolean
@@ -476,15 +476,14 @@ public class Types {
 
     private static boolean equals(GenericArrayType a, Type t) {
         return t instanceof GenericArrayType
-                && equals(a.getGenericComponentType(), ((GenericArrayType) t).getGenericComponentType());
+            && equals(a.getGenericComponentType(), ((GenericArrayType) t).getGenericComponentType());
     }
 
     private static boolean equals(WildcardType w, Type t) {
         if (t instanceof WildcardType) {
             final WildcardType other = (WildcardType) t;
-            return equals(TypeUtils.getImplicitLowerBounds(w), TypeUtils.getImplicitLowerBounds(other))
-                    && equals(TypeUtils.getImplicitUpperBounds(w), TypeUtils.getImplicitUpperBounds(other));
-
+            return equals(w.getLowerBounds(), other.getLowerBounds())
+                && equals(TypeUtils.getImplicitUpperBounds(w), TypeUtils.getImplicitUpperBounds(other));
         }
         return true;
     }
@@ -503,7 +502,7 @@ public class Types {
 
     /**
      * Present a given type as a Java-esque String.
-     * 
+     *
      * @param type
      * @return String
      */
