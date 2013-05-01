@@ -21,14 +21,14 @@ import therian.position.Position.Readable;
 
 /**
  * Copy operation.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
 public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Position.Readable<TARGET>> {
     /**
      * "Copy safely" operation.
-     * 
+     *
      * @param <SOURCE>
      * @param <TARGET>
      */

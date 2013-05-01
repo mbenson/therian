@@ -24,7 +24,7 @@ import therian.position.Position;
 
 /**
  * Convert operation.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -32,10 +32,12 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
     private class Result implements Position.Writable<TARGET> {
         TARGET value;
 
+        @Override
         public Type getType() {
             return Convert.super.getTargetPosition().getType();
         }
 
+        @Override
         public void setValue(final TARGET value) {
             final Type type = getType();
             Validate.isTrue(!(value == null && isPrimitive(type)), "Illegal value %s for type %s", value, type);
@@ -66,10 +68,12 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
                 Validate.notNull(targetType, "targetType");
             }
 
+            @Override
             public Type getType() {
                 return targetType;
             }
 
+            @Override
             public void setValue(TARGET value) {
             }
 

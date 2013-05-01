@@ -21,7 +21,7 @@ import therian.position.Position;
 
 /**
  * "Add" transformation.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -51,7 +51,7 @@ public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Posi
         }
         Add<?, ?> other = (Add<?, ?>) obj;
         return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
-            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+                && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
     }
 
     @Override
