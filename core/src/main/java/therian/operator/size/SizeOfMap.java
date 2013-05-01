@@ -19,19 +19,23 @@ import java.util.Map;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 
 /**
  * {@link Operator} to take the size of a {@link Map}.
  */
+@StandardOperator
 public class SizeOfMap implements Operator<Size<Map<?, ?>>> {
 
+    @Override
     public boolean perform(TherianContext context, Size<Map<?, ?>> operation) {
         final Map<?, ?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<Map<?, ?>> operation) {
         return true;
     }

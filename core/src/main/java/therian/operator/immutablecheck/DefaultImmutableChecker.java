@@ -34,9 +34,12 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import therian.buildweaver.StandardOperator;
+
 /**
  * Checks for types universally known to be immutable.
  */
+@StandardOperator
 public class DefaultImmutableChecker extends ImmutableChecker {
     private static final String[] KNOWN_IMMUTABLE_PREFIXES;
     private static final Set<Class<?>> KNOWN_IMMUTABLE_TYPES;
@@ -101,7 +104,7 @@ public class DefaultImmutableChecker extends ImmutableChecker {
             c = c.getEnclosingClass();
         }
         if (target.contains(c) && !target.equals(c)
-            || StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
+                || StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
             target.add(type);
         }
     }

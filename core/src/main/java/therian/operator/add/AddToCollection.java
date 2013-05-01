@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
 import therian.util.Types;
@@ -28,8 +29,10 @@ import therian.util.Types;
 /**
  * Add an element to a {@link Collection}.
  */
+@StandardOperator
 public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> {
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean perform(TherianContext context, Add<?, Collection<?>> operation) {
         ((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition().getValue());
@@ -37,6 +40,7 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Add<?, Collection<?>> operation) {
         // cannot add to immutable types
         if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {

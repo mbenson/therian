@@ -24,6 +24,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.position.Position.Readable;
 
@@ -35,9 +36,11 @@ import therian.position.Position.Readable;
  * </ul>
  * for non-abstract target types.
  */
+@StandardOperator
 public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
         return new CopyingConverter() {
@@ -52,6 +55,7 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
         }.perform(context, convert);
     }
 
+    @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
         return getConstructor(convert) != null;
     }
@@ -62,8 +66,8 @@ public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
             return null;
         }
         final Constructor<?> result =
-            ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
-                ClassUtils.toClass(convert.getSourcePosition().getValue()));
+                ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
+                    ClassUtils.toClass(convert.getSourcePosition().getValue()));
         return result == null ? ConstructorUtils.getAccessibleConstructor(rawTargetType) : result;
     }
 

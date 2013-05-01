@@ -21,6 +21,7 @@ import java.util.Iterator;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
 
@@ -28,8 +29,10 @@ import therian.operation.GetElementType;
  * Attempts to convert to {@link Iterable} and call {@link Iterable#iterator()}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Object, ? super Iterator> convert) {
         final Iterable sourceIterable = context.eval(Convert.to(Iterable.class, convert.getSourcePosition()));
         convert.getTargetPosition().setValue(sourceIterable.iterator());

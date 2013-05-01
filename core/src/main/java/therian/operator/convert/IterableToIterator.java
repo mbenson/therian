@@ -18,6 +18,7 @@ package therian.operator.convert;
 import java.util.Iterator;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
 /**
@@ -25,11 +26,13 @@ import therian.operation.Convert;
  * {@link Iterator}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class IterableToIterator extends ElementConverter<Iterable<?>, Iterator> {
     public IterableToIterator() {
         super(Iterable.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);
     }
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Iterable<?>, ? super Iterator> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().iterator());
         return true;

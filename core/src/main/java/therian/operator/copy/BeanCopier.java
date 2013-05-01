@@ -31,6 +31,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Copy;
 import therian.position.Position;
 import therian.position.relative.Property;
@@ -39,6 +40,7 @@ import therian.position.relative.Property;
  * Copies matching properties from source to target. Considered successful if one or more property conversions are
  * successful.
  */
+@StandardOperator
 public class BeanCopier extends Copier<Object, Object> {
     public static final String[] SKIP_PROPERTIES = { "class" };
 
@@ -59,11 +61,13 @@ public class BeanCopier extends Copier<Object, Object> {
         return new FilteredGenerator<Copy<?, ?>>(new TransformedGenerator<String, Copy<?, ?>>(
                 IteratorToGeneratorAdapter.adapt(targetProperties.iterator()), new UnaryFunction<String, Copy<?, ?>>() {
 
+                    @Override
                     public Copy<?, ?> evaluate(String name) {
                         return Copy.Safely.to(Property.at(name).of(target), Property.at(name).of(source));
                     }
                 }), new UnaryPredicate<Copy<?, ?>>() {
 
+            @Override
             public boolean test(Copy<?, ?> obj) {
                 return context.supports(obj);
             }
@@ -82,11 +86,13 @@ public class BeanCopier extends Copier<Object, Object> {
         return result;
     }
 
+    @Override
     public boolean perform(final TherianContext context, final Copy<?, ?> copy) {
         final MutableBoolean result = new MutableBoolean();
         propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).run(
             new UnaryProcedure<Copy<?, ?>>() {
 
+                @Override
                 public void run(Copy<?, ?> propertyCopy) {
                     context.eval(propertyCopy);
                     if (propertyCopy.isSuccessful()) {

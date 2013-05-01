@@ -22,6 +22,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
 import therian.util.Types;
@@ -29,8 +30,10 @@ import therian.util.Types;
 /**
  * Add an element to a {@link ListIterator}.
  */
+@StandardOperator
 public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
+    @Override
     @SuppressWarnings("unchecked")
     public boolean perform(TherianContext context, Add<?, ListIterator<?>> operation) {
         @SuppressWarnings("rawtypes")
@@ -54,6 +57,7 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
         }
     }
 
+    @Override
     public boolean supports(TherianContext context, Add<?, ListIterator<?>> operation) {
         // cannot add to immutable types
         if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
@@ -63,9 +67,9 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(
-                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
-                ListIterator.class.getTypeParameters()[0]);
+                Types.unrollVariables(
+                    TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
+                    ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw

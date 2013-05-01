@@ -22,6 +22,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
 import therian.position.Box;
@@ -35,14 +36,16 @@ import therian.util.Types;
  * <li>thence to array</li>
  * </ul>
  */
+@StandardOperator
 public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
 
+    @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
 
         // if element type not available, assume we're wrapping an arbitrary object as a singleton
         final Type sourceElementType =
-            context.evalIfSupported(GetElementType.of(convert.getSourcePosition()), convert.getSourcePosition()
-                .getType());
+                context.evalIfSupported(GetElementType.of(convert.getSourcePosition()), convert.getSourcePosition()
+                    .getType());
 
         // as advertised, we first convert our source position to an iterable of source element type
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -57,23 +60,24 @@ public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
         // next, we convert our source iterable to a collection of target element type
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Box<Collection<?>> targetElementCollection =
-            new Box(Types.parameterize(Collection.class, targetElementType));
+        new Box(Types.parameterize(Collection.class, targetElementType));
 
         final Convert<Iterable<?>, Collection<?>> sourceIterableToTargetElementCollection =
-            Convert.to(targetElementCollection, sourceIterable);
+                Convert.to(targetElementCollection, sourceIterable);
         if (!context.evalSuccessIfSupported(sourceIterableToTargetElementCollection)) {
             return false;
         }
         // finally, convert that collection to an array now that its size has stabilized
         final Convert<Collection<?>, ?> targetElementCollectionToArray =
-            Convert.to(convert.getTargetPosition(), targetElementCollection);
+                Convert.to(convert.getTargetPosition(), targetElementCollection);
         return context.evalSuccessIfSupported(targetElementCollectionToArray);
     }
 
+    @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
         // too much work to figure the whole thing; just try it when the time comes
         return TypeUtils.isArrayType(convert.getTargetPosition().getType())
-            && context.supports(Convert.to(Iterable.class, convert.getSourcePosition()));
+                && context.supports(Convert.to(Iterable.class, convert.getSourcePosition()));
     }
 
 }

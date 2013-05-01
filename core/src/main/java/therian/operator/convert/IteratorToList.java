@@ -20,17 +20,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
 /**
  * Implements simple conversion of a compatible {@link Iterator} to a {@link List}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class IteratorToList extends ElementConverter<Iterator<?>, List> {
     public IteratorToList() {
         super(Iterator.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
     }
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Iterator<?>, ? super List> operation) {
         final List<Object> result = new ArrayList<Object>();
         for (Iterator<?> iter = operation.getSourcePosition().getValue(); iter != null && iter.hasNext();) {

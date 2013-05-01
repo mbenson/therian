@@ -19,15 +19,19 @@ import org.apache.commons.lang3.StringUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 
+@StandardOperator
 public class SizeOfCharSequence implements Operator<Size<CharSequence>> {
 
+    @Override
     public boolean perform(TherianContext context, Size<CharSequence> operation) {
         operation.setResult(StringUtils.length(operation.getPosition().getValue()));
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<CharSequence> operation) {
         return true;
     }

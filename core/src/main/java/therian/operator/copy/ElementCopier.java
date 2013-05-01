@@ -6,6 +6,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Copy;
 import therian.operation.Size;
 import therian.position.Position;
@@ -16,11 +17,13 @@ import therian.position.relative.Element;
  * Tries to copy between arrays/iterables using {@link Element} positions. This should be more efficient than
  * {@link IterableCopier} where usable. Where elements must be added, only {@link List} targets are supported.
  */
+@StandardOperator
 public class ElementCopier implements Operator<Copy<?, ?>> {
     private interface ElementFactory {
         ReadWrite<?> element(int index);
     }
 
+    @Override
     public boolean perform(TherianContext context, Copy<?, ?> copy) {
         final ElementFactory sourceElementFactory = createElementFactory(copy.getSourcePosition());
         final ElementFactory targetElementFactory = createElementFactory(copy.getTargetPosition());
@@ -34,6 +37,7 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
         final int sourceSize = context.eval(Size.of(copy.getSourcePosition()));
         final int targetSize = context.eval(Size.of(copy.getTargetPosition()));
@@ -47,6 +51,7 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
             if (TypeUtils.isArrayType(source.getType())) {
                 return new ElementFactory() {
 
+                    @Override
                     public ReadWrite<?> element(int index) {
                         return Element.atArrayIndex(index).of(source);
                     }
@@ -56,6 +61,7 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
 
                 return new ElementFactory() {
 
+                    @Override
                     @SuppressWarnings("unchecked")
                     public ReadWrite<?> element(int index) {
                         return Element.atIndex(index).of((Position.Readable<Iterable<?>>) source);

@@ -5,11 +5,13 @@ import java.util.Iterator;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.position.Ref;
 
+@StandardOperator
 public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
     private static class NullRef extends Ref<Object> {
         private final Type type;
@@ -25,6 +27,7 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
         }
     }
 
+    @Override
     public boolean perform(TherianContext context, AddAll<?, ?> operation) {
         for (@SuppressWarnings("rawtypes")
         final Iterator iter = context.eval(Convert.to(Iterator.class, operation.getSourcePosition())); iter.hasNext();) {
@@ -38,6 +41,7 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, AddAll<?, ?> operation) {
         @SuppressWarnings("rawtypes")
         Convert<?, Iterator> toIterator = Convert.to(Iterator.class, operation.getSourcePosition());

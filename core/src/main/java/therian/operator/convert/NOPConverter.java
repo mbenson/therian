@@ -19,14 +19,17 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.ImmutableCheck;
 
 /**
  * Uses source value as target value when assignable and immutable.
  */
+@StandardOperator
 public class NOPConverter implements Operator<Convert<?, ?>> {
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean perform(TherianContext context, Convert<?, ?> operation) {
         final Convert raw = operation;
@@ -34,6 +37,7 @@ public class NOPConverter implements Operator<Convert<?, ?>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Convert<?, ?> operation) {
         return TypeUtils.isInstance(operation.getSourcePosition().getValue(), operation.getTargetPosition().getType())
                 && context.eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();

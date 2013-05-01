@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
 /**
@@ -26,12 +27,14 @@ import therian.operation.Convert;
  * {@link Collection}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class MapToValues extends ElementConverter<Map<?, ?>, Collection> {
 
     public MapToValues() {
         super(Map.class.getTypeParameters()[1], Iterable.class.getTypeParameters()[0]);
     }
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Map<?, ?>, ? super Collection> operation) {
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().values());
         return true;

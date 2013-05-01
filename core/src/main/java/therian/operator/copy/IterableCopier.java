@@ -10,6 +10,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.operation.Copy;
@@ -25,8 +26,10 @@ import therian.util.Types;
  * strategy is to add all target elements to a new array of target element type, and attempt to convert that to target
  * position.
  */
+@StandardOperator
 public class IterableCopier implements Operator<Copy<?, ?>> {
 
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public boolean perform(final TherianContext context, final Copy<?, ?> copy) {
         final GetElementType<?> getTargetElementType = GetElementType.of(copy.getTargetPosition());
@@ -112,6 +115,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         return context.forwardTo(Convert.to(convertTarget, targetElements));
     }
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean supports(final TherianContext context, final Copy<?, ?> copy) {
         // do we understand target type as a group of elements?

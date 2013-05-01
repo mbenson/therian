@@ -19,14 +19,17 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 import therian.position.Ref;
 
 /**
  * {@link Operator} to take the size of an {@link Iterable}.
  */
+@StandardOperator
 public class SizeOfIterable implements Operator<Size<Iterable<?>>> {
 
+    @Override
     public boolean perform(TherianContext context, final Size<Iterable<?>> operation) {
         final Iterable<?> value = operation.getPosition().getValue();
         if (value == null) {
@@ -37,6 +40,7 @@ public class SizeOfIterable implements Operator<Size<Iterable<?>>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<Iterable<?>> operation) {
         return TypeUtils.isAssignable(operation.getPosition().getType(), Iterable.class);
     }

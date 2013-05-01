@@ -49,11 +49,13 @@ public class OperatorsTest {
 
     static class Surgeon<S extends Surgery> implements Operator<S> {
 
+        @Override
         public boolean perform(TherianContext context, S operation) {
             operation.result = Success.FAILURE;
             return true;
         }
 
+        @Override
         public boolean supports(TherianContext context, S operation) {
             return true;
         }
@@ -73,10 +75,12 @@ public class OperatorsTest {
 
     public static class SuccessOperator implements Operator<Operation<Success>> {
 
+        @Override
         public boolean perform(TherianContext context, Operation<Success> operation) {
             return true;
         }
 
+        @Override
         public boolean supports(TherianContext context, Operation<Success> operation) {
             return true;
         }
@@ -117,6 +121,10 @@ public class OperatorsTest {
         actual.addAll(expected);
 
         assertEquals(expected, new ArrayList<Operator<?>>(actual));
+    }
 
+    @Test
+    public void testStandardOperators() {
+        Operators.standard();
     }
 }

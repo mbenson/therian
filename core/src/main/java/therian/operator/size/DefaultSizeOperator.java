@@ -19,14 +19,17 @@ import java.lang.reflect.Array;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 
 /**
  * Default {@link Size} {@link Operator}. Handles arrays (of which those with primitive component types of course cannot
  * be generalized), returns {@code 0} for {@code null}, and 1 otherwise.
  */
+@StandardOperator
 public class DefaultSizeOperator implements Operator<Size<?>> {
 
+    @Override
     public boolean perform(TherianContext context, Size<?> operation) {
         final Object value = operation.getPosition().getValue();
         final int result = value == null ? 0 : value.getClass().isArray() ? Array.getLength(value) : 1;
@@ -34,6 +37,7 @@ public class DefaultSizeOperator implements Operator<Size<?>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<?> operation) {
         return true;
     }

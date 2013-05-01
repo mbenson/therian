@@ -8,13 +8,16 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.position.Position;
 import therian.util.Types;
 
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class CollectionToArray implements Operator<Convert<? extends Collection, ?>> {
 
+    @Override
     @SuppressWarnings("unchecked")
     public boolean perform(TherianContext context, Convert<? extends Collection, ?> convert) {
         final Type targetComponentType = TypeUtils.getArrayComponentType(convert.getTargetPosition().getType());
@@ -27,6 +30,7 @@ public class CollectionToArray implements Operator<Convert<? extends Collection,
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Convert<? extends Collection, ?> convert) {
         if (!TypeUtils.isAssignable(convert.getSourcePosition().getType(), Collection.class)) {
             return false;
@@ -36,8 +40,8 @@ public class CollectionToArray implements Operator<Convert<? extends Collection,
             return false;
         }
         final Type sourceElementType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(convert.getSourcePosition().getType(), Collection.class),
-                Collection.class.getTypeParameters()[0]);
+                Types.unrollVariables(TypeUtils.getTypeArguments(convert.getSourcePosition().getType(), Collection.class),
+                    Collection.class.getTypeParameters()[0]);
 
         return TypeUtils.isAssignable(sourceElementType, targetComponentType);
     }

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.uelbox.UEL;
 
@@ -35,8 +36,10 @@ import therian.uelbox.UEL;
  * does not extend Converter due to its differing type allowances. Intended as a fallback strategy to implement "simple"
  * conversions (aka coercions) when other approaches have been exhausted.
  */
+@StandardOperator
 public class ELCoercionConverter implements Operator<Convert<?, ?>> {
 
+    @Override
     public boolean perform(TherianContext context, Convert<?, ?> operation) {
         final Object value;
         try {
@@ -50,6 +53,7 @@ public class ELCoercionConverter implements Operator<Convert<?, ?>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Convert<?, ?> operation) {
         final Class<?> rawTargetType = getRawTargetType(operation);
         final Class<?> useTargetType =

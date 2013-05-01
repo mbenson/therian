@@ -17,6 +17,16 @@ package therian.operator.convert;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -25,6 +35,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.Operation;
 import therian.TherianContext;
 import therian.TypeLiteral;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.position.Box;
@@ -34,6 +45,44 @@ import therian.position.Position;
  * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}.
  */
 public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
+    /**
+     * Standard converter to {@link List}.
+     */
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    public static final Converter<Object, List> IMPLEMENTING_LIST = CopyingConverter.implementing(List.class).with(
+        ArrayList.class);
+    /**
+     * Standard converter to {@link Set}.
+     */
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    public static final Converter<Object, Set> IMPLEMENTING_SET = CopyingConverter.implementing(Set.class).with(
+        HashSet.class);
+
+    /**
+     * Standard converter to {@link Map}.
+     */
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    public static final Converter<Object, Map> IMPLEMENTING_MAP = CopyingConverter.implementing(Map.class).with(
+        HashMap.class);
+
+    /**
+     * Standard converter to {@link SortedSet}.
+     */
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    public static final Converter<Object, SortedSet> IMPLEMENTING_SORTED_SET = CopyingConverter.implementing(
+        SortedSet.class).with(TreeSet.class);
+
+    /**
+     * Standard converter to {@link SortedMap}.
+     */
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    public static final Converter<Object, SortedMap> IMPLEMENTING_SORTED_MAP = CopyingConverter.implementing(
+        SortedMap.class).with(TreeMap.class);
 
     /**
      * Intermediate step in fluent interface.
@@ -71,10 +120,11 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         @Override
         public boolean supports(TherianContext context, Convert<? extends Object, ? super TARGET> convert) {
             return super.supports(context, convert)
-                && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
+                    && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
         }
     }
 
+    @Override
     public final boolean perform(final TherianContext context, final Convert<? extends SOURCE, ? super TARGET> convert) {
         final TARGET target;
         try {
@@ -94,10 +144,12 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
             // create a readable position
             targetPosition = new Position.Readable<TARGET>() {
 
+                @Override
                 public Type getType() {
                     return convert.getTargetPosition().getType();
                 }
 
+                @Override
                 public TARGET getValue() {
                     return target;
                 }
@@ -110,8 +162,8 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     @Override
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
         return super.supports(context, convert)
-            && context.supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()),
-                convert.getSourcePosition()));
+                && context.supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()),
+                    convert.getSourcePosition()));
     }
 
     /**

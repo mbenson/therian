@@ -19,26 +19,31 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
 /**
  * Implements simple conversion of a compatible {@link Iterator} to an {@link Enumeration}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class IteratorToEnumeration extends ElementConverter<Iterator<?>, Enumeration> {
     public IteratorToEnumeration() {
         super(Iterator.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);
     }
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Iterator<?>, ? super Enumeration> operation) {
         final Iterator<?> iter = operation.getSourcePosition().getValue();
 
         operation.getTargetPosition().setValue(new Enumeration<Object>() {
 
+            @Override
             public boolean hasMoreElements() {
                 return iter.hasNext();
             }
 
+            @Override
             public Object nextElement() {
                 return iter.next();
             }

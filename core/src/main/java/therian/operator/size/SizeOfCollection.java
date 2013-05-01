@@ -19,6 +19,7 @@ import java.util.Collection;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 
 /**
@@ -26,14 +27,17 @@ import therian.operation.Size;
  * however {@link SizeOfCollection} may be faster where usable, leaving {@link SizeOfIterable} for positions that are
  * <em>not</em> {@link Collection}s.
  */
+@StandardOperator
 public class SizeOfCollection implements Operator<Size<Collection<?>>> {
 
+    @Override
     public boolean perform(TherianContext context, Size<Collection<?>> operation) {
         Collection<?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<Collection<?>> operation) {
         return true;
     }

@@ -25,6 +25,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
 
@@ -32,8 +33,10 @@ import therian.operation.GetElementType;
  * Converts arrays, wraps other objects in {@link Collections#singletonList(Object)}.
  */
 @SuppressWarnings("rawtypes")
+@StandardOperator
 public class DefaultToListConverter extends Converter<Object, List> {
 
+    @Override
     public boolean perform(TherianContext context, Convert<? extends Object, ? super List> convert) {
         final List<?> list;
         if (TypeUtils.isArrayType(convert.getSourcePosition().getType())) {
@@ -43,7 +46,7 @@ public class DefaultToListConverter extends Converter<Object, List> {
                 array = (Object[]) source;
             } else {
                 final Class<?> primitiveType =
-                    (Class<?>) TypeUtils.getArrayComponentType(convert.getSourcePosition().getType());
+                        (Class<?>) TypeUtils.getArrayComponentType(convert.getSourcePosition().getType());
                 final int len = Array.getLength(source);
                 array = (Object[]) Array.newInstance(ClassUtils.primitiveToWrapper(primitiveType), len);
                 for (int i = 0; i < len; i++) {
@@ -61,7 +64,7 @@ public class DefaultToListConverter extends Converter<Object, List> {
     @Override
     public boolean supports(TherianContext context, Convert<?, ? super List> convert) {
         if (!super.supports(context, convert) || convert.getSourcePosition().getValue() == null
-            || convert.getSourcePosition().getValue() instanceof List<?>) {
+                || convert.getSourcePosition().getValue() instanceof List<?>) {
             return false;
         }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());

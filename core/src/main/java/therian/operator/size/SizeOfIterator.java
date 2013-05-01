@@ -22,6 +22,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.Operation;
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 
 /**
@@ -29,8 +30,10 @@ import therian.operation.Size;
  * destructive in that it exhausts the {@link Iterator}. So the {@link Operation} itself should be used sparingly and
  * with care.
  */
+@StandardOperator
 public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
 
+    @Override
     public boolean perform(TherianContext context, Size<Iterator<?>> operation) {
         final Iterator<? extends Object> value = operation.getPosition().getValue();
         int result = 0;
@@ -41,6 +44,7 @@ public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
         return true;
     }
 
+    @Override
     public boolean supports(TherianContext context, Size<Iterator<?>> operation) {
         return TypeUtils.isAssignable(operation.getPosition().getType(), Iterator.class);
     }
