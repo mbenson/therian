@@ -23,12 +23,12 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 /**
  * Same old "Type literal."
  */
-public abstract class TypeLiteral<T> {
+public abstract class TypeLiteral<T> implements Typed<T> {
     public final Type value;
 
     protected TypeLiteral() {
         this.value =
-            ObjectUtils
+                ObjectUtils
                 .defaultIfNull(
                     TypeUtils.getTypeArguments(getClass(), TypeLiteral.class).get(
                         TypeLiteral.class.getTypeParameters()[0]), Object.class);
@@ -48,6 +48,11 @@ public abstract class TypeLiteral<T> {
 
     @Override
     public int hashCode() {
-        return (37 << 4) | value.hashCode();
+        return 37 << 4 | value.hashCode();
+    }
+
+    @Override
+    public Type getType() {
+        return value;
     }
 }
