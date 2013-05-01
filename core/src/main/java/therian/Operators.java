@@ -31,32 +31,16 @@ import therian.util.Types;
 public class Operators {
 
     private static final Comparator<Operator<?>> COMPARATOR = new Comparator<Operator<?>>() {
+        private final TypeVariable<?> opVar = Operator.class.getTypeParameters()[0];
 
         @Override
         public int compare(Operator<?> o1, Operator<?> o2) {
             final Type opType1 =
-                    Types.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class),
-                        Operator.class.getTypeParameters()[0]);
+                    Types.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
             final Type opType2 =
-                    Types.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class),
-                        Operator.class.getTypeParameters()[0]);
+                    Types.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
 
             return compareTypes(opType1, opType2);
-            // if (ObjectUtils.equals(opType1, opType2)) {
-            // return 0;
-            // }
-            // if (TypeUtils.isAssignable(opType1, opType2)) {
-            // return -1;
-            // }
-            // if (TypeUtils.isAssignable(opType2, opType1)) {
-            // return 1;
-            // }
-            // final Class<?> raw1 = TypeUtils.getRawType(opType1, o1.getClass());
-            // final Class<?> raw2 = TypeUtils.getRawType(opType2, o2.getClass());
-            // if (ObjectUtils.equals(raw1, raw2)) {
-            // return compareTypes(ImmutablePair.of(opType1, o1.getClass()), ImmutablePair.of(opType2, o2.getClass()));
-            // }
-            // return opType1.toString().compareTo(opType2.toString());
         }
 
         private int compareTypes(Type t1, Type t2) {
@@ -80,7 +64,7 @@ public class Operators {
                 final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
                 for (TypeVariable<?> var : raw1.getTypeParameters()) {
                     final int recurse =
-                        compareTypes(Types.unrollVariables(typeArgs1, var), Types.unrollVariables(typeArgs2, var));
+                            compareTypes(Types.unrollVariables(typeArgs1, var), Types.unrollVariables(typeArgs2, var));
                     if (recurse != 0) {
                         return recurse;
                     }
@@ -98,44 +82,6 @@ public class Operators {
             return TypeUtils.getRawType(type, null);
         }
 
-        // /**
-        // * Compare types
-        // *
-        // * @param p1 first pair of type, assigning type
-        // * @param p2 second pair of type, assigning type
-        // * @return int
-        // */
-        // private int compareTypes(ImmutablePair<? extends Type, ? extends Type> p1,
-        // ImmutablePair<? extends Type, ? extends Type> p2) {
-        // if (ObjectUtils.equals(p1.left, p2.left)) {
-        // return 0;
-        // }
-        // if (TypeUtils.isAssignable(p1.left, p2.left)) {
-        // return -1;
-        // }
-        // if (TypeUtils.isAssignable(p2.left, p1.left)) {
-        // return 1;
-        // }
-        // final Class<?> raw1 = TypeUtils.getRawType(p1.left, p1.right);
-        // final Class<?> raw2 = TypeUtils.getRawType(p2.left, p2.right);
-        // if (ObjectUtils.equals(raw1, raw2)) {
-        // if (raw1.getTypeParameters().length == 0) {
-        // return 0;
-        // }
-        // final Map<TypeVariable<?>, Type> typeArgs1 = TypeUtils.getTypeArguments(p1.left, raw1);
-        // final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(p2.left, raw2);
-        // for (TypeVariable<?> var : raw1.getTypeParameters()) {
-        // final int recurse =
-        // compareTypes(ImmutablePair.of(Types.unrollVariables(typeArgs1, var), p1.right),
-        // ImmutablePair.of(Types.unrollVariables(typeArgs2, var), p2.right));
-        // if (recurse != 0) {
-        // return recurse;
-        // }
-        // }
-        // return 0;
-        // }
-        // return p1.left.toString().compareTo(p2.left.toString());
-        // }
     };
 
     /**
