@@ -22,6 +22,7 @@ import javax.el.ELContext;
 import javax.el.ELResolver;
 
 import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -255,15 +256,34 @@ public class TherianContext extends ELContextWrapper {
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
-     * @return operation's result
+     * @return operation's success
      */
     public final synchronized boolean forwardTo(final Operation<?> operation) {
+        return forwardTo(operation, null);
+    }
+
+    /**
+     * Delegate the success of the current operation to that of another.
+     *
+     * @param operation
+     * @param <RESULT>
+     * @param <OPERATION>
+     * @return operation's success
+     */
+    public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
+        final UnaryProcedure<? super RESULT> callback) {
         Validate.validState(!operations.isEmpty(), "cannot forward without an ongoing operation");
         final Operation<?> owner = operations.peek();
         Validate
             .isTrue(ObjectUtils.notEqual(owner, operation), "operations %s and %s are same/equal", owner, operation);
-        eval(operation);
-        return operation.isSuccessful();
+        final RESULT result = eval(operation);
+        if (operation.isSuccessful()) {
+            if (callback != null) {
+                callback.run(result);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
