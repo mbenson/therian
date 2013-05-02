@@ -68,19 +68,42 @@ public abstract class Converter<SOURCE, TARGET> implements Operator<Convert<? ex
         }
     }
 
-    private static final TypeVariable<?>[] TYPE_PARAMS = Converter.class.getTypeParameters();
-
     /**
      * {@link Logger} instance.
      */
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final Type sourceBound;
+    private final Type targetBound;
+
+    {
+        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
+        sourceBound = Types.unrollVariables(typeArguments, Converter.class.getTypeParameters()[0]);
+        targetBound = Types.unrollVariables(typeArguments, Converter.class.getTypeParameters()[1]);
+    }
+
+    /**
+     * Get the (upper) source bound.
+     *
+     * @return Type
+     */
+    public Type getSourceBound() {
+        return sourceBound;
+    }
+
+    /**
+     * Get the (lower) target bound.
+     *
+     * @return Type
+     */
+    public Type getTargetBound() {
+        return targetBound;
+    }
+
     @Override
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
-        return TypeUtils.isInstance(convert.getSourcePosition().getValue(),
-            Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(Types.unrollVariables(typeArguments, TYPE_PARAMS[1]), convert.getTargetPosition()
-                .getType());
+        return TypeUtils.isInstance(convert.getSourcePosition().getValue(), sourceBound)
+            && TypeUtils.isAssignable(targetBound, convert.getTargetPosition().getType());
     }
+
 }

@@ -28,38 +28,64 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
+import therian.operator.convert.Converter;
 import therian.util.Types;
 
 /**
  * {@link Copy} {@link Operator} superclass.
- * 
+ *
  * Note the assignability constraints:
  * <ul>
  * <li>SOURCE assignable from source type</li>
  * <li>TARGET assignable from target type</li>
  * </ul>
- * 
+ *
  * For example, a {@link Copier} of {@link CharSequence} to {@link Number} (not that this is a realistic operation, but
  * play along for the sake of discussion) could handle a copy of {@link String} to {@link Integer} as well as
  * {@link StringBuilder} to {@link BigDecimal}. Thus it is best that your {@link Copier} implementations parameterize
  * both SOURCE and TARGET as widely as possible.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
 public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends SOURCE, ? extends TARGET>> {
-    private static final TypeVariable<?>[] TYPE_PARAMS = Copier.class.getTypeParameters();
-
     /**
      * {@link Logger} instance.
      */
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final Type sourceBound;
+    private final Type targetBound;
+
+    {
+        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Copier.class);
+        sourceBound = Types.unrollVariables(typeArguments, Copier.class.getTypeParameters()[0]);
+        targetBound = Types.unrollVariables(typeArguments, Copier.class.getTypeParameters()[1]);
+    }
+
+    /**
+     * Get the (upper) source bound.
+     *
+     * @return Type
+     */
+    public Type getSourceBound() {
+        return sourceBound;
+    }
+
+    /**
+     * Get the (upper) target bound.
+     *
+     * @return Type
+     */
+    public Type getTargetBound() {
+        return targetBound;
+    }
+
     /**
      * By default, rejects immutable target positions, and ensures that type parameters are compatible.
-     * 
+     *
      * @param copy operation
-     * 
+     *
      * @see ImmutableCheck
      */
     public boolean supports(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
@@ -67,10 +93,7 @@ public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends 
         if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()) {
             return false;
         }
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Copier.class);
-        return TypeUtils.isInstance(copy.getSourcePosition().getValue(),
-            Types.unrollVariables(typeArguments, TYPE_PARAMS[0]))
-            && TypeUtils.isAssignable(copy.getTargetPosition().getType(),
-                Types.unrollVariables(typeArguments, TYPE_PARAMS[1]));
+        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), sourceBound)
+            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), targetBound);
     }
 }
