@@ -5,7 +5,6 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -16,16 +15,16 @@ import therian.position.Ref;
  * delegation), the destination parameter is unspecified at the class level.
  */
 @StandardOperator
-public class EnumToNumberConverter implements Operator<Convert<Enum<?>, ?>> {
+public class EnumToNumberConverter extends Converter.WithDynamicTarget<Enum<?>> {
 
     @Override
-    public boolean perform(TherianContext context, Convert<Enum<?>, ?> operation) {
+    public boolean perform(TherianContext context, Convert<? extends Enum<?>, ?> operation) {
         return context.forwardTo(Convert.to(operation.getTargetPosition(),
             Ref.to(operation.getSourcePosition().getValue().ordinal())));
     }
 
     @Override
-    public boolean supports(TherianContext context, Convert<Enum<?>, ?> operation) {
+    public boolean supports(TherianContext context, Convert<? extends Enum<?>, ?> operation) {
         if (!TypeUtils.isAssignable(operation.getSourcePosition().getType(), Enum.class)) {
             return false;
         }
