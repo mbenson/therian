@@ -21,6 +21,7 @@ import org.apache.commons.lang3.Validate;
 
 import therian.TypeLiteral;
 import therian.position.Position;
+import therian.util.Types;
 
 /**
  * Convert operation.
@@ -79,7 +80,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
             @Override
             public String toString() {
-                return targetType.toString();
+                return Types.toString(targetType);
             }
         });
     }
