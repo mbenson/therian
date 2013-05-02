@@ -20,7 +20,6 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -37,7 +36,7 @@ import therian.util.Types;
  * </ul>
  */
 @StandardOperator
-public class DefaultToArrayConverter implements Operator<Convert<?, ?>> {
+public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
