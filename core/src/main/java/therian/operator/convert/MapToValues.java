@@ -31,7 +31,7 @@ import therian.operation.Convert;
 public class MapToValues extends ElementConverter<Map<?, ?>, Collection> {
 
     public MapToValues() {
-        super(Map.class.getTypeParameters()[1], Iterable.class.getTypeParameters()[0]);
+        super(Map.class.getTypeParameters()[1], Collection.class.getTypeParameters()[0]);
     }
 
     @Override
