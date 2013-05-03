@@ -28,7 +28,6 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
-import therian.operator.convert.Converter;
 import therian.util.Types;
 
 /**
