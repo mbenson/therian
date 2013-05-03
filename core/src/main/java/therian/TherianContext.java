@@ -220,9 +220,12 @@ public class TherianContext extends ELContextWrapper {
             }
             operations.push(operation);
 
+            final FilteredIterable<Operator<?>> applicableOperators =
+                FilteredIterable.of(getTypedContext(Therian.class).getOperators())
+                    .retain(new OperatorFilter(operation));
+
             try {
-                for (Operator<?> operator : FilteredIterable.of(getTypedContext(Therian.class).getOperators()).retain(
-                    new OperatorFilter(operation))) {
+                for (Operator<?> operator : applicableOperators) {
                     if (evalRaw(operation, operator)) {
                         operation.setSuccessful(true);
                         break;
