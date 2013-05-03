@@ -28,7 +28,7 @@ import therian.operation.Convert;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class MapToValues extends ElementConverter<Map<?, ?>, Collection> {
+public class MapToValues extends AssignableElementConverter<Map<?, ?>, Collection> {
 
     public MapToValues() {
         super(Map.class.getTypeParameters()[1], Collection.class.getTypeParameters()[0]);

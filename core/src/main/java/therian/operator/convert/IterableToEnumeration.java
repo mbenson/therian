@@ -29,7 +29,7 @@ import therian.util.Positions;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class IterableToEnumeration extends ElementConverter<Iterable<?>, Enumeration> {
+public class IterableToEnumeration extends AssignableElementConverter<Iterable<?>, Enumeration> {
     public IterableToEnumeration() {
         super(Iterable.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);
     }

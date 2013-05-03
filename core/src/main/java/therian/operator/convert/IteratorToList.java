@@ -28,7 +28,7 @@ import therian.operation.Convert;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class IteratorToList extends ElementConverter<Iterator<?>, List> {
+public class IteratorToList extends AssignableElementConverter<Iterator<?>, List> {
     public IteratorToList() {
         super(Iterator.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
     }

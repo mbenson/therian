@@ -30,7 +30,7 @@ import therian.position.Box;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class EnumerationToIterator extends ElementConverter<Enumeration<?>, Iterator> {
+public class EnumerationToIterator extends AssignableElementConverter<Enumeration<?>, Iterator> {
     public EnumerationToIterator() {
         super(Enumeration.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);
     }

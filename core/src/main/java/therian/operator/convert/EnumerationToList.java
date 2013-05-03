@@ -28,7 +28,7 @@ import therian.operation.Convert;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class EnumerationToList extends ElementConverter<Enumeration<?>, List> {
+public class EnumerationToList extends AssignableElementConverter<Enumeration<?>, List> {
     public EnumerationToList() {
         super(Enumeration.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
     }
