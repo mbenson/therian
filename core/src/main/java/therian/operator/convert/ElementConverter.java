@@ -86,6 +86,9 @@ public abstract class ElementConverter<SOURCE, TARGET> extends Converter<SOURCE,
             return Object.class;
         }
 
+        if (TypeUtils.isAssignable(t, varOwner)) {
+            return Types.unrollVariables(TypeUtils.getTypeArguments(t, varOwner), targetElementType);
+        }
         if (t instanceof ParameterizedType) {
             final Map<TypeVariable<?>, Type> args = TypeUtils.determineTypeArguments(varOwner, (ParameterizedType) t);
             return args.get(targetElementType);

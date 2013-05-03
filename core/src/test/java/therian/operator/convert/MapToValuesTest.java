@@ -52,6 +52,10 @@ public class MapToValuesTest {
                 .to(new TypeLiteral<Collection<MetasyntacticVariable>>() {},
                     new Ref<Map<String, MetasyntacticVariable>>(Collections.singletonMap("foo",
                         MetasyntacticVariable.FOO)) {})) instanceof Collection<?>);
+        assertTrue(context
+            .eval(Convert
+                .to(new TypeLiteral<Iterable<MetasyntacticVariable>>() {}, new Ref<Map<String, MetasyntacticVariable>>(
+                    Collections.singletonMap("foo", MetasyntacticVariable.FOO)) {})) instanceof Collection<?>);
     }
 
     @Test
