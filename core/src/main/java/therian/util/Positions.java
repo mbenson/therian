@@ -17,10 +17,12 @@ package therian.util;
 
 import java.lang.reflect.Type;
 
+import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.TherianContext;
 import therian.TypeLiteral;
 import therian.position.Position;
 
@@ -211,5 +213,22 @@ public class Positions {
      */
     public static <T> Position.ReadWrite<T> readWrite(final TypeLiteral<T> type, T initialValue) {
         return readWrite(Validate.notNull(type, "type").value, initialValue);
+    }
+
+    /**
+     * Get a UnaryProcedure callback for writing a position value.
+     *
+     * @param pos
+     * @return UnaryProcedure
+     * @see TherianContext#forwardTo(therian.Operation, UnaryProcedure)
+     */
+    public static <T> UnaryProcedure<T> writeValue(final Position.Writable<? super T> pos) {
+        return new UnaryProcedure<T>() {
+
+            @Override
+            public void run(T value) {
+                pos.setValue(value);
+            }
+        };
     }
 }

@@ -15,7 +15,7 @@
  */
 package therian.operator.convert;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,13 +26,12 @@ import org.junit.Test;
 
 import therian.OperationException;
 import therian.Therian;
+import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
-
-import therian.TherianContext;
 import therian.operation.Convert;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class IterableToIteratorTest {
     private TherianContext context;
@@ -44,20 +43,20 @@ public class IterableToIteratorTest {
 
     @Test
     public void test() {
-        assertTrue(context.eval(Convert.to(Iterator.class, Ref.to(Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
+        assertTrue(context.eval(Convert.to(Iterator.class, Positions.readOnly(Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
         assertTrue(context.eval(Convert.to(new TypeLiteral<Iterator<String>>() {},
-            new Ref<List<String>>(Arrays.asList("foo", "bar", "baz")) {})) instanceof Iterator<?>);
+            Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
     }
 
     @Test(expected = OperationException.class)
     public void testUnknownSourceElementType() {
         context.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
-            Ref.to(Arrays.asList("foo", "bar", "baz"))));
+            Positions.readOnly(Arrays.asList("foo", "bar", "baz"))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleElementType() {
         context.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
-            new Ref<List<String>>(Arrays.asList("foo", "bar", "baz")) {}));
+            Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList("foo", "bar", "baz"))));
     }
 }

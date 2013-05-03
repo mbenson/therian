@@ -17,10 +17,14 @@ package therian;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.functor.UnaryFunction;
 import org.apache.commons.functor.UnaryPredicate;
 import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.functor.core.collection.FilteredIterable;
@@ -37,6 +41,33 @@ import therian.util.ReadOnlyUtils;
  * Therian context.
  */
 public class TherianContext extends ELContextWrapper {
+    /**
+     * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
+     *
+     * @see TherianContext#doWithHints(UnaryFunction, Hint...)
+     */
+    public static abstract class Hint {
+        /**
+         * By default, {@link #getClass()}
+         *
+         * @return Class, of which {@code this} must be an instance
+         */
+        protected Class<? extends Hint> getTypeImpl() {
+            return getClass();
+        }
+
+        /**
+         * Get the hint type to use.
+         *
+         * @return Class
+         */
+        public final Class<? extends Hint> getType() {
+            final Class<? extends Hint> result = getTypeImpl();
+            Validate.validState(result.isInstance(this), "%s is not an instance of %s", this, result);
+            return result;
+        }
+    }
+
     private class OperatorFilter implements UnaryPredicate<Operator<?>> {
         private final Operation<?> operation;
 
@@ -106,6 +137,51 @@ public class TherianContext extends ELContextWrapper {
             return current;
         }
         return Therian.standard().context();
+    }
+
+    /**
+     * Return the result of evaluating {@code function} against {@code this} with {@code hints} specified for the
+     * duration.
+     *
+     * @param function
+     * @param hints
+     * @return T
+     */
+    public synchronized <T> T doWithHints(UnaryFunction<TherianContext, T> function, Hint... hints) {
+        Validate.notNull(function, "function");
+        Validate.noNullElements(hints, "null element at hints[%s]");
+
+        final Map<Class<? extends Hint>, Hint> localHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
+        for (Hint hint : hints) {
+            final Class<? extends Hint> key = hint.getType();
+            if (localHints.containsKey(key)) {
+                throw new IllegalArgumentException(String.format("Found hints [%s, %s] with same type %s",
+                    localHints.get(key), hint, key));
+            }
+            localHints.put(key, hint);
+        }
+        final Map<Class<? extends Hint>, Hint> restoreHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
+        for (final Iterator<Map.Entry<Class<? extends Hint>, Hint>> entries = localHints.entrySet().iterator(); entries
+            .hasNext();) {
+            final Map.Entry<Class<? extends Hint>, Hint> e = entries.next();
+            final Hint existingHint = getTypedContext(e.getKey());
+            if (e.getValue().equals(existingHint)) {
+                entries.remove();
+            } else {
+                restoreHints.put(e.getKey(), existingHint);
+            }
+        }
+        for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
+            putContext(e.getKey(), e.getValue());
+        }
+
+        try {
+            return function.evaluate(this);
+        } finally {
+            for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
+                putContext(e.getKey(), restoreHints.get(e.getKey()));
+            }
+        }
     }
 
     /**

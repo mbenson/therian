@@ -24,12 +24,11 @@ import java.util.List;
 import org.junit.Test;
 
 import therian.TypeLiteral;
-import therian.position.Ref;
-import therian.position.relative.Property;
-import therian.position.relative.RelativePosition;
+import therian.position.Position;
 import therian.testfixture.Address;
 import therian.testfixture.Author;
 import therian.testfixture.Book;
+import therian.util.Positions;
 
 public class PropertyTest {
 
@@ -37,10 +36,11 @@ public class PropertyTest {
     public void testBasic() {
         final Book book = new Book();
         book.setTitle("Cryptonomicon");
-        RelativePosition.ReadWrite<Book, Author> authorOfBook = Property.<Author> at("author").of(Ref.to(book));
+        RelativePosition.ReadWrite<Book, Author> authorOfBook =
+            Property.<Author> at("author").of(Positions.readOnly(book));
         assertEquals(Author.class, authorOfBook.getType());
         assertEquals(null, authorOfBook.getValue());
-        assertEquals(Ref.to(book), authorOfBook.getParentPosition());
+        assertEquals(Positions.readOnly(book), authorOfBook.getParentPosition());
         final Author author = new Author();
         author.setFirstName("Neal");
         author.setLastName("Stephenson");
@@ -58,8 +58,8 @@ public class PropertyTest {
         book.setTitle("Cryptonomicon");
         book.setAuthor(author);
         final RelativePosition.ReadWrite<Author, List<Address>> bookAuthorAddresses =
-            Property.<List<Address>> at("addresses").of(Property.<Author> at("author").of(Ref.to(book)));
-        Property.<List<Address>> at("addresses").of(Ref.to(author));
+            Property.<List<Address>> at("addresses").of(Property.<Author> at("author").of(Positions.readOnly(book)));
+        Property.<List<Address>> at("addresses").of(Positions.readOnly(author));
         final Type addressListType = new TypeLiteral<List<Address>>() {}.value;
         assertEquals(addressListType, bookAuthorAddresses.getType());
 
@@ -71,7 +71,7 @@ public class PropertyTest {
 
     @Test
     public void testToString() {
-        final Ref<Book> bookRef = Ref.to(new Book());
+        final Position.Readable<Book> bookRef = Positions.readOnly(new Book());
         assertEquals(String.format("Relative Position: Property author of %s", bookRef),
             Property.at("author").of(bookRef).toString());
     }

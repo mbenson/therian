@@ -26,9 +26,8 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
-
+import therian.util.Positions;
 
 public class ELCoercionConverterTest extends OperatorTest {
 
@@ -39,24 +38,29 @@ public class ELCoercionConverterTest extends OperatorTest {
 
     @Test
     public void testCoerciontoString() {
-        assertEquals("666", therianContext.eval(Convert.to(String.class, Ref.to(Integer.valueOf(666)))));
+        assertEquals("666", therianContext.eval(Convert.to(String.class, Positions.readOnly(Integer.valueOf(666)))));
     }
 
     @Test
     public void testCoerciontoEnum() {
-        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, new Ref<Object>(null) {})));
-        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to(""))));
-        assertSame(MetasyntacticVariable.FOO, therianContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to("FOO"))));
+        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(Object.class, null))));
+        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(""))));
+        assertSame(MetasyntacticVariable.FOO,
+            therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly("FOO"))));
     }
 
     @Test
     public void testCoercionToBoolean() {
-        assertFalse(therianContext.eval(Convert.<Object, Boolean> to(Boolean.class, new Ref<Object>(null) {}))
+        assertFalse(therianContext.eval(
+            Convert.<Object, Boolean> to(Boolean.class, Positions.readOnly(Object.class, null))).booleanValue());
+        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("")))
             .booleanValue());
-        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to(""))).booleanValue());
-        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("false"))).booleanValue());
-        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("whatever"))).booleanValue());
-        assertTrue(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Ref.to("true"))).booleanValue());
+        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("false")))
+            .booleanValue());
+        assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("whatever")))
+            .booleanValue());
+        assertTrue(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("true")))
+            .booleanValue());
     }
 
 }

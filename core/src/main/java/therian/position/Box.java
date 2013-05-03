@@ -26,16 +26,17 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 /**
  * Portable read/write {@link Position}.
- * 
+ *
  * @param <T>
  */
+@Deprecated
 public class Box<T> implements Position.ReadWrite<T> {
     /**
      * {@link Box} that skips assignability checking of {@code value} to {@code type}. Use with care. Example: In the
      * Oracle implementation, {@link Collections#unmodifiableList(java.util.List)} returns a class at runtime that
      * actually extends {@link AbstractList}&lt;Object&gt; and which therefore is not truly assignable to some more
      * narrowly parameterized {@link List}, even though in practice no runtime assignability problems are possible.
-     * 
+     *
      * @param <T>
      */
     public static final class Unchecked<T> extends Box<T> {

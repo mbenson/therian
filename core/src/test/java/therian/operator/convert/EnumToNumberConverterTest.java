@@ -23,8 +23,8 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class EnumToNumberConverterTest extends OperatorTest {
 
@@ -37,9 +37,11 @@ public class EnumToNumberConverterTest extends OperatorTest {
     @Test
     public void testConversion() {
         assertEquals(Double.valueOf(0.0),
-            therianContext.eval(Convert.to(Double.class, Ref.to(MetasyntacticVariable.FOO))));
-        assertEquals(1, therianContext.eval(Convert.to(Integer.class, Ref.to(MetasyntacticVariable.BAR))).intValue());
-        assertEquals(2L, therianContext.eval(Convert.to(Long.class, Ref.to(MetasyntacticVariable.BAZ))).longValue());
+            therianContext.eval(Convert.to(Double.class, Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertEquals(1, therianContext.eval(Convert.to(Integer.class, Positions.readOnly(MetasyntacticVariable.BAR)))
+            .intValue());
+        assertEquals(2L, therianContext.eval(Convert.to(Long.class, Positions.readOnly(MetasyntacticVariable.BAZ)))
+            .longValue());
     }
 
 }

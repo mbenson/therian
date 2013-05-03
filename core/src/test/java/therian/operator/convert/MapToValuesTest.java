@@ -30,8 +30,8 @@ import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class MapToValuesTest {
     private TherianContext context;
@@ -44,39 +44,40 @@ public class MapToValuesTest {
     @Test
     public void test() {
         assertTrue(context.eval(Convert.to(Collection.class,
-            Ref.to(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
+            Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
         assertTrue(context.eval(Convert.to(Iterable.class,
-            Ref.to(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context
-            .eval(Convert
-                .to(new TypeLiteral<Collection<MetasyntacticVariable>>() {},
-                    new Ref<Map<String, MetasyntacticVariable>>(Collections.singletonMap("foo",
-                        MetasyntacticVariable.FOO)) {})) instanceof Collection<?>);
-        assertTrue(context
-            .eval(Convert
-                .to(new TypeLiteral<Iterable<MetasyntacticVariable>>() {}, new Ref<Map<String, MetasyntacticVariable>>(
-                    Collections.singletonMap("foo", MetasyntacticVariable.FOO)) {})) instanceof Collection<?>);
+            Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
+        assertTrue(context.eval(Convert.to(
+            new TypeLiteral<Collection<MetasyntacticVariable>>() {},
+            Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
+                Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
+        assertTrue(context.eval(Convert.to(
+            new TypeLiteral<Iterable<MetasyntacticVariable>>() {},
+            Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
+                Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
     }
 
     @Test
     public void testToIterable() {
         assertTrue(context.eval(Convert.to(Iterable.class,
-            Ref.to(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context
-            .eval(Convert
-                .to(new TypeLiteral<Iterable<MetasyntacticVariable>>() {}, new Ref<Map<String, MetasyntacticVariable>>(
-                    Collections.singletonMap("foo", MetasyntacticVariable.FOO)) {})) instanceof Collection<?>);
+            Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
+        assertTrue(context.eval(Convert.to(
+            new TypeLiteral<Iterable<MetasyntacticVariable>>() {},
+            Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
+                Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
     }
 
     @Test(expected = OperationException.class)
     public void testUnknownSourceElementType() {
         context.eval(Convert.to(new TypeLiteral<Collection<MetasyntacticVariable>>() {},
-            Ref.to(Collections.singletonMap("foo", MetasyntacticVariable.FOO))));
+            Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleElementType() {
-        context.eval(Convert.to(new TypeLiteral<Iterable<String>>() {}, new Ref<Map<String, MetasyntacticVariable>>(
-            Collections.singletonMap("foo", MetasyntacticVariable.FOO)) {}));
+        context.eval(Convert.to(
+            new TypeLiteral<Iterable<String>>() {},
+            Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
+                Collections.singletonMap("foo", MetasyntacticVariable.FOO))));
     }
 }

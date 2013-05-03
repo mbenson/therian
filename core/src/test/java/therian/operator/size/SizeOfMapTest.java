@@ -10,8 +10,8 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Size;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class SizeOfMapTest extends OperatorTest {
 
@@ -22,11 +22,14 @@ public class SizeOfMapTest extends OperatorTest {
 
     @Test
     public void test() {
-        assertEquals(0, therianContext.eval(Size.of(Ref.to(Collections.emptyMap()))).intValue());
-        assertEquals(1, therianContext
-            .eval(Size.of(Ref.to(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(Collections.emptyMap()))).intValue());
+        assertEquals(1,
+            therianContext
+                .eval(Size.of(Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO))))
+                .intValue());
         assertEquals(MetasyntacticVariable.values().length,
-            therianContext.eval(Size.of(Ref.to(EnumUtils.getEnumMap(MetasyntacticVariable.class)))).intValue());
+            therianContext.eval(Size.of(Positions.readOnly(EnumUtils.getEnumMap(MetasyntacticVariable.class))))
+                .intValue());
     }
 
 }

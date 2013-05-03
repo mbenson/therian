@@ -24,10 +24,11 @@ import java.util.Set;
 import org.junit.Test;
 
 import therian.TherianModule;
+import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.operator.getelementtype.GetArrayElementType;
-import therian.position.Ref;
+import therian.util.Positions;
 
 public class CollectionToArrayTest extends OperatorTest {
 
@@ -39,7 +40,8 @@ public class CollectionToArrayTest extends OperatorTest {
     @Test
     public void test() {
         final String[] array = { "foo", "bar", "baz" };
-        assertArrayEquals(array, therianContext.eval(Convert.to(String[].class, Ref.to(Arrays.asList(array)))));
+        assertArrayEquals(array,
+            therianContext.eval(Convert.to(String[].class, Positions.readOnly(Arrays.asList(array)))));
     }
 
     public void testPrimitive() {
@@ -52,6 +54,6 @@ public class CollectionToArrayTest extends OperatorTest {
             }
         };
         assertArrayEquals(new int[] { 0, 1, 2 },
-            therianContext.eval(Convert.to(int[].class, new Ref<Set<Integer>>(s) {})));
+            therianContext.eval(Convert.to(int[].class, Positions.readOnly(new TypeLiteral<Set<Integer>>() {}, s))));
     }
 }

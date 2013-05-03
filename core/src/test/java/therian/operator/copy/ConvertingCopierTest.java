@@ -14,7 +14,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package therian.operator.copy;
 
@@ -28,10 +28,10 @@ import therian.operation.Copy;
 import therian.operator.OperatorTest;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.position.Ref;
 import therian.position.relative.Property;
 import therian.position.relative.RelativePosition;
 import therian.testfixture.Address;
+import therian.util.Positions;
 
 public class ConvertingCopierTest extends OperatorTest {
 
@@ -45,8 +45,8 @@ public class ConvertingCopierTest extends OperatorTest {
     public void test() {
         final Address address = new Address();
         final RelativePosition.ReadWrite<Address, String> zipCodeOfAddress =
-            Property.<String> at("zipCode").of(Ref.to(address));
-        therianContext.eval(Copy.to(zipCodeOfAddress, Ref.to(66666)));
+            Property.<String> at("zipCode").of(Positions.readOnly(address));
+        therianContext.eval(Copy.to(zipCodeOfAddress, Positions.readOnly(66666)));
         assertEquals("66666", address.getZipCode());
         assertEquals("66666", zipCodeOfAddress.getValue());
     }

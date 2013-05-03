@@ -21,7 +21,7 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
-import therian.position.Ref;
+import therian.util.Positions;
 
 /**
  * {@link Operator} to take the size of an {@link Iterable}.
@@ -35,7 +35,7 @@ public class SizeOfIterable implements Operator<Size<Iterable<?>>> {
         if (value == null) {
             operation.setResult(0);
         } else {
-            operation.setResult(context.eval(Size.of(Ref.to(value.iterator()))));
+            operation.setResult(context.eval(Size.of(Positions.readOnly(value.iterator()))));
         }
         return true;
     }

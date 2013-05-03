@@ -15,7 +15,7 @@
  */
 package therian.operator.convert;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -28,7 +28,7 @@ import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
+import therian.util.Positions;
 
 /**
  *
@@ -46,19 +46,37 @@ public class EnumerationToListTest extends OperatorTest {
 
         final List<String> expected = Arrays.asList("foo", "bar", "baz");
 
-        assertEquals(expected, therianContext.eval(Convert.to(new TypeLiteral<Iterable<String>>() {},
-            new Ref<Enumeration<String>>(tokenize(s)) {})));
+        final TypeLiteral<Enumeration<String>> enumOfStringType = new TypeLiteral<Enumeration<String>>() {};
 
-        assertEquals(expected, therianContext.eval(Convert.to(new TypeLiteral<List<String>>() {},
-            new Ref<Enumeration<String>>(tokenize(s)) {})));
+        assertEquals(
+            expected,
+            therianContext.eval(Convert.to(new TypeLiteral<Iterable<String>>() {},
+                Positions.readOnly(enumOfStringType, tokenize(s)))));
 
-        assertEquals(expected, therianContext.eval(Convert.to(new TypeLiteral<List<Object>>() {},
-            new Ref<Enumeration<String>>(tokenize(s)) {})));
+        assertEquals(
+            expected,
+            therianContext.eval(Convert.to(new TypeLiteral<List<String>>() {},
+                Positions.readOnly(enumOfStringType, tokenize(s)))));
+
+        assertEquals(
+            expected,
+            therianContext.eval(Convert.to(new TypeLiteral<List<Object>>() {},
+                Positions.readOnly(enumOfStringType, tokenize(s)))));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Enumeration<String> tokenize(String s) {
-        final Enumeration raw = new StringTokenizer(s);
-        return raw;
+        final StringTokenizer tok = new StringTokenizer(s);
+        return new Enumeration<String>() {
+
+            @Override
+            public String nextElement() {
+                return tok.nextToken();
+            }
+
+            @Override
+            public boolean hasMoreElements() {
+                return tok.hasMoreElements();
+            }
+        };
     }
 }

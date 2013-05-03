@@ -17,34 +17,28 @@ package therian.operator.convert;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import therian.Therian;
-import therian.TherianContext;
 import therian.TherianModule;
 import therian.operation.Convert;
+import therian.operator.OperatorTest;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
-public class NOPConverterTest {
-    private TherianContext context;
-
-    @Before
-    public void setup() {
-        context =
-            Therian.usingModules(
-                TherianModule.create().withOperators(new NOPConverter(), new DefaultImmutableChecker())).context();
+public class NOPConverterTest extends OperatorTest {
+    @Override
+    protected TherianModule module() {
+        return TherianModule.create().withOperators(new NOPConverter(), new DefaultImmutableChecker());
     }
 
     @Test
     public void test() {
-        assertEquals("", context.eval(Convert.to(String.class, Ref.to(""))));
+        assertEquals("", therianContext.eval(Convert.to(String.class, Positions.readOnly(""))));
         assertEquals(MetasyntacticVariable.FOO,
-            context.eval(Convert.to(MetasyntacticVariable.class, Ref.to(MetasyntacticVariable.FOO))));
-        assertEquals(Long.valueOf(100L), context.eval(Convert.to(Long.class, Ref.to(Long.valueOf(100L)))));
-        assertEquals(Boolean.TRUE, context.eval(Convert.to(Boolean.class, Ref.to(Boolean.TRUE))));
+            therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertEquals(Long.valueOf(100L),
+            therianContext.eval(Convert.to(Long.class, Positions.readOnly(Long.valueOf(100L)))));
+        assertEquals(Boolean.TRUE, therianContext.eval(Convert.to(Boolean.class, Positions.readOnly(Boolean.TRUE))));
     }
-
 }

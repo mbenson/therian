@@ -15,9 +15,8 @@ import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.GetElementType;
-import therian.position.Box;
 import therian.position.Position;
-import therian.position.Ref;
+import therian.util.Positions;
 import therian.util.Types;
 
 /**
@@ -58,11 +57,11 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             if (sourceElement != null) {
                 final Position.Readable<?> sourceElementPosition;
                 if (sourceElementType == null || sourceElementType instanceof Class<?>) {
-                    sourceElementPosition = Ref.to(sourceElement);
+                    sourceElementPosition = Positions.readOnly(sourceElement);
                 } else {
-                    sourceElementPosition = new Box<Object>(sourceElementType, sourceElement);
+                    sourceElementPosition = Positions.<Object> readWrite(sourceElementType, sourceElement);
                 }
-                final Copy<?, ?> copyElement = Copy.to(Ref.to(targetElement), sourceElementPosition);
+                final Copy<?, ?> copyElement = Copy.to(Positions.readOnly(targetElement), sourceElementPosition);
                 context.eval(copyElement);
                 if (!copyElement.isSuccessful()) {
                     return false;
@@ -79,10 +78,11 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             sourceElementsForConversion.add(sourceIterator.next());
         }
 
-        final Box<?> targetElements = new Box(Types.genericArrayType(targetElementType));
+        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
         final Type sourceSubListType =
-                sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
-        final Box<?> sourceSubList = new Box<List<?>>(sourceSubListType, sourceElementsForConversion);
+            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+        final Position.ReadWrite<?> sourceSubList =
+            Positions.<List<?>> readWrite(sourceSubListType, sourceElementsForConversion);
         final Convert<?, ?> toTargetElementArray = Convert.to(targetElements, sourceSubList);
         context.eval(toTargetElementArray);
         if (!toTargetElementArray.isSuccessful()) {
@@ -107,7 +107,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         for (Object s : (Object[]) targetElements.getValue()) {
             allElements.add(s);
         }
-        ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
+        ((Position.Writable) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
             TypeUtils.getRawType(targetElements.getType(), null), allElements.size())));
 
         final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
@@ -160,11 +160,11 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             if (sourceElement != null) {
                 final Position.Readable<?> sourceElementPosition;
                 if (sourceElementType == null || sourceElementType instanceof Class<?>) {
-                    sourceElementPosition = Ref.to(sourceElement);
+                    sourceElementPosition = Positions.readOnly(sourceElement);
                 } else {
-                    sourceElementPosition = new Box<Object>(sourceElementType, sourceElement);
+                    sourceElementPosition = Positions.readWrite(sourceElementType, sourceElement);
                 }
-                if (!context.supports(Copy.to(Ref.to(targetElement), sourceElementPosition))) {
+                if (!context.supports(Copy.to(Positions.readOnly(targetElement), sourceElementPosition))) {
                     return false;
                 }
             }
@@ -177,10 +177,11 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             sourceElementsForConversion.add(sourceIterator.next());
         }
         // can we convert these to an array?
-        final Box<?> targetElements = new Box<Object>(Types.genericArrayType(targetElementType));
+        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
         final Type sourceSubListType =
-                sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
-        final Box<?> sourceSubList = new Box<List<?>>(sourceSubListType, sourceElementsForConversion);
+            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+        final Position.ReadWrite<?> sourceSubList =
+            Positions.<List<?>> readWrite(sourceSubListType, sourceElementsForConversion);
         if (!context.supports(Convert.to(targetElements, sourceSubList))) {
             return false;
         }
@@ -188,7 +189,8 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         // array of proper size, but null values == best we can do.
         final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElements.getType(), null);
 
-        ((Box) targetElements).setValue(Array.newInstance(rawTargetElementType, sourceElementsForConversion.size()));
+        ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
+            sourceElementsForConversion.size()));
 
         if (context.supports(AddAll.to(copy.getTargetPosition(), targetElements))) {
             return true;
@@ -207,8 +209,8 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         Object s : sourceIterable) {
             allElements.add(null);
         }
-        ((Box) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(rawTargetElementType,
-            allElements.size())));
+        ((Position.Writable) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
+            rawTargetElementType, allElements.size())));
 
         return context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), targetElements));
     }

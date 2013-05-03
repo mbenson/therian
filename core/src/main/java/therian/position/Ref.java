@@ -26,9 +26,10 @@ import therian.util.Types;
 
 /**
  * Reference to a given value.
- * 
+ *
  * @param <T>
  */
+@Deprecated
 public class Ref<T> implements Position.Readable<T> {
     private static final TypeVariable<?>[] TYPE_PARAMS = Ref.class.getTypeParameters();
 
@@ -37,7 +38,7 @@ public class Ref<T> implements Position.Readable<T> {
 
     /**
      * If {@code value} may be {@code null}, create an anonymous subclass e.g. <code>new Ref<String>(null) {}</code>.
-     * 
+     *
      * @param value
      */
     protected Ref(T value) {
@@ -83,7 +84,7 @@ public class Ref<T> implements Position.Readable<T> {
     /**
      * Valid for non-{@code null} values only, and then can only get raw type from value. Use an anonymous subclass for
      * greater flexibility WRT types.
-     * 
+     *
      * @param value
      * @return Ref
      */

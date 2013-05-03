@@ -18,12 +18,11 @@ package therian.operator.convert;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import org.apache.commons.functor.UnaryProcedure;
-
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
-import therian.position.Box;
+import therian.position.Position;
+import therian.util.Positions;
 
 /**
  * Implements simple conversion of a compatible {@link Enumeration} to an {@link Iterator}.
@@ -37,15 +36,9 @@ public class EnumerationToIterator extends AssignableElementConverter<Enumeratio
 
     @Override
     public boolean perform(TherianContext context, final Convert<? extends Enumeration<?>, ? super Iterator> operation) {
-        final Box<Iterable> iterable = new Box<Iterable>(Iterable.class);
-        return context.evalSuccess(Convert.to(iterable, operation.getSourcePosition()))
-            && context.forwardTo(Convert.to(Iterator.class, iterable), new UnaryProcedure<Iterator>() {
-
-                @Override
-                public void run(Iterator iter) {
-                    operation.getTargetPosition().setValue(iter);
-                }
-            });
+        final Position.ReadWrite<Iterable> rw = Positions.readWrite(Iterable.class);
+        return context.evalSuccess(Convert.to(rw, operation.getSourcePosition()))
+            && context.forwardTo(Convert.to(Iterator.class, rw), Positions.writeValue(operation.getTargetPosition()));
     }
 
 }

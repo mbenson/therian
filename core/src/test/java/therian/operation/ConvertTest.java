@@ -29,8 +29,8 @@ import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operator.convert.NOPConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class ConvertTest {
     private TherianContext therianContext;
@@ -46,21 +46,23 @@ public class ConvertTest {
     public void tesConvertUsingNullModules() {
         Therian therian = Therian.usingModules((TherianModule[]) null);
         TherianContext therianContext = therian.context();
-        therianContext.eval(Convert.to(String.class, Ref.to("")));
+        therianContext.eval(Convert.to(String.class, Positions.readOnly("")));
     }
 
     @Test
     public void testImmutableAssignable() {
         TypeLiteral<CharSequence> charSequenceType = new TypeLiteral<CharSequence>() {};
-        assertNull(therianContext.eval(Convert.to(charSequenceType, new Ref<String>(null) {})));
-        assertEquals("", therianContext.eval(Convert.to(charSequenceType, Ref.to(""))));
-        assertEquals("", therianContext.eval(Convert.to(String.class, Ref.to(""))));
+        assertNull(therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(String.class, null))));
+        assertEquals("", therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(""))));
+        assertEquals("", therianContext.eval(Convert.to(String.class, Positions.readOnly(""))));
         assertSame(MetasyntacticVariable.FOO,
-            therianContext.eval(Convert.to(MetasyntacticVariable.class, Ref.to(MetasyntacticVariable.FOO))));
-        assertSame(MetasyntacticVariable.FOO,
-            therianContext.eval(Convert.to(new TypeLiteral<Enum<?>>() {}, Ref.to(MetasyntacticVariable.FOO))));
-        assertEquals(Integer.valueOf(666), therianContext.eval(Convert.to(Integer.class, Ref.to(Integer.valueOf(666)))));
-        assertEquals(Integer.valueOf(666), therianContext.eval(Convert.to(Number.class, Ref.to(Integer.valueOf(666)))));
+            therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertSame(MetasyntacticVariable.FOO, therianContext.eval(Convert.to(new TypeLiteral<Enum<?>>() {},
+            Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertEquals(Integer.valueOf(666),
+            therianContext.eval(Convert.to(Integer.class, Positions.readOnly(Integer.valueOf(666)))));
+        assertEquals(Integer.valueOf(666),
+            therianContext.eval(Convert.to(Number.class, Positions.readOnly(Integer.valueOf(666)))));
     }
 
 }

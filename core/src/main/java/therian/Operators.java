@@ -86,8 +86,9 @@ public class Operators {
 
     /**
      * Get standard operators.
-     * 
+     *
      * @return Operator[]
+     * @see Therian#standard()
      */
     public static Operator<?>[] standard() {
         throw new UnsupportedOperationException("should use therian-build-weaver");
@@ -95,7 +96,7 @@ public class Operators {
 
     /**
      * Validate an {@link Operator} implementation.
-     * 
+     *
      * @param operator
      * @param <OPERATOR>
      * @return {@code operator}
@@ -113,7 +114,7 @@ public class Operators {
 
     /**
      * Get a comparator that compares {@link Operator}s by {@link Operation} type/type parameter assignability.
-     * 
+     *
      * @return a Comparator that does not handle {@code null} values
      */
     public static Comparator<Operator<?>> comparator() {

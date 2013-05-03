@@ -38,11 +38,15 @@ import therian.TypeLiteral;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.Copy;
-import therian.position.Box;
 import therian.position.Position;
+import therian.util.Hints;
+import therian.util.Positions;
 
 /**
- * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}.
+ * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}. If source type is
+ * assignable to target type and a {@link Hints.IntermediateOperation} is found on the context, no work will be done.
+ *
+ * @see TherianContext.Hint
  */
 public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
     /**
@@ -120,7 +124,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         @Override
         public boolean supports(TherianContext context, Convert<? extends Object, ? super TARGET> convert) {
             return super.supports(context, convert)
-                    && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
+                && TypeUtils.isAssignable(targetType, convert.getTargetPosition().getType());
         }
     }
 
@@ -141,29 +145,25 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
             final Position.Readable<TARGET> unchecked = (Position.Readable<TARGET>) convert.getTargetPosition();
             targetPosition = unchecked;
         } else {
-            // create a readable position
-            targetPosition = new Position.Readable<TARGET>() {
-
-                @Override
-                public Type getType() {
-                    return convert.getTargetPosition().getType();
-                }
-
-                @Override
-                public TARGET getValue() {
-                    return target;
-                }
-
-            };
+            targetPosition = Positions.readOnly(convert.getTargetPosition().getType(), target);
         }
         return context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
     }
 
     @Override
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
-        return super.supports(context, convert)
-                && context.supports(Copy.to(new Box<TARGET>(convert.getTargetPosition().getType()),
-                    convert.getSourcePosition()));
+        if (!super.supports(context, convert)) {
+            return false;
+        }
+        if (TypeUtils.isAssignable(convert.getSourcePosition().getType(), convert.getTargetPosition().getType())
+            && context.getContext(Hints.IntermediateOperation.class) != null) {
+            return false;
+        }
+        // ideally we would check whether the copy was possible, but a copier typically knows it can't copy to
+        // an immutable target, including a null value, so we would have to instantiate the target object twice
+        // or resort to weird ways of reusing it and even then it might not get used, so we'll just risk
+        // failure to perform() instead.
+        return true;
     }
 
     /**

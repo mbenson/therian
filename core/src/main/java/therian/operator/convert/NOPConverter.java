@@ -17,13 +17,17 @@ package therian.operator.convert;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operators;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
-import therian.operation.ImmutableCheck;
 
 /**
- * Uses source value as target value when assignable and immutable.
+ * Uses source value as target value when assignable. This is a so-called "standard converter," but a more strongly
+ * typed Converter can be specified for any given datatype that requires a new instance. Some type of
+ * {@link CopyingConverter} is recommended for this purpose.
+ *
+ * @see Operators#standard()
  */
 @StandardOperator
 public class NOPConverter extends Converter.WithDynamicTarget<Object> {
@@ -38,8 +42,7 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> operation) {
-        return TypeUtils.isInstance(operation.getSourcePosition().getValue(), operation.getTargetPosition().getType())
-            && context.eval(ImmutableCheck.of(operation.getSourcePosition())).booleanValue();
+        return TypeUtils.isInstance(operation.getSourcePosition().getValue(), operation.getTargetPosition().getType());
     }
 
 }

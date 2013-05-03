@@ -26,9 +26,9 @@ import therian.operator.OperatorTest;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.position.Ref;
 import therian.testfixture.Address;
 import therian.testfixture.Country;
+import therian.util.Positions;
 
 public class BeanCopierTest extends OperatorTest {
 
@@ -53,7 +53,7 @@ public class BeanCopierTest extends OperatorTest {
 
         final Address target = new Address();
 
-        therianContext.eval(Copy.to(Ref.to(target), Ref.to(source)));
+        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(source)));
         assertEquals(source, target);
     }
 

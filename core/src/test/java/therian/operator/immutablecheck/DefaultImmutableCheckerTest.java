@@ -30,8 +30,8 @@ import therian.TherianModule;
 import therian.operation.ImmutableCheck;
 import therian.operator.OperatorTest;
 import therian.position.Position;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class DefaultImmutableCheckerTest extends OperatorTest {
     @Override
@@ -41,22 +41,22 @@ public class DefaultImmutableCheckerTest extends OperatorTest {
 
     @Test
     public void testBasic() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to("foo"))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(MetasyntacticVariable.FOO))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly("foo"))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(MetasyntacticVariable.FOO))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(MethodUtils.getAccessibleMethod(DefaultImmutableCheckerTest.class, "testBasic")
-                .getAnnotation(Test.class)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Arrays.asList("foo", "bar", "baz")))));
+            ImmutableCheck.of(Positions.readOnly(MethodUtils.getAccessibleMethod(DefaultImmutableCheckerTest.class,
+                "testBasic").getAnnotation(Test.class)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Arrays.asList("foo", "bar", "baz")))));
     }
 
     @Test
     public void testNull() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(new Ref<Object>(null) {})).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Object.class, null))).booleanValue());
     }
 
     @Test
     public void testObject() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(new Object()))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(new Object()))).booleanValue());
     }
 
     @Test
@@ -92,134 +92,144 @@ public class DefaultImmutableCheckerTest extends OperatorTest {
 
     @Test
     public void testWrapper() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Integer.valueOf(666)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Long.valueOf(666L)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Byte.valueOf((byte) 0)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Short.valueOf((short) 0)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Character.valueOf((char) 0)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Boolean.TRUE))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Float.valueOf(0.0f)))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Double.valueOf(0.0)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Integer.valueOf(666)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Long.valueOf(666L)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Byte.valueOf((byte) 0)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Short.valueOf((short) 0)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Character.valueOf((char) 0))))
+            .booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Boolean.TRUE))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Float.valueOf(0.0f)))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Double.valueOf(0.0)))).booleanValue());
     }
 
     @Test
     public void testJavaUtilCollectionsFactoryTypes() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyList()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptySet()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptySet().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap().keySet()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap().keySet().iterator())))
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptyList()))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptySet()))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptySet().iterator())))
             .booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap().values()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.emptyMap().values().iterator())))
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptyMap()))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptyMap().keySet())))
+            .booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.emptyMap().keySet().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Collections.emptyMap().values())))
+            .booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.emptyMap().values().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableList(Collections.emptyList()))))
+            .booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableList(Collections.emptyList()).iterator())))
             .booleanValue());
         assertTrue(therianContext
-            .eval(ImmutableCheck.of(Ref.to(Collections.unmodifiableList(Collections.emptyList())))).booleanValue());
+            .eval(
+                ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableList(Collections.emptyList())
+                    .listIterator()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableList(Collections.emptyList()).iterator()))).booleanValue());
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSet(Collections.emptySet())))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableList(Collections.emptyList()).listIterator())))
-            .booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.unmodifiableSet(Collections.emptySet()))))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSet(Collections.emptySet()).iterator()))).booleanValue());
-        assertTrue(therianContext.eval(ImmutableCheck.of(Ref.to(Collections.unmodifiableMap(Collections.emptyMap()))))
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSet(Collections.emptySet()).iterator())))
             .booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableMap(Collections.emptyMap()).keySet()))).booleanValue());
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableMap(Collections.emptyMap())))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableMap(Collections.emptyMap()).values()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableMap(Collections.emptyMap()).keySet().iterator())))
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableMap(Collections.emptyMap()).keySet())))
             .booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableMap(Collections.emptyMap()).values().iterator())))
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableMap(Collections.emptyMap()).values())))
             .booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>())))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>()).iterator())))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>()).headSet("foo"))))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>()).tailSet("foo"))))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>()).subSet("foo", "foo"))))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref
-                .to(Collections.unmodifiableSortedSet(new TreeSet<String>()).headSet("foo").iterator())))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref
-                .to(Collections.unmodifiableSortedSet(new TreeSet<String>()).tailSet("foo").iterator())))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedSet(new TreeSet<String>()).subSet("foo", "foo")
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableMap(Collections.emptyMap()).keySet()
                 .iterator()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).keySet())))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).values())))
-            .booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).keySet()
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableMap(Collections.emptyMap()).values()
                 .iterator()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).values()
-                .iterator()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).headMap("foo"))))
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>()))))
             .booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).headMap("foo")
-                .keySet()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).headMap("foo")
-                .values()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).headMap("foo")
-                .keySet().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).headMap("foo")
-                .values().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).tailMap("foo"))))
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>()).iterator())))
             .booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).tailMap("foo")
-                .keySet()))).booleanValue());
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>())
+                .headSet("foo")))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).tailMap("foo")
-                .values()))).booleanValue());
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>())
+                .tailSet("foo")))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).tailMap("foo")
-                .keySet().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).tailMap("foo")
-                .values().iterator()))).booleanValue());
-        assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()).subMap("foo",
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>()).subSet("foo",
                 "foo")))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>())
+                .headSet("foo").iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>())
+                .tailSet("foo").iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedSet(new TreeSet<String>())
+                .subSet("foo", "foo").iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>()))))
+            .booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .keySet()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .values()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .keySet().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .values().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .headMap("foo")))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .headMap("foo").keySet()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .headMap("foo").values()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .headMap("foo").keySet().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .headMap("foo").values().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .tailMap("foo")))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .tailMap("foo").keySet()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .tailMap("foo").values()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .tailMap("foo").keySet().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .tailMap("foo").values().iterator()))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+                .subMap("foo", "foo")))).booleanValue());
+        assertTrue(therianContext.eval(
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
                 .subMap("foo", "foo").keySet()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
                 .subMap("foo", "foo").values()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
                 .subMap("foo", "foo").keySet().iterator()))).booleanValue());
         assertTrue(therianContext.eval(
-            ImmutableCheck.of(Ref.to(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
+            ImmutableCheck.of(Positions.readOnly(Collections.unmodifiableSortedMap(new TreeMap<String, Object>())
                 .subMap("foo", "foo").values().iterator()))).booleanValue());
     }
 

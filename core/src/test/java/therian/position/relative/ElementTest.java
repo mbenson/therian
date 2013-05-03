@@ -25,69 +25,76 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
-import therian.position.Ref;
+import therian.TypeLiteral;
+import therian.position.Position;
+import therian.util.Positions;
 
 public class ElementTest {
 
     @Test
     public void testGetIterableElementType() {
         final List<String> l = new ArrayList<String>();
-        assertEquals(String.class, Element.atIndex(0).of(new Ref<List<String>>(l) {}).getType());
-        assertEquals(Object.class, Element.atIndex(0).of(Ref.to(l)).getType());
+        assertEquals(String.class, Element.atIndex(0).of(Positions.readOnly(new TypeLiteral<List<String>>() {}, l))
+            .getType());
+        assertEquals(Object.class, Element.atIndex(0).of(Positions.readOnly(l)).getType());
     }
 
     @Test
     public void testGetIterableElementValue() {
         final List<String> l = new ArrayList<String>();
         l.add("foo");
-        assertEquals("foo", Element.atIndex(0).of(Ref.to(l)).getValue());
+        assertEquals("foo", Element.atIndex(0).of(Positions.readOnly(l)).getValue());
     }
 
     @Test
     public void testGetOutOfBoundsIterableElementValue() {
-        assertNull(Element.atIndex(0).of(Ref.to(Collections.emptyList())).getValue());
+        assertNull(Element.atIndex(0).of(Positions.readOnly(Collections.emptyList())).getValue());
     }
 
     @Test
     public void testSetIterableElementValue() {
         final List<String> l = new ArrayList<String>();
         l.add("foo");
-        Element.atIndex(0).of(Ref.to(l)).setValue("bar");
+        Element.atIndex(0).of(Positions.readOnly(l)).setValue("bar");
         assertEquals("bar", l.get(0));
     }
 
     @Test
     public void testGetArrayElementType() {
-        assertEquals(boolean.class, Element.atArrayIndex(0).of(Ref.to(ArrayUtils.EMPTY_BOOLEAN_ARRAY)).getType());
-        assertEquals(Boolean.class, Element.atArrayIndex(0).of(Ref.to(ArrayUtils.toArray(Boolean.TRUE))).getType());
-        assertEquals(Object.class, Element.atArrayIndex(0).of(Ref.to(ArrayUtils.EMPTY_OBJECT_ARRAY)).getType());
-        assertEquals(String.class, Element.atArrayIndex(0).of(Ref.to(ArrayUtils.EMPTY_STRING_ARRAY)).getType());
+        assertEquals(boolean.class, Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.EMPTY_BOOLEAN_ARRAY))
+            .getType());
+        assertEquals(Boolean.class, Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.toArray(Boolean.TRUE)))
+            .getType());
+        assertEquals(Object.class, Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.EMPTY_OBJECT_ARRAY))
+            .getType());
+        assertEquals(String.class, Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.EMPTY_STRING_ARRAY))
+            .getType());
     }
 
     @Test
     public void testGetArrayElementValue() {
-        assertEquals("foo", Element.atArrayIndex(0).of(Ref.to(ArrayUtils.toArray("foo"))).getValue());
+        assertEquals("foo", Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.toArray("foo"))).getValue());
     }
 
     @Test
     public void testGetOutOfBoundsArrayElementValue() {
-        assertNull(Element.atArrayIndex(0).of(Ref.to(ArrayUtils.EMPTY_STRING_ARRAY)).getValue());
+        assertNull(Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.EMPTY_STRING_ARRAY)).getValue());
     }
 
     @Test
     public void testSetArrayElementValue() {
         final String[] array = ArrayUtils.toArray("foo");
-        Element.atArrayIndex(0).of(Ref.to(array)).setValue("bar");
+        Element.atArrayIndex(0).of(Positions.readOnly(array)).setValue("bar");
         assertEquals("bar", array[0]);
     }
 
     @Test
     public void testToString() {
-        final Ref<ArrayList<String>> listRef = Ref.to(new ArrayList<String>());
+        final Position.Readable<ArrayList<String>> listRef = Positions.readOnly(new ArrayList<String>());
         assertEquals(String.format("Relative Position: Element [0] of %s", listRef), Element.atIndex(0).of(listRef)
             .toString());
 
-        final Ref<String[]> arrayRef = Ref.to(new String[0]);
+        final Position.Readable<String[]> arrayRef = Positions.readOnly(new String[0]);
         assertEquals(String.format("Relative Position: Array Element [0] of %s", arrayRef),
             Element.atArrayIndex(0).of(arrayRef).toString());
     }

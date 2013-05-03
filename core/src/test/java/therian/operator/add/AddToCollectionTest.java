@@ -17,8 +17,7 @@ import therian.TypeLiteral;
 import therian.operation.Add;
 import therian.operator.OperatorTest;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.position.Box;
-import therian.position.Ref;
+import therian.util.Positions;
 
 public class AddToCollectionTest extends OperatorTest {
 
@@ -30,7 +29,8 @@ public class AddToCollectionTest extends OperatorTest {
     @Test
     public void testRawList() {
         final List<?> l = new ArrayList<Object>();
-        assertTrue(therianContext.eval(Add.to(new Box<List<?>>(List.class, l), Ref.to("foo"))).booleanValue());
+        assertTrue(therianContext.eval(Add.to(Positions.<List<?>> readWrite(List.class, l), Positions.readOnly("foo")))
+            .booleanValue());
         assertEquals(1, l.size());
         assertEquals("foo", l.get(0));
     }
@@ -38,28 +38,34 @@ public class AddToCollectionTest extends OperatorTest {
     @Test
     public void testTypedList() {
         final List<String> l = new ArrayList<String>();
-        assertTrue(therianContext.eval(
-            Add.to(new Box<List<String>>(new TypeLiteral<List<String>>() {}.value, l), Ref.to("foo"))).booleanValue());
+        assertTrue(therianContext
+            .eval(
+                Add.to(Positions.<List<String>> readWrite(new TypeLiteral<List<String>>() {}, l),
+                    Positions.readOnly("foo"))).booleanValue());
         assertEquals(1, l.size());
         assertEquals("foo", l.get(0));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(expected = OperationException.class)
     public void testImmutableList() {
-        therianContext.eval(Add.to(new Box.Unchecked<List<String>>(new TypeLiteral<List<String>>() {}.value,
-            Collections.<String> emptyList()), Ref.to("foo")));
+        therianContext.eval(Add.to(
+            Positions.<List> readWrite(new TypeLiteral<List>() {}, Collections.<String> emptyList()),
+            Positions.readOnly("foo")));
     }
 
     @Test(expected = OperationException.class)
     public void testWrongTypeList() {
-        therianContext.eval(Add.to(new Box<List<String>>(new TypeLiteral<List<String>>() {}.value,
-            new ArrayList<String>()), Ref.to(new Object())));
+        therianContext.eval(Add.to(
+            Positions.<List<String>> readWrite(new TypeLiteral<List<String>>() {}, new ArrayList<String>()),
+            Positions.readOnly(new Object())));
     }
 
     @Test
     public void testRawSet() {
         final Set<?> s = new HashSet<Object>();
-        assertTrue(therianContext.eval(Add.to(new Box<Set<?>>(Set.class, s), Ref.to("foo"))).booleanValue());
+        assertTrue(therianContext.eval(Add.to(Positions.<Set<?>> readWrite(Set.class, s), Positions.readOnly("foo")))
+            .booleanValue());
         assertEquals(1, s.size());
         assertEquals("foo", s.iterator().next());
     }
@@ -68,7 +74,8 @@ public class AddToCollectionTest extends OperatorTest {
     public void testTypedSet() {
         final Set<String> s = new HashSet<String>();
         assertTrue(therianContext.eval(
-            Add.to(new Box<Set<String>>(new TypeLiteral<Set<String>>() {}.value, s), Ref.to("foo"))).booleanValue());
+            Add.to(Positions.<Set<String>> readWrite(new TypeLiteral<Set<String>>() {}, s), Positions.readOnly("foo")))
+            .booleanValue());
         assertEquals(1, s.size());
         assertEquals("foo", s.iterator().next());
     }
@@ -77,13 +84,14 @@ public class AddToCollectionTest extends OperatorTest {
     public void testImmutableSet() {
         final Set<String> s = Collections.singleton("bar");
         assertTrue(therianContext.eval(
-            Add.to(new Box<Set<String>>(new TypeLiteral<Set<String>>() {}.value, s), Ref.to("foo"))).booleanValue());
+            Add.to(Positions.<Set<String>> readWrite(new TypeLiteral<Set<String>>() {}, s), Positions.readOnly("foo")))
+            .booleanValue());
     }
 
     @Test(expected = OperationException.class)
     public void testWrongTypeSet() {
-        therianContext
-            .eval(Add.to(new Box<Set<String>>(new TypeLiteral<Set<String>>() {}.value, new HashSet<String>()),
-                Ref.to(new Object())));
+        therianContext.eval(Add.to(
+            Positions.<Set<String>> readWrite(new TypeLiteral<Set<String>>() {}, new HashSet<String>()),
+            Positions.readOnly(new Object())));
     }
 }

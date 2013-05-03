@@ -17,8 +17,6 @@ package therian.operator.convert;
 
 import java.util.Enumeration;
 
-import org.apache.commons.functor.UnaryProcedure;
-
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -35,16 +33,10 @@ public class IterableToEnumeration extends AssignableElementConverter<Iterable<?
     }
 
     @Override
-    public boolean perform(TherianContext context, final Convert<? extends Iterable<?>, ? super Enumeration> operation) {
+    public boolean perform(TherianContext context, final Convert<? extends Iterable<?>, ? super Enumeration> convert) {
         return context.forwardTo(
-            Convert.to(Enumeration.class, Positions.readOnly(operation.getSourcePosition().getValue().iterator())),
-            new UnaryProcedure<Enumeration>() {
-
-                @Override
-                public void run(Enumeration result) {
-                    operation.getTargetPosition().setValue(result);
-                }
-            });
+            Convert.to(Enumeration.class, Positions.readOnly(convert.getSourcePosition().getValue().iterator())),
+            Positions.writeValue(convert.getTargetPosition()));
     }
 
 }

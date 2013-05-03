@@ -8,7 +8,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
-import therian.position.Ref;
+import therian.util.Positions;
 
 /**
  * Convert an enum value to any number, by way of {@link Enum#ordinal()}. Because multiple target types are served (by
@@ -20,7 +20,7 @@ public class EnumToNumberConverter extends Converter.WithDynamicTarget<Enum<?>> 
     @Override
     public boolean perform(TherianContext context, Convert<? extends Enum<?>, ?> operation) {
         return context.forwardTo(Convert.to(operation.getTargetPosition(),
-            Ref.to(operation.getSourcePosition().getValue().ordinal())));
+            Positions.readOnly(operation.getSourcePosition().getValue().ordinal())));
     }
 
     @Override

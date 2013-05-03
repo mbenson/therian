@@ -27,8 +27,10 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import therian.position.Ref;
+import therian.TypeLiteral;
+import therian.position.Position;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class KeyedValueTest {
     private Map<String, MetasyntacticVariable> map;
@@ -40,7 +42,9 @@ public class KeyedValueTest {
         for (MetasyntacticVariable var : MetasyntacticVariable.values()) {
             map.put(var.name().toLowerCase(Locale.US), var);
         }
-        atFoo = Keyed.<MetasyntacticVariable> value().at("foo").of(new Ref<Map<String, MetasyntacticVariable>>(map) {});
+        atFoo =
+            Keyed.<MetasyntacticVariable> value().at("foo")
+                .of(Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {}, map));
     }
 
     @Test
@@ -63,7 +67,7 @@ public class KeyedValueTest {
 
     @Test
     public void testToString() {
-        final Ref<HashMap<String, Object>> mapRef = Ref.to(new HashMap<String, Object>());
+        final Position.Readable<HashMap<String, Object>> mapRef = Positions.readOnly(new HashMap<String, Object>());
         assertEquals(String.format("Relative Position: Keyed Value [foo] of %s", mapRef),
             Keyed.value().at("foo").of(mapRef).toString());
     }

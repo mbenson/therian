@@ -22,7 +22,7 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Size;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
+import therian.util.Positions;
 
 public class SizeOfCharSequenceTest extends OperatorTest {
 
@@ -33,10 +33,10 @@ public class SizeOfCharSequenceTest extends OperatorTest {
 
     @Test
     public void test() {
-        assertEquals(0, therianContext.eval(Size.of(new Ref<String>(null) {})).intValue());
-        assertEquals(0, therianContext.eval(Size.of(Ref.to(""))).intValue());
-        assertEquals(3, therianContext.eval(Size.of(Ref.to("foo"))).intValue());
-        assertEquals(3, therianContext.eval(Size.of(Ref.to(new StringBuilder("bar")))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(String.class, null))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(""))).intValue());
+        assertEquals(3, therianContext.eval(Size.of(Positions.readOnly("foo"))).intValue());
+        assertEquals(3, therianContext.eval(Size.of(Positions.readOnly(new StringBuilder("bar")))).intValue());
     }
 
 }

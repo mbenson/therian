@@ -10,8 +10,8 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Size;
 import therian.operator.OperatorTest;
-import therian.position.Ref;
 import therian.testfixture.MetasyntacticVariable;
+import therian.util.Positions;
 
 public class SizeOfCollectionTest extends OperatorTest {
 
@@ -22,10 +22,10 @@ public class SizeOfCollectionTest extends OperatorTest {
 
     @Test
     public void test() {
-        assertEquals(0, therianContext.eval(Size.of(Ref.to(Collections.emptyList()))).intValue());
-        assertEquals(1, therianContext.eval(Size.of(Ref.to(Collections.singleton("foo")))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(Collections.emptyList()))).intValue());
+        assertEquals(1, therianContext.eval(Size.of(Positions.readOnly(Collections.singleton("foo")))).intValue());
         assertEquals(MetasyntacticVariable.values().length,
-            therianContext.eval(Size.of(Ref.to(Arrays.asList(MetasyntacticVariable.values())))).intValue());
+            therianContext.eval(Size.of(Positions.readOnly(Arrays.asList(MetasyntacticVariable.values())))).intValue());
     }
 
 }

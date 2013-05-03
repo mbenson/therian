@@ -102,9 +102,9 @@ public class Therian {
     }
 
     /**
-     * Return an instance configured as {@link Therian#STANDARD} + {@link TherianModule}s discovered using the
+     * Return an instance configured as {@link Therian#standard()} + {@link TherianModule}s discovered using the
      * {@link ServiceLoader} mechanism.
-     * 
+     *
      * @return Therian
      */
     public static synchronized Therian usingDiscoveredModules() {
@@ -123,6 +123,11 @@ public class Therian {
         return new Therian(modules);
     }
 
+    /**
+     * Get a Therian instance configured with standard {@link Operator}s and {@link ELResolver}s.
+     *
+     * @return Therian
+     */
     public static Therian standard() {
         return STANDARD;
     }

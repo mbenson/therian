@@ -24,15 +24,14 @@ import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
-import therian.position.Box;
-import therian.util.Types;
+import therian.position.Position;
+import therian.util.Positions;
 
 /**
- * Converts to array using the following approach:
+ * Converts assignable element containers to arrays:
  * <ul>
- * <li>convert source to {@link Iterable}</li>
- * <li>thence to collection of target element type</li>
- * <li>thence to array</li>
+ * <li>uses {@link GetElementType} to determine element type (if unavailable for source type, singleton is assumed)</li>
+ * <li>in the worst case, converts from source to {@link Iterable} to {@link Collection} to target</li>
  * </ul>
  */
 @StandardOperator
@@ -41,41 +40,38 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
     @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
 
-        // if element type not available, assume we're wrapping an arbitrary object as a singleton
-        final Type sourceElementType =
-            context.evalIfSupported(GetElementType.of(convert.getSourcePosition()), convert.getSourcePosition()
-                .getType());
-
-        // as advertised, we first convert our source position to an iterable of source element type
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        final Box<Iterable<?>> sourceIterable = new Box(Types.parameterize(Iterable.class, sourceElementType));
-
-        final Convert<?, Iterable<?>> sourceToIterable = Convert.to(sourceIterable, convert.getSourcePosition());
-        if (!context.evalSuccessIfSupported(sourceToIterable)) {
+        @SuppressWarnings("rawtypes")
+        final Position.ReadWrite<Iterable> iterable = Positions.readWrite(Iterable.class);
+        if (convert.getSourcePosition().getValue() instanceof Iterable<?>) {
+            iterable.setValue((Iterable<?>) convert.getSourcePosition().getValue());
+        } else if (!context.evalSuccess(Convert.to(iterable, convert.getSourcePosition()))) {
             return false;
         }
-        final Type targetElementType = TypeUtils.getArrayComponentType(convert.getTargetPosition().getType());
-
-        // next, we convert our source iterable to a collection of target element type
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Box<Collection<?>> targetElementCollection =
-            new Box(Types.parameterize(Collection.class, targetElementType));
-
-        final Convert<Iterable<?>, Collection<?>> sourceIterableToTargetElementCollection =
-            Convert.to(targetElementCollection, sourceIterable);
-        if (!context.evalSuccessIfSupported(sourceIterableToTargetElementCollection)) {
-            return false;
+        if (iterable.getValue() instanceof Collection<?> == false) {
+            iterable.setValue(context.eval(Convert.to(Collection.class, iterable)));
         }
-        // finally, convert that collection to an array now that its size has stabilized
-        final Convert<Collection<?>, ?> targetElementCollectionToArray =
-            Convert.to(convert.getTargetPosition(), targetElementCollection);
-        return context.evalSuccessIfSupported(targetElementCollectionToArray);
+        return context.forwardTo(Convert.to(convert.getTargetPosition(), iterable));
     }
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
-        // too much work to figure the whole thing; just try it when the time comes
-        return TypeUtils.isArrayType(convert.getTargetPosition().getType())
+        if (!super.supports(context, convert) || !TypeUtils.isArrayType(convert.getTargetPosition().getType())) {
+            return false;
+        }
+        final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
+        if (!context.supports(getTargetElementType)) {
+            return false;
+        }
+        final Type targetElementType = context.eval(getTargetElementType);
+        final Type sourceElementType;
+        final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
+        if (context.supports(getSourceElementType)) {
+            sourceElementType = context.eval(getSourceElementType);
+        } else {
+            // if element type not available, assume we're wrapping an arbitrary object as a singleton
+            sourceElementType = convert.getSourcePosition().getType();
+        }
+        return TypeUtils.isAssignable(sourceElementType, targetElementType)
             && context.supports(Convert.to(Iterable.class, convert.getSourcePosition()));
     }
 
