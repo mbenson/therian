@@ -39,58 +39,44 @@ import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.position.Position;
-import therian.util.Hints;
 import therian.util.Positions;
 
 /**
- * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}. If source type is
- * assignable to target type and a {@link Hints.IntermediateOperation} is found on the context, no work will be done.
- *
- * @see TherianContext.Hint
+ * Abstract base class for a converter that defers its work to a {@link Copy} {@link Operation}.
  */
 public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
     /**
      * Standard converter to {@link List}.
      */
-    @SuppressWarnings("rawtypes")
-    @StandardOperator
-    public static final Converter<Object, List> IMPLEMENTING_LIST = CopyingConverter.implementing(List.class).with(
-        ArrayList.class);
+    @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, List> IMPLEMENTING_LIST =
+        CopyingConverter.implementing(List.class).with(ArrayList.class);
     /**
      * Standard converter to {@link Set}.
      */
-    @SuppressWarnings("rawtypes")
-    @StandardOperator
-    public static final Converter<Object, Set> IMPLEMENTING_SET = CopyingConverter.implementing(Set.class).with(
-        HashSet.class);
+    @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, Set> IMPLEMENTING_SET =
+        CopyingConverter.implementing(Set.class).with(HashSet.class);
 
     /**
      * Standard converter to {@link Map}.
      */
-    @SuppressWarnings("rawtypes")
-    @StandardOperator
-    public static final Converter<Object, Map> IMPLEMENTING_MAP = CopyingConverter.implementing(Map.class).with(
-        HashMap.class);
+    @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, Map> IMPLEMENTING_MAP =
+        CopyingConverter.implementing(Map.class).with(HashMap.class);
 
     /**
      * Standard converter to {@link SortedSet}.
      */
-    @SuppressWarnings("rawtypes")
-    @StandardOperator
-    public static final Converter<Object, SortedSet> IMPLEMENTING_SORTED_SET = CopyingConverter.implementing(
-        SortedSet.class).with(TreeSet.class);
+    @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, SortedSet> IMPLEMENTING_SORTED_SET =
+        CopyingConverter.implementing(SortedSet.class).with(TreeSet.class);
 
     /**
      * Standard converter to {@link SortedMap}.
      */
-    @SuppressWarnings("rawtypes")
-    @StandardOperator
-    public static final Converter<Object, SortedMap> IMPLEMENTING_SORTED_MAP = CopyingConverter.implementing(
-        SortedMap.class).with(TreeMap.class);
+    @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, SortedMap> IMPLEMENTING_SORTED_MAP =
+        CopyingConverter.implementing(SortedMap.class).with(TreeMap.class);
 
     /**
      * Intermediate step in fluent interface.
-     *
+     * 
      * @param <TARGET>
      */
     public static class Implementing<TARGET> {
@@ -155,10 +141,6 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         if (!super.supports(context, convert)) {
             return false;
         }
-        if (TypeUtils.isAssignable(convert.getSourcePosition().getType(), convert.getTargetPosition().getType())
-            && context.getContext(Hints.IntermediateOperation.class) != null) {
-            return false;
-        }
         // ideally we would check whether the copy was possible, but a copier typically knows it can't copy to
         // an immutable target, including a null value, so we would have to instantiate the target object twice
         // or resort to weird ways of reusing it and even then it might not get used, so we'll just risk
@@ -168,7 +150,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create copy destination object from source position.
-     *
+     * 
      * @param readable object
      * @return TARGET
      */
@@ -181,7 +163,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
-     *
+     * 
      * @param targetType which must have an accessible no-arg constructor
      * @param <TARGET>
      * @return CopyingConverter instance
@@ -193,7 +175,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     *
+     * 
      * @param targetType
      * @return {@link Implementing} step
      */
@@ -204,7 +186,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     *
+     * 
      * @param targetType
      * @return {@link Implementing} step
      */
