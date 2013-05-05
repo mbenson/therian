@@ -19,6 +19,12 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.operation.Convert;
 
+/**
+ * Provides a means of narrowing the type parameters of a given converter.
+ *
+ * @param <SOURCE>
+ * @param <TARGET>
+ */
 public abstract class ConverterWrapper<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
     @SuppressWarnings("rawtypes")
     private final Operator wrapped;
