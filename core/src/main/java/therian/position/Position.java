@@ -18,7 +18,7 @@ package therian.position;
 import therian.Typed;
 
 /**
- * Object position.
+ * A Position describes the combination of a type and a value, which may be readable, writable, or both.
  * 
  * @param <T>
  */
