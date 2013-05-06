@@ -21,42 +21,40 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import therian.OperationException;
-import therian.Therian;
-import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
+import therian.operator.OperatorTest;
 import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;
 
-public class IterableToIteratorTest {
-    private TherianContext context;
+public class IterableToIteratorTest extends OperatorTest {
 
-    @Before
-    public void setup() {
-        context = Therian.usingModules(TherianModule.create().withOperators(new IterableToIterator())).context();
+    @Override
+    protected TherianModule module() {
+        return TherianModule.create().withOperators(new IterableToIterator());
     }
 
     @Test
     public void test() {
-        assertTrue(context.eval(Convert.to(Iterator.class, Positions.readOnly(Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
-        assertTrue(context.eval(Convert.to(new TypeLiteral<Iterator<String>>() {},
+        assertTrue(therianContext.eval(Convert.to(Iterator.class,
+            Positions.readOnly(Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
+        assertTrue(therianContext.eval(Convert.to(new TypeLiteral<Iterator<String>>() {},
             Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList("foo", "bar", "baz")))) instanceof Iterator<?>);
     }
 
     @Test(expected = OperationException.class)
     public void testUnknownSourceElementType() {
-        context.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
+        therianContext.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
             Positions.readOnly(Arrays.asList("foo", "bar", "baz"))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleElementType() {
-        context.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
+        therianContext.eval(Convert.to(new TypeLiteral<Iterator<MetasyntacticVariable>>() {},
             Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList("foo", "bar", "baz"))));
     }
 }

@@ -21,37 +21,34 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import therian.OperationException;
-import therian.Therian;
-import therian.TherianContext;
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
+import therian.operator.OperatorTest;
 import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;
 
-public class MapToValuesTest {
-    private TherianContext context;
+public class MapToValuesTest extends OperatorTest {
 
-    @Before
-    public void setup() {
-        context = Therian.usingModules(TherianModule.create().withOperators(new MapToValues())).context();
+    @Override
+    protected TherianModule module() {
+        return TherianModule.create().withOperators(new MapToValues());
     }
 
     @Test
     public void test() {
-        assertTrue(context.eval(Convert.to(Collection.class,
+        assertTrue(therianContext.eval(Convert.to(Collection.class,
             Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context.eval(Convert.to(Iterable.class,
+        assertTrue(therianContext.eval(Convert.to(Iterable.class,
             Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context.eval(Convert.to(
+        assertTrue(therianContext.eval(Convert.to(
             new TypeLiteral<Collection<MetasyntacticVariable>>() {},
             Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
                 Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context.eval(Convert.to(
+        assertTrue(therianContext.eval(Convert.to(
             new TypeLiteral<Iterable<MetasyntacticVariable>>() {},
             Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
                 Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
@@ -59,9 +56,9 @@ public class MapToValuesTest {
 
     @Test
     public void testToIterable() {
-        assertTrue(context.eval(Convert.to(Iterable.class,
+        assertTrue(therianContext.eval(Convert.to(Iterable.class,
             Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
-        assertTrue(context.eval(Convert.to(
+        assertTrue(therianContext.eval(Convert.to(
             new TypeLiteral<Iterable<MetasyntacticVariable>>() {},
             Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
                 Collections.singletonMap("foo", MetasyntacticVariable.FOO)))) instanceof Collection<?>);
@@ -69,13 +66,13 @@ public class MapToValuesTest {
 
     @Test(expected = OperationException.class)
     public void testUnknownSourceElementType() {
-        context.eval(Convert.to(new TypeLiteral<Collection<MetasyntacticVariable>>() {},
+        therianContext.eval(Convert.to(new TypeLiteral<Collection<MetasyntacticVariable>>() {},
             Positions.readOnly(Collections.singletonMap("foo", MetasyntacticVariable.FOO))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleElementType() {
-        context.eval(Convert.to(
+        therianContext.eval(Convert.to(
             new TypeLiteral<Iterable<String>>() {},
             Positions.readOnly(new TypeLiteral<Map<String, MetasyntacticVariable>>() {},
                 Collections.singletonMap("foo", MetasyntacticVariable.FOO))));

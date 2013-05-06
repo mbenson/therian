@@ -19,13 +19,16 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
 import therian.operator.convert.DefaultToListConverter;
 
 /**
  * Returns the input type for any non-array type, representing a singleton.
+ *
  * @see DefaultToListConverter
  */
+@StandardOperator
 public class GetSingletonElementType implements Operator<GetElementType<?>> {
 
     @Override

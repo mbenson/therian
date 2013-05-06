@@ -17,8 +17,10 @@ package therian;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
@@ -29,7 +31,9 @@ import javax.el.ExpressionFactory;
 
 import org.apache.commons.functor.UnaryProcedure;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
+import org.apache.commons.lang3.Validate;
 
+import therian.Operator.DependsOn;
 import therian.uelbox.ELContextWrapper;
 import therian.uelbox.IterableELResolver;
 import therian.uelbox.SimpleELContext;
@@ -51,10 +55,27 @@ public class Therian {
     private Therian(TherianModule... modules) {
         this.modules = modules == null ? new TherianModule[0] : modules;
 
+        final Set<Class<?>> operatorsPresent = new HashSet<Class<?>>();
+        final Set<Class<?>> operatorsNeeded = new HashSet<Class<?>>();
+
+        int moduleNumber = 0;
         for (TherianModule module : this.modules) {
+            Validate.noNullElements(module.getOperators(), "null operator at index %2$s of module %1$s", moduleNumber);
             Collections.addAll(operators, module.getOperators());
+            for (Operator<?> operator : module.getOperators()) {
+                final Class<?> opType = operator.getClass();
+                operatorsPresent.add(opType);
+                final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
+                if (dependsOn != null) {
+                    Collections.addAll(operatorsNeeded, dependsOn.value());
+                }
+            }
             Collections.addAll(elResolvers, module.getElResolvers());
+            moduleNumber++;
         }
+        operatorsNeeded.removeAll(operatorsPresent);
+        Validate.isTrue(operatorsNeeded.isEmpty(), "Missing required operators: %s", operatorsNeeded);
+
         Collections.sort(operators, Operators.comparator());
         IteratorToGeneratorAdapter.adapt(operators.iterator()).run(new UnaryProcedure<Operator<?>>() {
 
@@ -62,7 +83,6 @@ public class Therian {
                 Operators.validateImplementation(obj);
             }
         });
-        //TODO require Operator dependencies
     }
 
     Iterable<Operator<?>> getOperators() {

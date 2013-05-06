@@ -21,12 +21,12 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
 import therian.util.Types;
 
 @SuppressWarnings("rawtypes")
-// not sure if this should be a standard operator...
-// @StandardOperator
+@StandardOperator
 public class GetMapElementType implements Operator<GetElementType<Map>> {
 
     @Override
