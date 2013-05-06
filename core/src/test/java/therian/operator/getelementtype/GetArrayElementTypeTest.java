@@ -15,7 +15,8 @@
  */
 package therian.operator.getelementtype;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -25,7 +26,6 @@ import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
-import therian.operator.getelementtype.GetArrayElementType;
 import therian.util.Types;
 
 public class GetArrayElementTypeTest extends OperatorTest {
