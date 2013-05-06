@@ -15,6 +15,9 @@
  */
 package therian.operator.getelementtype;
 
+import java.lang.reflect.Type;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
@@ -29,8 +32,11 @@ public class GetIterableElementType implements Operator<GetElementType<Iterable>
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Iterable> op) {
-        op.setResult(Types.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class),
-            Iterable.class.getTypeParameters()[0]));
+        final Type result =
+            ObjectUtils.defaultIfNull(Types.unrollVariables(
+                TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class),
+                Iterable.class.getTypeParameters()[0]), Object.class);
+        op.setResult(result);
         return true;
     }
 
