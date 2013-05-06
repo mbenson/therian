@@ -15,18 +15,36 @@
  */
 package therian;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Implements an {@link Operation}. Note that a concrete {@link Operator} implementation should host no direct type
  * variables.
- *
+ * 
  * @param <OPERATION>
  * @see Operators#validateImplementation(Operator)
  */
 public interface Operator<OPERATION extends Operation<?>> {
 
     /**
+     * Allows an Operator to define that it depends on other Operators, which is not to say that such should be taken as
+     * an all-inclusive list, but may still be instructive.
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface DependsOn {
+        @SuppressWarnings("rawtypes")
+        Class<? extends Operator>[] value();
+    }
+
+    /**
      * Perform the specified operation.
-     *
+     * 
      * @param context active
      * @param operation to perform
      * @return whether the evaluation was successful
@@ -37,10 +55,10 @@ public interface Operator<OPERATION extends Operation<?>> {
      * Learn whether an operation is supported. This check can be fairly perfunctory as the evaluation of a given
      * {@link Operation} sets an associated success status, thus just because an {@link Operation} is deemed to be
      * "supported" does not <em>guarantee</em> it will be successfully evaluated.
-     *
+     * 
      * @param context active
      * @param operation to check
-     *
+     * 
      * @return true if supported
      */
     boolean supports(TherianContext context, OPERATION operation);
