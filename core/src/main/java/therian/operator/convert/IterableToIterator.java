@@ -18,15 +18,18 @@ package therian.operator.convert;
 import java.util.Iterator;
 
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
+import therian.operator.getelementtype.GetIterableElementType;
+import therian.operator.getelementtype.GetIteratorElementType;
 
 /**
- * Implements simple conversion of a compatible {@link Iterable} to an
- * {@link Iterator}.
+ * Implements simple conversion of a compatible {@link Iterable} to an {@link Iterator}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetIterableElementType.class, GetIteratorElementType.class })
 public class IterableToIterator extends AssignableElementConverter<Iterable<?>, Iterator> {
     public IterableToIterator() {
         super(Iterable.class.getTypeParameters()[0], Iterator.class.getTypeParameters()[0]);

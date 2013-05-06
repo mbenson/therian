@@ -19,15 +19,18 @@ import java.util.Collection;
 import java.util.Map;
 
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
+import therian.operator.getelementtype.GetIterableElementType;
+import therian.operator.getelementtype.GetMapElementType;
 
 /**
- * Implements simple conversion of a {@link Map} to its own {@code value}
- * {@link Collection}.
+ * Implements simple conversion of a {@link Map} to its own {@code value} {@link Collection}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetMapElementType.class, GetIterableElementType.class })
 public class MapToValues extends AssignableElementConverter<Map<?, ?>, Collection> {
 
     public MapToValues() {

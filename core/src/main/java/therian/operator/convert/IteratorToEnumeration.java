@@ -18,15 +18,19 @@ package therian.operator.convert;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
+import therian.operator.getelementtype.GetEnumerationElementType;
+import therian.operator.getelementtype.GetIteratorElementType;
 
 /**
  * Implements simple conversion of a compatible {@link Iterator} to an {@link Enumeration}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetIteratorElementType.class, GetEnumerationElementType.class })
 public class IteratorToEnumeration extends AssignableElementConverter<Iterator<?>, Enumeration> {
     public IteratorToEnumeration() {
         super(Iterator.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);

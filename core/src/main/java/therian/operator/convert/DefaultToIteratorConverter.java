@@ -20,16 +20,19 @@ import java.util.Iterator;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
+import therian.operator.getelementtype.GetIteratorElementType;
 
 /**
  * Attempts to convert to {@link Iterable} and call {@link Iterable#iterator()}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ DefaultToListConverter.class, GetIteratorElementType.class })
 public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
 
     @Override
@@ -56,12 +59,10 @@ public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
 
         final Type targetElementType = context.eval(getTargetElementType);
         final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
-        final Type sourceElementType;
-        if (context.supports(getSourceElementType)) {
-            sourceElementType = context.eval(getSourceElementType);
-        } else {
-            sourceElementType = convert.getSourcePosition().getType();
+        if (!context.supports(getSourceElementType)) {
+            return false;
         }
+        final Type sourceElementType = context.eval(getSourceElementType);
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
 

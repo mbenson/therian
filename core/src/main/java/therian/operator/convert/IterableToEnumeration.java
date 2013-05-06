@@ -17,9 +17,12 @@ package therian.operator.convert;
 
 import java.util.Enumeration;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
+import therian.operator.getelementtype.GetEnumerationElementType;
+import therian.operator.getelementtype.GetIterableElementType;
 import therian.util.Positions;
 
 /**
@@ -27,6 +30,7 @@ import therian.util.Positions;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetIterableElementType.class, GetEnumerationElementType.class })
 public class IterableToEnumeration extends AssignableElementConverter<Iterable<?>, Enumeration> {
     public IterableToEnumeration() {
         super(Iterable.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);

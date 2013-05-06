@@ -30,30 +30,20 @@ import therian.position.Position;
 import therian.util.Positions;
 
 /**
- * Converts assignable element containers to arrays:
- * <ul>
- * <li>uses {@link GetElementType} to determine element type (if unavailable for source type, singleton is assumed)</li>
- * <li>in the worst case, converts from source to {@link Iterable} to {@link Collection} to target</li>
- * </ul>
+ * Converts from source to {@link Collection} to target.
  */
 @StandardOperator
-@DependsOn({ GetArrayElementType.class, CollectionToArray.class, IterableToList.class, DefaultToListConverter.class })
+@DependsOn({ GetArrayElementType.class, CollectionToArray.class })
 public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
-
         @SuppressWarnings("rawtypes")
-        final Position.ReadWrite<Iterable> iterable = Positions.readWrite(Iterable.class);
-        if (convert.getSourcePosition().getValue() instanceof Iterable<?>) {
-            iterable.setValue((Iterable<?>) convert.getSourcePosition().getValue());
-        } else if (!context.evalSuccess(Convert.to(iterable, convert.getSourcePosition()))) {
+        final Position.ReadWrite<Collection> coll = Positions.readWrite(Collection.class);
+        if (!context.evalSuccess(Convert.to(coll, convert.getSourcePosition()))) {
             return false;
         }
-        if (iterable.getValue() instanceof Collection<?> == false) {
-            iterable.setValue(context.eval(Convert.to(Collection.class, iterable)));
-        }
-        return context.forwardTo(Convert.to(convert.getTargetPosition(), iterable));
+        return context.forwardTo(Convert.to(convert.getTargetPosition(), coll));
     }
 
     @Override
@@ -61,8 +51,7 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
         if (!(super.supports(context, convert) && TypeUtils.isArrayType(convert.getTargetPosition().getType()))) {
             return false;
         }
-        if (!(convert.getSourcePosition().getValue() instanceof Iterable<?> || context.supports(Convert.to(
-            Iterable.class, convert.getSourcePosition())))) {
+        if (!context.supports(Convert.to(Collection.class, convert.getSourcePosition()))) {
             return false;
         }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
@@ -70,14 +59,11 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
             return false;
         }
         final Type targetElementType = context.eval(getTargetElementType);
-        final Type sourceElementType;
         final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
-        if (context.supports(getSourceElementType)) {
-            sourceElementType = context.eval(getSourceElementType);
-        } else {
-            // if element type not available, assume we're wrapping an arbitrary object as a singleton
-            sourceElementType = convert.getSourcePosition().getType();
+        if (!context.supports(getSourceElementType)) {
+            return false;
         }
+        final Type sourceElementType = context.eval(getSourceElementType);
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
 

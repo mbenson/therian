@@ -24,16 +24,12 @@ import java.util.Iterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
-import therian.OperationException;
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.util.Positions;
 
-/**
- *
- */
 public class DefaultToArrayConverterTest extends OperatorTest {
 
     public static class Foo implements Iterable<String> {
@@ -51,17 +47,8 @@ public class DefaultToArrayConverterTest extends OperatorTest {
     private static final String[] STRINGS = new String[] { "foo", "bar", "baz" };
 
     protected TherianModule module() {
-        return TherianModule.create().withOperators(new DefaultToArrayConverter(), new DefaultToListConverter());
-    }
-
-    @Test(expected = OperationException.class)
-    public void testArrayOfStringToArrayOfString() {
-        therianContext.eval(Convert.to(String[].class, Positions.readOnly(new String[] { "foo" })));
-    }
-
-    @Test(expected = OperationException.class)
-    public void testArrayOfStringToArrayOfObject() {
-        therianContext.eval(Convert.to(Object[].class, Positions.readOnly(new String[] { "foo" })));
+        return TherianModule.create().withOperators(new DefaultToArrayConverter(), new DefaultToListConverter(),
+            new IterableToList(), new IteratorToList());
     }
 
     @Test
@@ -74,11 +61,6 @@ public class DefaultToArrayConverterTest extends OperatorTest {
     public void testStringToArrayOfObject() {
         assertArrayEquals(new String[] { "foo" },
             therianContext.eval(Convert.to(Object[].class, Positions.readOnly("foo"))));
-    }
-
-    @Test(expected = OperationException.class)
-    public void testArrayOfIntToArrayOfInt() {
-        therianContext.eval(Convert.to(int[].class, Positions.readOnly(new int[] { 6, 6, 6 })));
     }
 
     @Test
@@ -109,4 +91,11 @@ public class DefaultToArrayConverterTest extends OperatorTest {
                 Positions.readOnly(new TypeLiteral<Iterable<String>>() {}, new Foo()))));
     }
 
+    @Test
+    public void testIteratorOfStringToArrayOfString() {
+        assertArrayEquals(
+            STRINGS,
+            therianContext.eval(Convert.to(String[].class,
+                Positions.readOnly(new TypeLiteral<Iterator<String>>() {}, new Foo().iterator()))));
+    }
 }

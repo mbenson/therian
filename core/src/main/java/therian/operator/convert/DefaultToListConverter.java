@@ -31,13 +31,14 @@ import therian.operation.Convert;
 import therian.operation.GetElementType;
 import therian.operator.getelementtype.GetArrayElementType;
 import therian.operator.getelementtype.GetIterableElementType;
+import therian.operator.getelementtype.GetSingletonElementType;
 
 /**
  * Converts arrays, wraps other objects in {@link Collections#singletonList(Object)}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-@DependsOn({ GetIterableElementType.class, GetArrayElementType.class })
+@DependsOn({ GetIterableElementType.class, GetArrayElementType.class, GetSingletonElementType.class })
 public class DefaultToListConverter extends Converter<Object, List> {
 
     @Override
@@ -77,12 +78,10 @@ public class DefaultToListConverter extends Converter<Object, List> {
         }
         final Type targetElementType = context.eval(getTargetElementType);
         final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
-        final Type sourceElementType;
-        if (context.supports(getSourceElementType)) {
-            sourceElementType = context.eval(getSourceElementType);
-        } else {
-            sourceElementType = convert.getSourcePosition().getType();
+        if (!context.supports(getSourceElementType)) {
+            return false;
         }
+        final Type sourceElementType = context.eval(getSourceElementType);
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
 

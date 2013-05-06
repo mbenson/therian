@@ -20,14 +20,18 @@ import java.util.Enumeration;
 import java.util.List;
 
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
+import therian.operator.getelementtype.GetEnumerationElementType;
+import therian.operator.getelementtype.GetIterableElementType;
 
 /**
  * Implements simple conversion of a compatible {@link Enumeration} to a {@link List}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetEnumerationElementType.class, GetIterableElementType.class })
 public class EnumerationToList extends AssignableElementConverter<Enumeration<?>, List> {
     public EnumerationToList() {
         super(Enumeration.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);
