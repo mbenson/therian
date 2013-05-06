@@ -15,8 +15,6 @@
  */
 package therian.operator.convert;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
-
 import therian.Operators;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
@@ -26,7 +24,7 @@ import therian.operation.Convert;
  * Uses source value as target value when assignable. This is a so-called "standard converter," but a more strongly
  * typed Converter can be specified for any given datatype that requires a new instance. Some type of
  * {@link CopyingConverter} is recommended for this purpose.
- *
+ * 
  * @see Operators#standard()
  */
 @StandardOperator
@@ -34,15 +32,15 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public boolean perform(TherianContext context, Convert<?, ?> operation) {
-        final Convert raw = operation;
+    public boolean perform(TherianContext context, Convert<?, ?> convert) {
+        final Convert raw = convert;
         raw.getTargetPosition().setValue(raw.getSourcePosition().getValue());
         return true;
     }
 
     @Override
-    public boolean supports(TherianContext context, Convert<?, ?> operation) {
-        return TypeUtils.isInstance(operation.getSourcePosition().getValue(), operation.getTargetPosition().getType());
+    public boolean supports(TherianContext context, Convert<?, ?> convert) {
+        return isNoop(convert);
     }
 
 }
