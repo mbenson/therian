@@ -36,7 +36,7 @@ import therian.util.Types;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-@DependsOn(GetIterableElementType.class)
+@DependsOn({ GetIterableElementType.class, IteratorToList.class })
 public class IterableToList extends AssignableElementConverter<Iterable<?>, List> {
 
     public IterableToList() {

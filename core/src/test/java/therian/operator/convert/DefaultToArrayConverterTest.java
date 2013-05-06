@@ -17,15 +17,16 @@
 package therian.operator.convert;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
 import therian.OperationException;
 import therian.TherianModule;
+import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.util.Positions;
@@ -49,7 +50,6 @@ public class DefaultToArrayConverterTest extends OperatorTest {
 
     private static final String[] STRINGS = new String[] { "foo", "bar", "baz" };
 
-    // * <li>in the worst case, converts from source to {@link Iterable} to {@link Collection} to target</li>
     protected TherianModule module() {
         return TherianModule.create().withOperators(new DefaultToArrayConverter(), new DefaultToListConverter());
     }
@@ -70,34 +70,43 @@ public class DefaultToArrayConverterTest extends OperatorTest {
             therianContext.eval(Convert.to(String[].class, Positions.readOnly("foo"))));
     }
 
-//    @Test
+    @Test
     public void testStringToArrayOfObject() {
-        fail("Not yet implemented");
+        assertArrayEquals(new String[] { "foo" },
+            therianContext.eval(Convert.to(Object[].class, Positions.readOnly("foo"))));
     }
 
-//    @Test(expected = OperationException.class)
+    @Test(expected = OperationException.class)
     public void testArrayOfIntToArrayOfInt() {
-        fail("Not yet implemented");
+        therianContext.eval(Convert.to(int[].class, Positions.readOnly(new int[] { 6, 6, 6 })));
     }
 
-//    @Test
+    @Test
     public void testArrayOfIntToArrayOfInteger() {
-        fail("Not yet implemented");
+        final int[] beast = { 6, 6, 6 };
+        assertArrayEquals(ArrayUtils.toObject(beast),
+            therianContext.eval(Convert.to(Integer[].class, Positions.readOnly(beast))));
     }
 
-//    @Test
+    @Test
     public void testArrayOfIntToArrayOfObject() {
-        fail("Not yet implemented");
+        final int[] beast = { 6, 6, 6 };
+        assertArrayEquals(ArrayUtils.toObject(beast),
+            therianContext.eval(Convert.to(Object[].class, Positions.readOnly(beast))));
     }
 
-//    @Test
-    public void testIntToArrayOfInt() {
-        fail("Not yet implemented");
+    @Test
+    public void testIntegerToArrayOfInt() {
+        assertArrayEquals(new int[] { 666 },
+            therianContext.eval(Convert.to(int[].class, Positions.readOnly(Integer.valueOf(666)))));
     }
 
-//    @Test
+    @Test
     public void testIterableOfStringToArrayOfString() {
-        fail("Not yet implemented");
+        assertArrayEquals(
+            STRINGS,
+            therianContext.eval(Convert.to(String[].class,
+                Positions.readOnly(new TypeLiteral<Iterable<String>>() {}, new Foo()))));
     }
 
 }

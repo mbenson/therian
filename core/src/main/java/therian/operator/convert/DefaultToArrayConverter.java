@@ -61,6 +61,10 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
         if (!(super.supports(context, convert) && TypeUtils.isArrayType(convert.getTargetPosition().getType()))) {
             return false;
         }
+        if (!(convert.getSourcePosition().getValue() instanceof Iterable<?> || context.supports(Convert.to(
+            Iterable.class, convert.getSourcePosition())))) {
+            return false;
+        }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
@@ -74,8 +78,7 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
             // if element type not available, assume we're wrapping an arbitrary object as a singleton
             sourceElementType = convert.getSourcePosition().getType();
         }
-        return TypeUtils.isAssignable(sourceElementType, targetElementType)
-            && context.supports(Convert.to(Iterable.class, convert.getSourcePosition()));
+        return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
 
 }
