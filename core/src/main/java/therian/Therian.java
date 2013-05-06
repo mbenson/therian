@@ -62,6 +62,7 @@ public class Therian {
                 Operators.validateImplementation(obj);
             }
         });
+        //TODO require Operator dependencies
     }
 
     Iterable<Operator<?>> getOperators() {
