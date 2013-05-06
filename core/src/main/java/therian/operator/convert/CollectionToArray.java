@@ -22,14 +22,17 @@ import java.util.Collection;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
+import therian.operator.getelementtype.GetArrayElementType;
 import therian.position.Position;
 
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn(GetArrayElementType.class)
 public class CollectionToArray extends Converter.WithDynamicTarget<Collection> {
 
     @SuppressWarnings("unchecked")
@@ -51,7 +54,9 @@ public class CollectionToArray extends Converter.WithDynamicTarget<Collection> {
         }
         convert.getSourcePosition().getValue().toArray(toFill);
         if (primitiveTargetElementType) {
-            System.arraycopy(toFill, 0, result, 0, size);
+            for (int i = 0; i < size; i++) {
+                Array.set(result, i, toFill[i]);
+            }
         }
         ((Position.Writable<Object>) convert.getTargetPosition()).setValue(result);
         return true;

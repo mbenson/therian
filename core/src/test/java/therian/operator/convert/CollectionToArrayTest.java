@@ -19,6 +19,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -27,23 +28,35 @@ import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
-import therian.operator.getelementtype.GetArrayElementType;
 import therian.util.Positions;
 
 public class CollectionToArrayTest extends OperatorTest {
 
+    private static final String[] STRINGS = { "foo", "bar", "baz" };
+
     @Override
     protected TherianModule module() {
-        return TherianModule.create().withOperators(new CollectionToArray(), new GetArrayElementType());
+        return TherianModule.create().withOperators(new CollectionToArray());
     }
 
     @Test
-    public void test() {
-        final String[] array = { "foo", "bar", "baz" };
-        assertArrayEquals(array,
-            therianContext.eval(Convert.to(String[].class, Positions.readOnly(Arrays.asList(array)))));
+    public void testListOfStringToArrayOfString() {
+        assertArrayEquals(
+            STRINGS,
+            therianContext.eval(Convert.to(String[].class,
+                Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList(STRINGS)))));
     }
 
+    @Test
+    public void testListOfStringToArrayOfObject() {
+        new TypeLiteral<List<String>>() {};
+        assertArrayEquals(
+            STRINGS,
+            therianContext.eval(Convert.to(Object[].class,
+                Positions.readOnly(new TypeLiteral<List<String>>() {}, Arrays.asList(STRINGS)))));
+    }
+
+    @Test
     public void testPrimitive() {
         @SuppressWarnings("serial")
         final Set<Integer> s = new LinkedHashSet<Integer>() {
