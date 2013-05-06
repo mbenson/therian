@@ -21,9 +21,11 @@ import java.util.Collection;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
+import therian.operator.getelementtype.GetArrayElementType;
 import therian.position.Position;
 import therian.util.Positions;
 
@@ -35,6 +37,7 @@ import therian.util.Positions;
  * </ul>
  */
 @StandardOperator
+@DependsOn({ GetArrayElementType.class, CollectionToArray.class, IterableToList.class, DefaultToListConverter.class })
 public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
@@ -55,7 +58,7 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
-        if (!super.supports(context, convert) || !TypeUtils.isArrayType(convert.getTargetPosition().getType())) {
+        if (!(super.supports(context, convert) && TypeUtils.isArrayType(convert.getTargetPosition().getType()))) {
             return false;
         }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());

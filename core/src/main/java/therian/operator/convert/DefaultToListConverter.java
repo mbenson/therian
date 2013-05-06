@@ -24,16 +24,20 @@ import java.util.List;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
+import therian.operator.getelementtype.GetArrayElementType;
+import therian.operator.getelementtype.GetIterableElementType;
 
 /**
  * Converts arrays, wraps other objects in {@link Collections#singletonList(Object)}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@DependsOn({ GetIterableElementType.class, GetArrayElementType.class })
 public class DefaultToListConverter extends Converter<Object, List> {
 
     @Override
@@ -46,7 +50,7 @@ public class DefaultToListConverter extends Converter<Object, List> {
                 array = (Object[]) source;
             } else {
                 final Class<?> primitiveType =
-                        (Class<?>) TypeUtils.getArrayComponentType(convert.getSourcePosition().getType());
+                    (Class<?>) TypeUtils.getArrayComponentType(convert.getSourcePosition().getType());
                 final int len = Array.getLength(source);
                 array = (Object[]) Array.newInstance(ClassUtils.primitiveToWrapper(primitiveType), len);
                 for (int i = 0; i < len; i++) {
@@ -63,10 +67,10 @@ public class DefaultToListConverter extends Converter<Object, List> {
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ? super List> convert) {
-        if (!super.supports(context, convert) || convert.getSourcePosition().getValue() == null
-                || convert.getSourcePosition().getValue() instanceof List<?>) {
+        if (!super.supports(context, convert) || convert.getSourcePosition().getValue() == null) {
             return false;
         }
+
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
