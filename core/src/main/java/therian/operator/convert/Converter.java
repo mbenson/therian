@@ -30,20 +30,20 @@ import therian.util.Types;
 
 /**
  * {@link Convert} {@link Operator} superclass.
- * 
+ *
  * Note the assignability constraints:
  * <ul>
  * <li>SOURCE assignable from source type</li>
  * <li>TARGET assignable to target type</li>
  * </ul>
- * 
+ *
  * For example, if you wanted to convert a {@link String} to a {@link Number}, then a {@link Converter} of
  * {@link CharSequence} to {@link Integer} would satisfy. The inverse is not necessarily true: a {@link Converter}
  * declared to convert {@link String} to {@link Number} may not be able to handle the source value of, or produce a
  * target value compatible with, a conversion requested from {@link CharSequence} to {@link Integer}. Thus it is best to
  * define your domain APIs as widely as possible, and for your {@link Converter} implementations, parameterize SOURCE as
  * widely as possible and TARGET as narrowly as possible.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -58,16 +58,22 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
         Operator<Convert<? extends SOURCE, ?>> {
         private static final TypeVariable<?>[] TYPE_PARAMS = Converter.WithDynamicTarget.class.getTypeParameters();
 
+        private final Type sourceBound = Types.unrollVariables(
+            TypeUtils.getTypeArguments(getClass(), Converter.WithDynamicTarget.class), TYPE_PARAMS[0]);
+
         /**
          * {@link Logger} instance.
          */
         protected final Logger log = LoggerFactory.getLogger(getClass());
 
+        // override default parameter name
+        @Override
+        public abstract boolean perform(TherianContext context, Convert<? extends SOURCE, ?> convert);
+
         @Override
         public boolean supports(TherianContext context, Convert<? extends SOURCE, ?> convert) {
             return !(isNoop(convert) && isRejectNoop())
-                && TypeUtils.isInstance(convert.getSourcePosition().getValue(), Types.unrollVariables(
-                    TypeUtils.getTypeArguments(getClass(), Converter.WithDynamicTarget.class), TYPE_PARAMS[0]));
+                && TypeUtils.isInstance(convert.getSourcePosition().getValue(), sourceBound);
         }
     }
 
@@ -85,27 +91,13 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
         targetBound = Types.unrollVariables(typeArguments, Converter.class.getTypeParameters()[1]);
     }
 
-    /**
-     * Get the (upper) source bound.
-     * 
-     * @return Type
-     */
-    public Type getSourceBound() {
-        return sourceBound;
-    }
-
-    /**
-     * Get the (lower) target bound.
-     * 
-     * @return Type
-     */
-    public Type getTargetBound() {
-        return targetBound;
-    }
+    // override default parameter name
+    @Override
+    public abstract boolean perform(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert);
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@code true} if the source value is an instance of our SOURCE bound and the target type is assignable
      *         from our TARGET bound. If, the source value is an instance of the target type, returns !
      *         {@link #isRejectNoop()}.

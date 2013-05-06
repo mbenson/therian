@@ -62,23 +62,9 @@ public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends 
         targetBound = Types.unrollVariables(typeArguments, Copier.class.getTypeParameters()[1]);
     }
 
-    /**
-     * Get the (upper) source bound.
-     *
-     * @return Type
-     */
-    public Type getSourceBound() {
-        return sourceBound;
-    }
-
-    /**
-     * Get the (upper) target bound.
-     *
-     * @return Type
-     */
-    public Type getTargetBound() {
-        return targetBound;
-    }
+    // override default parameter name
+    @Override
+    public abstract boolean perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy);
 
     /**
      * By default, rejects immutable target positions, and ensures that type parameters are compatible.
