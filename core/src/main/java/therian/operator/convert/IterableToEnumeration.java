@@ -30,7 +30,7 @@ import therian.util.Positions;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-@DependsOn({ GetIterableElementType.class, GetEnumerationElementType.class })
+@DependsOn({ GetIterableElementType.class, GetEnumerationElementType.class, IteratorToEnumeration.class })
 public class IterableToEnumeration extends AssignableElementConverter<Iterable<?>, Enumeration> {
     public IterableToEnumeration() {
         super(Iterable.class.getTypeParameters()[0], Enumeration.class.getTypeParameters()[0]);
