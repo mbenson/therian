@@ -15,13 +15,20 @@
  */
 package therian.operation;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.Map;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operation;
 import therian.BindTypeVariable;
+import therian.Operation;
+import therian.Typed;
 import therian.position.Position;
-
+import therian.util.Types;
 
 /**
  * Abstract transform operation. A "transformer" is an operator over a transform operation. Defining "Transformer" in
@@ -29,6 +36,33 @@ import therian.position.Position;
  */
 public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends
     Operation<RESULT> {
+
+    private static Type narrow(Position.Readable<?> pos) {
+        if (pos.getValue() != null) {
+            final Type type = pos.getType();
+            if (!pos.getValue().getClass().equals(TypeUtils.getRawType(type, null))) {
+                final Class<?> rawValueType = pos.getValue().getClass();
+                final TypeVariable<?>[] typeParameters = rawValueType.getTypeParameters();
+                final Type result;
+                if (typeParameters.length > 0 && type instanceof ParameterizedType) {
+                    final Map<TypeVariable<?>, Type> argMappings =
+                        TypeUtils.determineTypeArguments(rawValueType, (ParameterizedType) type);
+                    final Type[] args = new Type[typeParameters.length];
+
+                    int index = 0;
+                    for (TypeVariable<?> typeVariable : typeParameters) {
+                        args[index++] = ObjectUtils.defaultIfNull(argMappings.get(typeVariable), Types.WILDCARD_ALL);
+                    }
+                    result = Types.parameterize(rawValueType, args);
+                } else {
+                    result = rawValueType;
+                }
+                return result;
+            }
+        }
+        return pos.getType();
+    }
+
     private final Position.Readable<SOURCE> sourcePosition;
     private final TARGET_POSITION targetPosition;
 
@@ -45,13 +79,59 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     }
 
     /**
+     * Get the narrowest possible source type, deduced from source position type/value.
+     * 
+     * @return Typed
+     */
+    @BindTypeVariable
+    public Typed<SOURCE> getSourceType() {
+        final Position.Readable<SOURCE> source = getSourcePosition();
+        final Type result = narrow(source);
+        if (!Types.equals(result, source.getType())) {
+            return new Typed<SOURCE>() {
+                @Override
+                public Type getType() {
+                    return result;
+                }
+            };
+        }
+        return source;
+    }
+
+    /**
      * Get the sourcePosition.
      * 
      * @return Position.Readable<SOURCE>
      */
-    @BindTypeVariable
     public Position.Readable<SOURCE> getSourcePosition() {
         return sourcePosition;
+    }
+
+    /**
+     * Get the narrowest possible target type. If this {@link Transform} operation maps its {@code TARGET_POSITION} type
+     * parameter as some {@link Readable} then this will be deduced from target position type/value, else the target
+     * position will be returned.
+     * 
+     * @return Typed
+     */
+    @BindTypeVariable
+    public Typed<TARGET> getTargetType() {
+        final TARGET_POSITION target = getTargetPosition();
+        if (TypeUtils.isAssignable(
+            TypeUtils.getTypeArguments(getClass(), Transform.class).get(Transform.class.getTypeParameters()[3]),
+            Position.Readable.class)) {
+            final Type result = narrow((Position.Readable<TARGET>) target);
+            if (!Types.equals(result, target.getType())) {
+                return new Typed<TARGET>() {
+
+                    @Override
+                    public Type getType() {
+                        return result;
+                    }
+                };
+            }
+        }
+        return target;
     }
 
     /**
@@ -59,7 +139,6 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
      * 
      * @return TARGET_POSITION
      */
-    @BindTypeVariable
     public TARGET_POSITION getTargetPosition() {
         return targetPosition;
     }
