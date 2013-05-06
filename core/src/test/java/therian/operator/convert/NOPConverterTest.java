@@ -22,14 +22,13 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
-import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;
 
 public class NOPConverterTest extends OperatorTest {
     @Override
     protected TherianModule module() {
-        return TherianModule.create().withOperators(new NOPConverter(), new DefaultImmutableChecker());
+        return TherianModule.create().withOperators(new NOPConverter());
     }
 
     @Test
