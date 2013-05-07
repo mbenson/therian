@@ -18,8 +18,8 @@ package therian.operator.convert;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,13 +54,13 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      * Standard converter to {@link Set}.
      */
     @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, Set> IMPLEMENTING_SET =
-        CopyingConverter.implementing(Set.class).with(HashSet.class);
+        CopyingConverter.implementing(Set.class).with(LinkedHashSet.class);
 
     /**
      * Standard converter to {@link Map}.
      */
     @SuppressWarnings("rawtypes") @StandardOperator public static final Converter<Object, Map> IMPLEMENTING_MAP =
-        CopyingConverter.implementing(Map.class).with(HashMap.class);
+        CopyingConverter.implementing(Map.class).with(LinkedHashMap.class);
 
     /**
      * Standard converter to {@link SortedSet}.
@@ -76,7 +76,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Intermediate step in fluent interface.
-     * 
+     *
      * @param <TARGET>
      */
     public static class Implementing<TARGET> {
@@ -150,7 +150,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create copy destination object from source position.
-     * 
+     *
      * @param readable object
      * @return TARGET
      */
@@ -163,7 +163,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     /**
      * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
-     * 
+     *
      * @param targetType which must have an accessible no-arg constructor
      * @param <TARGET>
      * @return CopyingConverter instance
@@ -175,7 +175,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     * 
+     *
      * @param targetType
      * @return {@link Implementing} step
      */
@@ -186,7 +186,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
      * target type using the default constructor of a specific implementation.
-     * 
+     *
      * @param targetType
      * @return {@link Implementing} step
      */
