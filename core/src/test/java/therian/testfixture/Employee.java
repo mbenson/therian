@@ -18,8 +18,10 @@
  */
 package therian.testfixture;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
- * 
+ *
  */
 public class Employee implements Person {
     private String firstName, lastName;
@@ -47,5 +49,27 @@ public class Employee implements Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Employee == false) {
+            return false;
+        }
+        final Employee other = (Employee) obj;
+        return ObjectUtils.equals(other.getFirstName(), getFirstName())
+            && ObjectUtils.equals(other.getLastName(), getLastName());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 89 << 4;
+        result |= ObjectUtils.hashCode(getFirstName());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getLastName());
+        return result;
     }
 }

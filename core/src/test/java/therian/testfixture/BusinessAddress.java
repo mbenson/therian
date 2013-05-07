@@ -14,12 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package therian.testfixture;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
- * 
+ *
  */
 public class BusinessAddress extends Address {
     private String company;
@@ -30,5 +32,16 @@ public class BusinessAddress extends Address {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BusinessAddress && super.equals(obj)
+            && ObjectUtils.equals(((BusinessAddress) obj).getCompany(), getCompany());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() << 4 | ObjectUtils.hashCode(getCompany());
     }
 }

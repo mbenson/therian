@@ -19,13 +19,16 @@
 package therian.testfixture;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
- * 
+ *
  */
 public class Library {
     private String libraryName;
@@ -64,5 +67,33 @@ public class Library {
             }
         }
         return emps;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Library == false) {
+            return false;
+        }
+        final Library other = (Library) obj;
+        return ObjectUtils.equals(other.getLibraryName(), getLibraryName())
+            && ObjectUtils.equals(other.getTaggedBooks(), getTaggedBooks())
+            && ObjectUtils.equals(other.getEmployees(), getEmployees())
+            && Arrays.equals(other.getPersons(), getPersons());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 91 << 4;
+        result |= ObjectUtils.hashCode(getLibraryName());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getTaggedBooks());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getEmployees());
+        result <<= 4;
+        result |= Arrays.hashCode(getPersons());
+        return result;
     }
 }

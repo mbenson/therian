@@ -16,6 +16,8 @@
  */
 package therian.testfixture;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
  * illustrated book.
  */
@@ -30,10 +32,20 @@ public class IllustratedBook extends Book {
     }
 
     /**
-     * @param illustrator
-     *            the illustrator to set
+     * @param illustrator the illustrator to set
      */
     public void setIllustrator(Person illustrator) {
         this.illustrator = illustrator;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) && obj instanceof IllustratedBook
+            && ObjectUtils.equals(((IllustratedBook) obj).getIllustrator(), getIllustrator());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() << 4 | ObjectUtils.hashCode(getIllustrator());
     }
 }

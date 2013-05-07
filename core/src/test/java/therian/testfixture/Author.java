@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package therian.testfixture;
 
 import java.util.List;
+
+import org.apache.commons.lang3.ObjectUtils;
 
 public class Author implements Person {
     private String firstName;
@@ -60,5 +62,33 @@ public class Author implements Person {
 
     public String getMiddleName() {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Author == false) {
+            return false;
+        }
+        final Author other = (Author) obj;
+        return ObjectUtils.equals(other.getFirstName(), getFirstName())
+            && ObjectUtils.equals(other.getLastName(), getLastName())
+            && ObjectUtils.equals(other.getCompany(), getCompany())
+            && ObjectUtils.equals(other.getAddresses(), getAddresses());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 73 << 4;
+        result |= ObjectUtils.hashCode(getFirstName());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getLastName());
+        result <<= 4;
+        result |= ObjectUtils.hashCode(getCompany());
+        result <<= 16;
+        result |= ObjectUtils.hashCode(getAddresses());
+        return result;
     }
 }
