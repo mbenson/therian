@@ -31,6 +31,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Copy;
 import therian.position.Position;
@@ -41,13 +42,14 @@ import therian.position.relative.Property;
  * successful.
  */
 @StandardOperator
+@DependsOn(ConvertingCopier.class)
 public class BeanCopier extends Copier<Object, Object> {
     public static final String[] SKIP_PROPERTIES = { "class" };
 
     @Override
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
         return super.supports(context, copy)
-                && !propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).toCollection()
+            && !propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).toCollection()
                 .isEmpty();
     }
 
@@ -59,13 +61,13 @@ public class BeanCopier extends Copier<Object, Object> {
         targetProperties.retainAll(sourceProperties);
 
         return new FilteredGenerator<Copy<?, ?>>(new TransformedGenerator<String, Copy<?, ?>>(
-                IteratorToGeneratorAdapter.adapt(targetProperties.iterator()), new UnaryFunction<String, Copy<?, ?>>() {
+            IteratorToGeneratorAdapter.adapt(targetProperties.iterator()), new UnaryFunction<String, Copy<?, ?>>() {
 
-                    @Override
-                    public Copy<?, ?> evaluate(String name) {
-                        return Copy.Safely.to(Property.at(name).of(target), Property.at(name).of(source));
-                    }
-                }), new UnaryPredicate<Copy<?, ?>>() {
+                @Override
+                public Copy<?, ?> evaluate(String name) {
+                    return Copy.Safely.to(Property.at(name).of(target), Property.at(name).of(source));
+                }
+            }), new UnaryPredicate<Copy<?, ?>>() {
 
             @Override
             public boolean test(Copy<?, ?> obj) {
@@ -75,9 +77,9 @@ public class BeanCopier extends Copier<Object, Object> {
     }
 
     private Set<String> getPropertyNames(TherianContext context, Position.Readable<?> position) {
-        final HashSet<String> result = new HashSet<String>();
-        for (Iterator<FeatureDescriptor> iter =
-                context.getELResolver().getFeatureDescriptors(context, position.getValue()); iter.hasNext();) {
+        final Set<String> result = new HashSet<String>();
+        for (final Iterator<FeatureDescriptor> iter =
+            context.getELResolver().getFeatureDescriptors(context, position.getValue()); iter.hasNext();) {
             final String name = iter.next().getName();
             if (!ArrayUtils.contains(SKIP_PROPERTIES, name)) {
                 result.add(name);
@@ -94,8 +96,7 @@ public class BeanCopier extends Copier<Object, Object> {
 
                 @Override
                 public void run(Copy<?, ?> propertyCopy) {
-                    context.eval(propertyCopy);
-                    if (propertyCopy.isSuccessful()) {
+                    if (context.evalSuccess(propertyCopy)) {
                         result.setValue(true);
                     }
                 }

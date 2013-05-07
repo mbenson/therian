@@ -61,9 +61,6 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
     }
 
     public static <S, T> Copy<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
-        // TODO should we return Copy<? extends S, T>, massaging source position for the tightest combo
-        // of runtime type + type parameters detectable from any generic source type? This would theoretically
-        // give us the best chance of matching copiers
         return new Copy<S, T>(sourcePosition, targetPosition);
     }
 }

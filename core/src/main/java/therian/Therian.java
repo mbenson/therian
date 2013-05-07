@@ -65,9 +65,14 @@ public class Therian {
             for (Operator<?> operator : module.getOperators()) {
                 final Class<?> opType = operator.getClass();
                 operatorsPresent.add(opType);
-                final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
-                if (dependsOn != null) {
-                    Collections.addAll(operatorsNeeded, dependsOn.value());
+
+                Class<?> c = opType;
+                while (c != null) {
+                    final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
+                    if (dependsOn != null) {
+                        Collections.addAll(operatorsNeeded, dependsOn.value());
+                    }
+                    c = c.getSuperclass();
                 }
             }
             Collections.addAll(elResolvers, module.getElResolvers());

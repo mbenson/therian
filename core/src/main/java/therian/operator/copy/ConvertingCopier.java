@@ -28,22 +28,19 @@ import therian.position.Position;
  * values.
  */
 @StandardOperator
-public class ConvertingCopier implements Operator<Copy<?, ?>> {
+public class ConvertingCopier extends Copier<Object, Object> {
 
     @Override
     public boolean perform(TherianContext context, Copy<?, ?> operation) {
-        final Convert<?, ?> convert =
-                Convert.to((Position.Writable<?>) operation.getTargetPosition(), operation.getSourcePosition());
-        return context.forwardTo(convert);
+        return context.forwardTo(Convert.to((Position.Writable<?>) operation.getTargetPosition(),
+            operation.getSourcePosition()));
     }
 
     @Override
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
-        if (copy.getTargetPosition() instanceof Position.Writable) {
-            return context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()
-                    && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(),
-                        copy.getSourcePosition()));
-        }
-        return false;
+        return copy.getTargetPosition() instanceof Position.Writable<?>
+            && context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()
+            && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), copy.getSourcePosition()));
     }
+
 }

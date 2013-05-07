@@ -55,7 +55,12 @@ public abstract class OperatorTest {
                 final Class<? extends Operator> type = operator.getClass();
                 operatorTypesPresent.add(type);
                 operatorTypesNeeded.remove(type);
-                handle(type.getAnnotation(DependsOn.class));
+
+                Class<?> c = type;
+                while (c != null) {
+                    handle(c.getAnnotation(DependsOn.class));
+                    c = c.getSuperclass();
+                }
             }
 
             void handle(DependsOn deps) {

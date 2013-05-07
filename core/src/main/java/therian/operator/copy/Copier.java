@@ -26,8 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.util.Types;
 
 /**
@@ -47,6 +49,7 @@ import therian.util.Types;
  * @param <SOURCE>
  * @param <TARGET>
  */
+@DependsOn(DefaultImmutableChecker.class)
 public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends SOURCE, ? extends TARGET>> {
     /**
      * {@link Logger} instance.

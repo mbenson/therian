@@ -17,7 +17,6 @@ package therian.operator.copy;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
@@ -25,7 +24,6 @@ import therian.operation.Copy;
 import therian.operator.OperatorTest;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
-import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.testfixture.Address;
 import therian.testfixture.Country;
 import therian.util.Positions;
@@ -33,9 +31,9 @@ import therian.util.Positions;
 public class BeanCopierTest extends OperatorTest {
 
     @Override
-    protected TherianModule[] modules() {
-        return ArrayUtils.toArray(TherianModule.create().withOperators(new ELCoercionConverter(), new BeanCopier(),
-            new DefaultCopyingConverter(), new ConvertingCopier(), new DefaultImmutableChecker()));
+    protected TherianModule module() {
+        return TherianModule.create().withOperators(new ELCoercionConverter(), new BeanCopier(),
+            new DefaultCopyingConverter(), new ConvertingCopier());
     }
 
     @Test
