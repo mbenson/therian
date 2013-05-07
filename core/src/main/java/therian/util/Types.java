@@ -157,9 +157,23 @@ public class Types {
      */
     public static final WildcardType WILDCARD_ALL = wildcardType(new Type[] { Object.class }, new Type[0]);
 
+    /**
+     * "Refine" a declared type:
+     * <ul>
+     * <li>If {@code type} is a {@link TypeVariable}, return its normalized upper bound.</li>
+     * <li>If {@code type} is a {@link WildcardType}, return its normalized upper bound.</li>
+     * </ul>
+     *
+     * @param type
+     * @param parentType
+     * @return Type
+     */
     public static Type refine(Type type, Type parentType) {
         if (type instanceof TypeVariable) {
             return TypeUtils.normalizeUpperBounds(((TypeVariable<?>) type).getBounds())[0];
+        }
+        if (type instanceof WildcardType) {
+            return TypeUtils.normalizeUpperBounds(((WildcardType) type).getUpperBounds())[0];
         }
         return type;
     }
