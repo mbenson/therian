@@ -60,20 +60,25 @@ public class BeanCopier extends Copier<Object, Object> {
         final Set<String> targetProperties = getPropertyNames(context, target);
         targetProperties.retainAll(sourceProperties);
 
-        return new FilteredGenerator<Copy<?, ?>>(new TransformedGenerator<String, Copy<?, ?>>(
-            IteratorToGeneratorAdapter.adapt(targetProperties.iterator()), new UnaryFunction<String, Copy<?, ?>>() {
-
-                @Override
-                public Copy<?, ?> evaluate(String name) {
-                    return Copy.Safely.to(Property.at(name).of(target), Property.at(name).of(source));
-                }
-            }), new UnaryPredicate<Copy<?, ?>>() {
+        final UnaryFunction<String, Copy<?, ?>> propertyNameToCopyOperation = new UnaryFunction<String, Copy<?, ?>>() {
 
             @Override
-            public boolean test(Copy<?, ?> obj) {
-                return context.supports(obj);
+            public Copy<?, ?> evaluate(String name) {
+                return Copy.Safely.to(Property.at(name).of(target), Property.at(name).of(source));
             }
-        });
+        };
+
+        final UnaryPredicate<Copy<?, ?>> isSupported = new UnaryPredicate<Copy<?, ?>>() {
+
+            @Override
+            public boolean test(Copy<?, ?> copyOperation) {
+                return context.supports(copyOperation);
+            }
+        };
+
+        // adapt iterator over properties to generate copy operations and filter by those supported in the context:
+        return new FilteredGenerator<Copy<?, ?>>(new TransformedGenerator<String, Copy<?, ?>>(
+            IteratorToGeneratorAdapter.adapt(targetProperties.iterator()), propertyNameToCopyOperation), isSupported);
     }
 
     private Set<String> getPropertyNames(TherianContext context, Position.Readable<?> position) {
