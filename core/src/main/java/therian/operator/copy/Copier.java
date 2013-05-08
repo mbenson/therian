@@ -77,11 +77,19 @@ public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends 
      * @see ImmutableCheck
      */
     public boolean supports(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
-        // cannot copy to immutable types
-        if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()) {
+        if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue() && isRejectImmutable()) {
             return false;
         }
         return TypeUtils.isInstance(copy.getSourcePosition().getValue(), sourceBound)
             && TypeUtils.isAssignable(copy.getTargetPosition().getType(), targetBound);
+    }
+
+    /**
+     * Learn whether to reject immutable targets.
+     *
+     * @return true
+     */
+    protected boolean isRejectImmutable() {
+        return true;
     }
 }
