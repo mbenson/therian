@@ -22,7 +22,6 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -37,38 +36,56 @@ import therian.position.Position.Readable;
  * for non-abstract target types.
  */
 @StandardOperator
-public class DefaultCopyingConverter implements Operator<Convert<?, ?>> {
+public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object> {
+
+    @SuppressWarnings("rawtypes")
+    private static class Delegate extends CopyingConverter {
+        private static Constructor<?> getConstructor(Convert<?, ?> convert) {
+            final Class<?> rawTargetType = TypeUtils.getRawType(convert.getTargetPosition().getType(), null);
+            if ((rawTargetType.getModifiers() & Modifier.ABSTRACT) > 0) {
+                return null;
+            }
+            final Constructor<?> result =
+                ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
+                    ClassUtils.toClass(convert.getSourcePosition().getValue()));
+            return result == null ? convert.getSourcePosition().getValue() == null ? null : ConstructorUtils
+                .getAccessibleConstructor(rawTargetType) : result;
+        }
+
+        private final Convert<?, ?> convert;
+
+        /**
+         * @param convert
+         */
+        private Delegate(Convert<?, ?> convert) {
+            this.convert = convert;
+        }
+
+        @Override
+        protected Object createCopyDestination(Readable readable) throws Exception {
+            final Constructor<?> constructor = getConstructor(convert);
+            return constructor.getParameterTypes().length == 0 ? constructor.newInstance() : constructor
+                .newInstance(readable.getValue());
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean supports(TherianContext context, Convert convert) {
+            return super.supports(context, convert) && getConstructor(convert) != null;
+        }
+
+    }
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
-        return new CopyingConverter() {
-
-            @Override
-            protected Object createCopyDestination(Readable readable) throws Exception {
-                final Constructor<?> constructor = getConstructor(convert);
-                return constructor.getParameterTypes().length == 0 ? constructor.newInstance() : constructor
-                    .newInstance(readable.getValue());
-            }
-
-        }.perform(context, convert);
+        return new Delegate(convert).perform(context, convert);
     }
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
-        return getConstructor(convert) != null;
-    }
-
-    private Constructor<?> getConstructor(Convert<?, ?> convert) {
-        final Class<?> rawTargetType = TypeUtils.getRawType(convert.getTargetPosition().getType(), null);
-        if ((rawTargetType.getModifiers() & Modifier.ABSTRACT) > 0) {
-            return null;
-        }
-        final Constructor<?> result =
-                ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
-                    ClassUtils.toClass(convert.getSourcePosition().getValue()));
-        return result == null ? ConstructorUtils.getAccessibleConstructor(rawTargetType) : result;
+        return new Delegate(convert).supports(context, convert);
     }
 
 }
