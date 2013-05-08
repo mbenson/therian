@@ -22,8 +22,6 @@ import org.junit.Test;
 import therian.TherianModule;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
-import therian.operator.convert.DefaultCopyingConverter;
-import therian.operator.convert.ELCoercionConverter;
 import therian.testfixture.Address;
 import therian.testfixture.Country;
 import therian.util.Positions;
