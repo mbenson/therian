@@ -35,8 +35,9 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean perform(TherianContext context, Add<?, Collection<?>> operation) {
-        ((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition().getValue());
-        operation.setResult(Boolean.TRUE);
+        final boolean result =
+            ((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition().getValue());
+        operation.setResult(result);
         return true;
     }
 
@@ -50,9 +51,9 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
             return false;
         }
         final Type targetElementType =
-                Types.unrollVariables(
-                    TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
-                    Collection.class.getTypeParameters()[0]);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
+                Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection
