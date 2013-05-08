@@ -25,6 +25,8 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.TherianContext;
 import therian.TypeLiteral;
 import therian.position.Position;
+import therian.position.Position.Readable;
+import therian.position.Position.Writable;
 
 /**
  * Utility methods relating to {@link Position}s.
@@ -73,7 +75,7 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Only Position<%s>(%s)", type, value);
+            return String.format("Read-Only Position<%s>(%s)", Types.toString(type), value);
         }
 
     }
@@ -129,9 +131,29 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Write Position<%s>(%s)", type, value);
+            return String.format("Read-Write Position<%s>(%s)", Types.toString(type), value);
         }
 
+    }
+
+    /**
+     * Learn whether {@code pos} is {@link Readable}.
+     *
+     * @param pos
+     * @return boolean
+     */
+    public static boolean isReadable(Position<?> pos) {
+        return pos instanceof Position.Readable<?>;
+    }
+
+    /**
+     * Learn whether {@code pos} is {@link Writable}.
+     *
+     * @param pos
+     * @return boolean
+     */
+    public static boolean isWritable(Position<?> pos) {
+        return pos instanceof Position.Writable<?>;
     }
 
     /**
