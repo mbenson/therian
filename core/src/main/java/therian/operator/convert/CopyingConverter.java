@@ -144,8 +144,8 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         // ideally we would check whether the copy was possible, but a copier typically knows it can't copy to
         // an immutable target, including a null value, so we would have to instantiate the target object twice
         // or resort to weird ways of reusing it and even then it might not get used, so we'll just risk
-        // failure to perform() instead.
-        return true;
+        // failure to perform() instead.  We do reject null source values, however.
+        return convert.getSourcePosition().getValue() != null;
     }
 
     /**
