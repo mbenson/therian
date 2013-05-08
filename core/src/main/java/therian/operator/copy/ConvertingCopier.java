@@ -22,6 +22,7 @@ import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
 import therian.position.Position;
+import therian.util.Positions;
 
 /**
  * {@link Copy} {@link Operator} that attempts overwriting conversion for writable target positions storing immutable
@@ -38,7 +39,7 @@ public class ConvertingCopier extends Copier<Object, Object> {
 
     @Override
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
-        return copy.getTargetPosition() instanceof Position.Writable<?>
+        return Positions.isWritable(copy.getTargetPosition())
             && context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()
             && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), copy.getSourcePosition()));
     }
