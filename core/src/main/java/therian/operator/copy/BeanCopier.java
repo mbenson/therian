@@ -34,6 +34,9 @@ import therian.TherianContext;
 import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Copy;
+import therian.operator.convert.DefaultCopyingConverter;
+import therian.operator.convert.ELCoercionConverter;
+import therian.operator.convert.NOPConverter;
 import therian.position.Position;
 import therian.position.relative.Property;
 
@@ -42,7 +45,7 @@ import therian.position.relative.Property;
  * successful.
  */
 @StandardOperator
-@DependsOn(ConvertingCopier.class)
+@DependsOn({ ConvertingCopier.class, NOPConverter.class, ELCoercionConverter.class, DefaultCopyingConverter.class })
 public class BeanCopier extends Copier<Object, Object> {
     public static final String[] SKIP_PROPERTIES = { "class" };
 

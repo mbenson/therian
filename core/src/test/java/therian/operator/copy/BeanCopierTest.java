@@ -32,8 +32,7 @@ public class BeanCopierTest extends OperatorTest {
 
     @Override
     protected TherianModule module() {
-        return TherianModule.create().withOperators(new ELCoercionConverter(), new BeanCopier(),
-            new DefaultCopyingConverter(), new ConvertingCopier());
+        return TherianModule.create().withOperators(new BeanCopier());
     }
 
     @Test
