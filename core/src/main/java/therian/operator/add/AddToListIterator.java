@@ -46,7 +46,7 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
         }
         try {
             listIterator.add(operation.getSourcePosition().getValue());
-            operation.setResult(Boolean.TRUE);
+            operation.setResult(true);
             return true;
         } catch (UnsupportedOperationException e) {
             return false;
@@ -67,9 +67,9 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
             return false;
         }
         final Type targetElementType =
-                Types.unrollVariables(
-                    TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
-                    ListIterator.class.getTypeParameters()[0]);
+            Types.unrollVariables(
+                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
+                ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw
