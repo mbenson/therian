@@ -30,8 +30,8 @@ public class AddToListIteratorTest extends OperatorTest {
     public void testRaw() {
         final List<?> l = new ArrayList<Object>();
         assertTrue(therianContext.eval(
-            Add.to(Positions.<ListIterator<?>> readWrite(ListIterator.class, l.listIterator()),
-                Positions.readOnly("foo"))).booleanValue());
+            Add.to(Positions.readWrite(ListIterator.class, l.listIterator()), Positions.readOnly("foo")))
+            .booleanValue());
         assertEquals(1, l.size());
         assertEquals("foo", l.get(0));
     }
@@ -40,25 +40,25 @@ public class AddToListIteratorTest extends OperatorTest {
     public void testTyped() {
         final List<String> l = new ArrayList<String>();
         assertTrue(therianContext.eval(
-            Add.to(
-                Positions.<ListIterator<String>> readWrite(new TypeLiteral<ListIterator<String>>() {}.value,
-                    l.listIterator()), Positions.readOnly("foo"))).booleanValue());
+            Add.to(Positions.readWrite(new TypeLiteral<ListIterator<String>>() {}.value, l.listIterator()),
+                Positions.readOnly("foo"))).booleanValue());
         assertEquals(1, l.size());
         assertEquals("foo", l.get(0));
     }
 
     @Test(expected = OperationException.class)
     public void testImmutable() {
-        therianContext.eval(Add.to(Positions.<ListIterator<String>> readWrite(
-            new TypeLiteral<ListIterator<String>>() {}, Collections.unmodifiableList(Collections.<String> emptyList())
-                .listIterator()), Positions.readOnly("foo")));
+        therianContext.eval(Add.to(
+            Positions.readWrite(new TypeLiteral<ListIterator<String>>() {},
+                Collections.unmodifiableList(Collections.<String> emptyList()).listIterator()),
+            Positions.readOnly("foo")));
     }
 
     @Test(expected = OperationException.class)
     public void testWrongType() {
-        therianContext.eval(Add.to(Positions.<ListIterator<String>> readWrite(
-            new TypeLiteral<ListIterator<String>>() {}, new ArrayList<String>().listIterator()), Positions
-            .readOnly(new Object())));
+        therianContext.eval(Add.to(
+            Positions.readWrite(new TypeLiteral<ListIterator<String>>() {}, new ArrayList<String>().listIterator()),
+            Positions.readOnly(new Object())));
     }
 
     @Test
@@ -69,8 +69,7 @@ public class AddToListIteratorTest extends OperatorTest {
         listIterator.next();
         assertEquals(2, listIterator.nextIndex());
         assertTrue(therianContext.eval(
-            Add.to(
-                Positions.<ListIterator<String>> readWrite(new TypeLiteral<ListIterator<String>>() {}, listIterator),
+            Add.to(Positions.readWrite(new TypeLiteral<ListIterator<String>>() {}, listIterator),
                 Positions.readOnly("blah"))).booleanValue());
         assertEquals(2, listIterator.nextIndex());
         assertEquals("baz", listIterator.next());
