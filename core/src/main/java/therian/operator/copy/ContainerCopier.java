@@ -3,18 +3,30 @@ package therian.operator.copy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
+import therian.BindTypeVariable;
+import therian.Operator.DependsOn;
 import therian.TherianContext;
+import therian.Typed;
 import therian.buildweaver.StandardOperator;
 import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.GetElementType;
+import therian.operator.add.AddToCollection;
+import therian.operator.add.AddToListIterator;
+import therian.operator.addall.AddAllToArray;
+import therian.operator.addall.GenericAddAllOperator;
+import therian.operator.convert.DefaultToArrayConverter;
+import therian.operator.convert.DefaultToListConverter;
+import therian.operator.convert.EnumerationToList;
+import therian.operator.convert.IteratorToList;
+import therian.operator.convert.NOPConverter;
 import therian.position.Position;
 import therian.util.Positions;
 import therian.util.Types;
@@ -22,32 +34,57 @@ import therian.util.Types;
 /**
  * Tries to convert source and target to {@link Iterable}s, copy source elements onto corresponding target elements,
  * then to add remaining elements to target. If elements cannot be added but target position is writable, fallback
- * strategy is to add all target elements to a new array of target element type, and attempt to convert that to target
- * position.
+ * strategy is to add all target elements to a new array of target element type, and attempt to convert that to the
+ * target position.
  */
-@StandardOperator
-public class IterableCopier implements Operator<Copy<?, ?>> {
+@DependsOn({ DefaultToListConverter.class, NOPConverter.class, DefaultToArrayConverter.class,
+    GenericAddAllOperator.class, AddAllToArray.class })
+public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
+
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    @DependsOn(AddToCollection.class)
+    public static class ToIterable extends ContainerCopier<Iterable> {
+    }
+
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    @DependsOn({ IteratorToList.class, AddToListIterator.class })
+    public static class ToIterator extends ContainerCopier<Iterator> {
+    }
+
+    @SuppressWarnings("rawtypes")
+    @StandardOperator
+    @DependsOn({ EnumerationToList.class })
+    public static class ToEnumeration extends ContainerCopier<Enumeration> {
+    }
+
+    @StandardOperator
+    public static class ToArray extends ContainerCopier<Object> {
+        @Override
+        public boolean supports(TherianContext context, Copy<?, ? extends Object> copy) {
+            return TypeUtils.isArrayType(copy.getTargetPosition().getType()) && super.supports(context, copy);
+        }
+    }
+
+    public static abstract class Dynamic<TARGET> extends ContainerCopier<TARGET> {
+        private Dynamic() {
+        }
+
+        @BindTypeVariable
+        public abstract Typed<TARGET> getTargetType();
+    }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public boolean perform(final TherianContext context, final Copy<?, ?> copy) {
-        final GetElementType<?> getTargetElementType = GetElementType.of(copy.getTargetPosition());
-        final Type targetElementType = context.eval(getTargetElementType);
-
-        final Convert<?, Iterable> sourceToIterable = Convert.to(Iterable.class, copy.getSourcePosition());
-        final Convert<?, Iterable> targetToIterable = Convert.to(Iterable.class, copy.getTargetPosition());
-
-        final Iterable sourceIterable = context.eval(sourceToIterable);
+    public boolean perform(final TherianContext context, final Copy<?, ? extends TARGET> copy) {
+        final Iterable sourceIterable = context.eval(Convert.to(Iterable.class, copy.getSourcePosition()));
         final Iterator<?> sourceIterator = sourceIterable.iterator();
-        final Iterable targetIterable = context.eval(targetToIterable);
+        final Iterable targetIterable = context.eval(Convert.to(Iterable.class, copy.getTargetPosition()));
         final Iterator<?> targetIterator = targetIterable.iterator();
-        final Type sourceElementType;
-        final GetElementType<?> getSourceElementType = GetElementType.of(copy.getSourcePosition());
-        if (context.supports(getSourceElementType)) {
-            sourceElementType = context.eval(getSourceElementType);
-        } else {
-            sourceElementType = null;
-        }
+        final Type targetElementType = context.eval(GetElementType.of(copy.getTargetPosition()));
+        final Type sourceElementType = context.eval(GetElementType.of(copy.getSourcePosition()));
+
         while (targetIterator.hasNext()) {
             if (!sourceIterator.hasNext()) {
                 break;
@@ -55,15 +92,8 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             final Object targetElement = targetIterator.next();
             final Object sourceElement = sourceIterator.next();
             if (sourceElement != null) {
-                final Position.Readable<?> sourceElementPosition;
-                if (sourceElementType == null || sourceElementType instanceof Class<?>) {
-                    sourceElementPosition = Positions.readOnly(sourceElement);
-                } else {
-                    sourceElementPosition = Positions.<Object> readWrite(sourceElementType, sourceElement);
-                }
-                final Copy<?, ?> copyElement = Copy.to(Positions.readOnly(targetElement), sourceElementPosition);
-                context.eval(copyElement);
-                if (!copyElement.isSuccessful()) {
+                if (!context.evalSuccess(Copy.to(Positions.readOnly(targetElement),
+                    Positions.readOnly(sourceElementType, sourceElement)))) {
                     return false;
                 }
             }
@@ -79,13 +109,9 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         }
 
         final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
-        final Type sourceSubListType =
-            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
-        final Position.ReadWrite<?> sourceSubList =
-            Positions.<List<?>> readWrite(sourceSubListType, sourceElementsForConversion);
-        final Convert<?, ?> toTargetElementArray = Convert.to(targetElements, sourceSubList);
-        context.eval(toTargetElementArray);
-        if (!toTargetElementArray.isSuccessful()) {
+        final Position.Readable<?> sourceSubList =
+            Positions.readOnly(Types.parameterize(List.class, sourceElementType), sourceElementsForConversion);
+        if (!context.evalSuccess(Convert.to(targetElements, sourceSubList))) {
             return false;
         }
 
@@ -95,7 +121,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         }
 
         // can't add new elements. last try: convert an array of the proper size to the target type and set value
-        if (!Position.Writable.class.isInstance(copy.getTargetPosition())) {
+        if (!Positions.isWritable(copy.getTargetPosition())) {
             return false;
         }
         final List<Object> allElements = new ArrayList<Object>();
@@ -108,7 +134,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             allElements.add(s);
         }
         ((Position.Writable) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
-            TypeUtils.getRawType(targetElements.getType(), null), allElements.size())));
+            TypeUtils.getRawType(targetElementType, null), allElements.size())));
 
         final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
 
@@ -117,36 +143,38 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public boolean supports(final TherianContext context, final Copy<?, ?> copy) {
-        // do we understand target type as a group of elements?
+    public boolean supports(final TherianContext context, final Copy<?, ? extends TARGET> copy) {
+        if (!super.supports(context, copy)) {
+            return false;
+        }
+        final Convert<?, Iterable> sourceToIterable = Convert.to(Iterable.class, copy.getSourcePosition());
+        if (!context.supports(sourceToIterable)) {
+            return false;
+        }
+
+        final Convert<?, Iterable> targetToIterable = Convert.to(Iterable.class, copy.getTargetPosition());
+        if (!context.supports(targetToIterable)) {
+            return false;
+        }
+
+        final GetElementType<?> getSourceElementType = GetElementType.of(copy.getSourcePosition());
+        if (!context.supports(getSourceElementType)) {
+            return false;
+        }
+
         final GetElementType<?> getTargetElementType = GetElementType.of(copy.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
         }
 
+        final Iterable sourceIterable = context.eval(sourceToIterable);
+        final Iterable targetIterable = context.eval(targetToIterable);
+        final Type sourceElementType = context.eval(getSourceElementType);
         final Type targetElementType = context.eval(getTargetElementType);
 
-        final Convert<?, Iterable> sourceToIterable = Convert.to(Iterable.class, copy.getSourcePosition());
-        if (!context.supports(sourceToIterable)) {
-            return false;
-        }
-        final Convert<?, Iterable> targetToIterable = Convert.to(Iterable.class, copy.getTargetPosition());
-
-        if (!context.supports(targetToIterable)) {
-            return false;
-        }
-        final Iterable sourceIterable = context.eval(sourceToIterable);
         final Iterator<?> sourceIterator = sourceIterable.iterator();
-        final Iterable targetIterable = context.eval(targetToIterable);
         final Iterator<?> targetIterator = targetIterable.iterator();
 
-        final Type sourceElementType;
-        final GetElementType<?> getSourceElementType = GetElementType.of(copy.getSourcePosition());
-        if (context.supports(getSourceElementType)) {
-            sourceElementType = context.eval(getSourceElementType);
-        } else {
-            sourceElementType = null;
-        }
         while (targetIterator.hasNext()) {
             if (!sourceIterator.hasNext()) {
                 break;
@@ -154,16 +182,11 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
             final Object targetElement = targetIterator.next();
             final Object sourceElement = sourceIterator.next();
             if (targetElement == null && sourceElement != null) {
-                // can do nothing with null elements returned from an Iterator:
+                // can do nothing with null target elements returned from an Iterator:
                 return false;
             }
             if (sourceElement != null) {
-                final Position.Readable<?> sourceElementPosition;
-                if (sourceElementType == null || sourceElementType instanceof Class<?>) {
-                    sourceElementPosition = Positions.readOnly(sourceElement);
-                } else {
-                    sourceElementPosition = Positions.readWrite(sourceElementType, sourceElement);
-                }
+                final Position.Readable<?> sourceElementPosition = Positions.readOnly(sourceElementType, sourceElement);
                 if (!context.supports(Copy.to(Positions.readOnly(targetElement), sourceElementPosition))) {
                     return false;
                 }
@@ -180,14 +203,13 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
         final Type sourceSubListType =
             sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
-        final Position.ReadWrite<?> sourceSubList =
-            Positions.<List<?>> readWrite(sourceSubListType, sourceElementsForConversion);
+        final Position.Readable<?> sourceSubList = Positions.readOnly(sourceSubListType, sourceElementsForConversion);
         if (!context.supports(Convert.to(targetElements, sourceSubList))) {
             return false;
         }
 
         // array of proper size, but null values == best we can do.
-        final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElements.getType(), null);
+        final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
 
         ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
             sourceElementsForConversion.size()));
@@ -198,7 +220,7 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
 
         // can't add new elements. last try: can we convert an array of the proper size to the target type and set
         // value?
-        if (copy.getTargetPosition() instanceof Position.Writable<?> == false) {
+        if (!Positions.isWritable(copy.getTargetPosition())) {
             return false;
         }
         final List<Object> allElements = new ArrayList<Object>();
@@ -215,4 +237,18 @@ public class IterableCopier implements Operator<Copy<?, ?>> {
         return context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), targetElements));
     }
 
+    @Override
+    protected boolean isRejectImmutable() {
+        return false;
+    }
+
+    public static <TARGET> ContainerCopier.Dynamic<TARGET> to(final Typed<TARGET> targetType) {
+        return new ContainerCopier.Dynamic<TARGET>() {
+
+            @Override
+            public Typed<TARGET> getTargetType() {
+                return targetType;
+            }
+        };
+    }
 }
