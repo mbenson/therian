@@ -68,7 +68,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Create a new Transform instance.
-     * 
+     *
      * @param sourcePosition
      * @param targetPosition
      */
@@ -80,7 +80,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the narrowest possible source type, deduced from source position type/value.
-     * 
+     *
      * @return Typed
      */
     @BindTypeVariable
@@ -100,7 +100,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the sourcePosition.
-     * 
+     *
      * @return Position.Readable<SOURCE>
      */
     public Position.Readable<SOURCE> getSourcePosition() {
@@ -111,7 +111,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
      * Get the narrowest possible target type. If this {@link Transform} operation maps its {@code TARGET_POSITION} type
      * parameter as some {@link Readable} then this will be deduced from target position type/value, else the target
      * position will be returned.
-     * 
+     *
      * @return Typed
      */
     @BindTypeVariable
@@ -136,7 +136,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the targetPosition.
-     * 
+     *
      * @return TARGET_POSITION
      */
     public TARGET_POSITION getTargetPosition() {
@@ -169,6 +169,16 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     @Override
     public String toString() {
-        return String.format("%s %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
+        return String.format("%s%s to %s", getSimpleName(), getSourcePosition(), getTargetPosition());
+    }
+
+    private String getSimpleName() {
+        final StringBuilder buf = new StringBuilder();
+        Class<?> c = getClass();
+        while (c != null) {
+            buf.insert(0, ' ').insert(0, c.getSimpleName());
+            c = c.getEnclosingClass();
+        }
+        return buf.toString();
     }
 }
