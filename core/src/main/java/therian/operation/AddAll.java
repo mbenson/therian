@@ -15,12 +15,15 @@
  */
 package therian.operation;
 
+import java.util.Collection;
+
 import org.apache.commons.lang3.ObjectUtils;
 
 import therian.position.Position;
 
 /**
- * "Add all" transformation.
+ * "Add all" transformation. Like {@link Collection#addAll(Collection)} result of an {@link AddAll} operation is
+ * intended to reflect whether a change was made to the target position.
  *
  * @param <SOURCE>
  * @param <TARGET>
@@ -51,7 +54,7 @@ public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, P
         }
         AddAll<?, ?> other = (AddAll<?, ?>) obj;
         return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
-                && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
     }
 
     @Override

@@ -15,12 +15,15 @@
  */
 package therian.operation;
 
+import java.util.Collection;
+
 import org.apache.commons.lang3.ObjectUtils;
 
 import therian.position.Position;
 
 /**
- * "Add" transformation.
+ * "Add" transformation. Like {@link Collection#add(Object)}, the result of an {@link Add} operation is intended to
+ * reflect whether a change was made to the target position.
  *
  * @param <SOURCE>
  * @param <TARGET>
@@ -51,7 +54,7 @@ public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Posi
         }
         Add<?, ?> other = (Add<?, ?>) obj;
         return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
-                && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
+            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
     }
 
     @Override
