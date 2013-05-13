@@ -16,21 +16,22 @@
 package therian.operator.convert;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.TherianContext;
 import therian.Operator.DependsOn;
+import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
 import therian.operator.getelementtype.GetArrayElementType;
 import therian.position.Position;
 import therian.util.Positions;
+import therian.util.Types;
 
 /**
- * Converts from source to {@link Collection} to target.
+ * Converts from source to {@link List} of target element type to target.
  */
 @StandardOperator
 @DependsOn({ GetArrayElementType.class, CollectionToArray.class })
@@ -38,12 +39,12 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
 
     @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
-        @SuppressWarnings("rawtypes")
-        final Position.ReadWrite<Collection> coll = Positions.readWrite(Collection.class);
-        if (!context.evalSuccess(Convert.to(coll, convert.getSourcePosition()))) {
-            return false;
-        }
-        return context.forwardTo(Convert.to(convert.getTargetPosition(), coll));
+        final Type targetElementType = context.eval(GetElementType.of(convert.getTargetPosition()));
+
+        final Position.ReadWrite<List<?>> list = Positions.readWrite(Types.parameterize(List.class, targetElementType));
+
+        return context.evalSuccess(Convert.to(list, convert.getSourcePosition()))
+            && context.forwardTo(Convert.to(convert.getTargetPosition(), list));
     }
 
     @Override
@@ -51,20 +52,14 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
         if (!(super.supports(context, convert) && TypeUtils.isArrayType(convert.getTargetPosition().getType()))) {
             return false;
         }
-        if (!context.supports(Convert.to(Collection.class, convert.getSourcePosition()))) {
-            return false;
-        }
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
         }
         final Type targetElementType = context.eval(getTargetElementType);
-        final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
-        if (!context.supports(getSourceElementType)) {
-            return false;
-        }
-        final Type sourceElementType = context.eval(getSourceElementType);
-        return TypeUtils.isAssignable(sourceElementType, targetElementType);
+
+        return context.supports(Convert.to(Positions.readWrite(Types.parameterize(List.class, targetElementType)),
+            convert.getSourcePosition()));
     }
 
 }
