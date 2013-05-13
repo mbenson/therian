@@ -33,7 +33,7 @@ public class ELCoercionConverterTest extends OperatorTest {
 
     @Override
     protected TherianModule[] modules() {
-        return new TherianModule[] { TherianModule.create().withOperators(new ELCoercionConverter()) };
+        return new TherianModule[] { TherianModule.create().withOperators(new ELCoercionConverter.HandlesNoop()) };
     }
 
     @Test

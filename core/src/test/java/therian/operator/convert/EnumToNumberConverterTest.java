@@ -17,7 +17,6 @@ package therian.operator.convert;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
@@ -29,9 +28,8 @@ import therian.util.Positions;
 public class EnumToNumberConverterTest extends OperatorTest {
 
     @Override
-    protected TherianModule[] modules() {
-        return ArrayUtils.toArray(TherianModule.create().withOperators(new EnumToNumberConverter(),
-            new ELCoercionConverter()));
+    protected TherianModule module() {
+        return TherianModule.create().withOperators(new EnumToNumberConverter());
     }
 
     @Test
