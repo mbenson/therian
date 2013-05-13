@@ -1,0 +1,22 @@
+//generated file
+package therian;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import therian.Operator;
+
+class StandardOperators {
+
+	public static final List<Operator<?>> STANDARD_OPERATORS;
+
+	static {
+		final Operator<?>[] operators = {
+			${operators}
+		};
+
+		STANDARD_OPERATORS = Collections.<Operator<?>> unmodifiableList(Arrays.asList(operators));
+	}
+
+}

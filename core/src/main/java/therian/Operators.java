@@ -91,7 +91,7 @@ public class Operators {
      * @see Therian#standard()
      */
     public static Operator<?>[] standard() {
-        throw new UnsupportedOperationException("should use therian-build-weaver");
+        return StandardOperators.STANDARD_OPERATORS.toArray(new Operator[0]);
     }
 
     /**
