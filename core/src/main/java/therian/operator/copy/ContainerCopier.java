@@ -28,6 +28,7 @@ import therian.operator.convert.EnumerationToList;
 import therian.operator.convert.IteratorToList;
 import therian.operator.convert.NOPConverter;
 import therian.position.Position;
+import therian.position.relative.Element;
 import therian.util.Positions;
 import therian.util.Types;
 
@@ -35,7 +36,7 @@ import therian.util.Types;
  * Tries to convert source and target to {@link Iterable}s, copy source elements onto corresponding target elements,
  * then to add remaining elements to target. If elements cannot be added but target position is writable, fallback
  * strategy is to add all target elements to a new array of target element type, and attempt to convert that to the
- * target position.
+ * target position. This class contains the hidden gem that is nested element conversion.
  */
 @DependsOn({ DefaultToListConverter.class, NOPConverter.class, DefaultToArrayConverter.class,
     GenericAddAllOperator.class, AddAllToArray.class })
@@ -109,10 +110,21 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         }
 
         final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
-        final Position.Readable<?> sourceSubList =
-            Positions.readOnly(Types.parameterize(List.class, sourceElementType), sourceElementsForConversion);
-        if (!context.evalSuccess(Convert.to(targetElements, sourceSubList))) {
-            return false;
+        final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
+        ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
+            sourceElementsForConversion.size()));
+
+        final Position.Readable<List<?>> sourceSubList =
+            Positions
+                .<List<?>> readOnly(Types.parameterize(List.class, sourceElementType), sourceElementsForConversion);
+
+        for (int i = 0, sz = sourceElementsForConversion.size(); i < sz; i++) {
+            final Position.ReadWrite<?> targetElement = Element.atArrayIndex(i).of(targetElements);
+            final Position.ReadWrite<?> sourceElement = Element.atIndex(i).of(sourceSubList);
+
+            if (!context.evalSuccess(Convert.to(targetElement, sourceElement))) {
+                return false;
+            }
         }
 
         final AddAll<?, ?> addAll = AddAll.to(copy.getTargetPosition(), targetElements);
@@ -130,8 +142,8 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
             allElements.add(t);
         }
         // add target elements converted from source objects
-        for (Object s : (Object[]) targetElements.getValue()) {
-            allElements.add(s);
+        for (int i = 0, sz = Array.getLength(targetElements.getValue()); i < sz; i++) {
+            allElements.add(Array.get(targetElements.getValue(), i));
         }
         ((Position.Writable) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(
             TypeUtils.getRawType(targetElementType, null), allElements.size())));
@@ -199,20 +211,38 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         while (sourceIterator.hasNext()) {
             sourceElementsForConversion.add(sourceIterator.next());
         }
-        // can we convert these to an array?
-        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
-        final Type sourceSubListType =
-            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
-        final Position.Readable<?> sourceSubList = Positions.readOnly(sourceSubListType, sourceElementsForConversion);
-        if (!context.supports(Convert.to(targetElements, sourceSubList))) {
-            return false;
-        }
 
-        // array of proper size, but null values == best we can do.
+        //@formatter:off
+        /*
+         * array is "lowest common denominator" wrt primitive vs. Object elements;
+         * plan:
+         *  - create an array of proper size and initial values
+         *  - verify we can convert each remaining element into the corresponding position of this array
+         *  - verify that we can either:
+         *    - AddAll this array to our original target pos, OR
+         *    - expand the array to full size and convert to original (writable) target pos
+         */
+        //@formatter:on
+
         final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
 
+        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
         ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
             sourceElementsForConversion.size()));
+
+        final Type sourceSubListType =
+            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+        final Position.Readable<List<?>> sourceSubList =
+            Positions.<List<?>> readOnly(sourceSubListType, sourceElementsForConversion);
+
+        for (int i = 0, sz = sourceElementsForConversion.size(); i < sz; i++) {
+            final Position.ReadWrite<?> targetElement = Element.atArrayIndex(i).of(targetElements);
+            final Position.ReadWrite<?> sourceElement = Element.atIndex(i).of(sourceSubList);
+
+            if (!context.supports(Convert.to(targetElement, sourceElement))) {
+                return false;
+            }
+        }
 
         if (context.supports(AddAll.to(copy.getTargetPosition(), targetElements))) {
             return true;
@@ -228,7 +258,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
             allElements.add(t);
         }
         for (@SuppressWarnings("unused")
-        Object s : sourceIterable) {
+        Object s : sourceElementsForConversion) {
             allElements.add(null);
         }
         ((Position.Writable) targetElements).setValue(allElements.toArray((Object[]) Array.newInstance(

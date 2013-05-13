@@ -26,6 +26,9 @@ import org.apache.commons.lang3.ObjectUtils;
 public class Employee implements Person {
     private String firstName, lastName;
 
+    public Employee() {
+    }
+
     public Employee(String firstN, String lastN) {
         this.firstName = firstN;
         this.lastName = lastN;

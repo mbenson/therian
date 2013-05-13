@@ -18,7 +18,9 @@ package therian.operator.copy;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,7 +45,9 @@ import therian.operator.convert.DefaultCopyingConverter;
 import therian.position.Position;
 import therian.testfixture.Author;
 import therian.testfixture.Book;
+import therian.testfixture.Employee;
 import therian.testfixture.MetasyntacticVariable;
+import therian.testfixture.Person;
 import therian.util.Positions;
 
 /**
@@ -52,13 +57,46 @@ public class ContainerCopierTest extends OperatorTest {
     private interface LocalTypes {
         static final TypeLiteral<Set<Book>> SET_OF_BOOK = new TypeLiteral<Set<Book>>() {};
         static final TypeLiteral<List<Book>> LIST_OF_BOOK = new TypeLiteral<List<Book>>() {};
+        static final TypeLiteral<List<Employee>> LIST_OF_EMPLOYEE = new TypeLiteral<List<Employee>>() {};
+    }
+
+    public static class Jerk implements Person {
+        private final String lastName;
+        private final String firstName;
+        private final String middleName;
+
+        public Jerk(String... name) {
+            lastName = name.length > 0 ? name[0] : null;
+            firstName = name.length > 1 ? name[1] : null;
+            if (name.length < 3) {
+                middleName = null;
+            } else {
+                middleName = StringUtils.join(Arrays.asList(name).subList(2, name.length), ' ');
+            }
+        }
+
+        @Override
+        public String getFirstName() {
+            return firstName;
+        }
+
+        @Override
+        public String getMiddleName() {
+            return middleName;
+        }
+
+        @Override
+        public String getLastName() {
+            return lastName;
+        }
 
     }
 
     private Book[] books;
+    private Jerk[] jerks;
 
     @Before
-    public void setupBooks() {
+    public void setupData() {
         MetasyntacticVariable[] values = MetasyntacticVariable.values();
         books = new Book[values.length];
         for (int i = 0; i < values.length; i++) {
@@ -69,12 +107,15 @@ public class ContainerCopierTest extends OperatorTest {
             author.setLastName("Stephenson");
             books[i].setAuthor(author);
         }
+        jerks =
+            new Jerk[] { new Jerk("Morris", "Keith"), new Jerk("Hetson", "Greg"), new Jerk("Rogerson", "Roger"),
+                new Jerk("Lehrer", "Keith", "Michael", "\"Lucky\"") };
     }
 
     protected TherianModule module() {
         return TherianModule.create().withOperators(new ContainerCopier.ToIterable(), new ContainerCopier.ToIterator(),
             new ContainerCopier.ToEnumeration(), new ContainerCopier.ToArray(), CopyingConverter.IMPLEMENTING_SET,
-            new DefaultCopyingConverter(), new BeanCopier());
+            CopyingConverter.IMPLEMENTING_LIST, new DefaultCopyingConverter(), new BeanCopier());
     }
 
     @Test
@@ -202,5 +243,23 @@ public class ContainerCopierTest extends OperatorTest {
         therianContext.eval(Copy.to(target, Positions.readOnly(books[0])));
         assertEquals(1, target.getValue().size());
         assertSame(books[0], target.getValue().iterator().next());
+    }
+
+    @Test
+    public void testTypeConversionToList() {
+        final List<Employee> targetList = new ArrayList<Employee>();
+        therianContext.eval(Copy.to(Positions.readOnly(LocalTypes.LIST_OF_EMPLOYEE, targetList),
+            Positions.readOnly(jerks)));
+        final Iterator<Employee> eachEmployee = targetList.iterator();
+
+        for (final Iterator<Jerk> eachJerk = Arrays.asList(jerks).iterator(); eachJerk.hasNext();) {
+            assertTrue(eachEmployee.hasNext());
+            final Jerk jerk = eachJerk.next();
+            final Employee employee = eachEmployee.next();
+            assertEquals(jerk.getFirstName(), employee.getFirstName());
+            assertNull(employee.getMiddleName());
+            assertEquals(jerk.getLastName(), employee.getLastName());
+        }
+        assertFalse(eachEmployee.hasNext());
     }
 }

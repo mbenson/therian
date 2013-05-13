@@ -104,8 +104,12 @@ public class BeanCopier extends Copier<Object, Object> {
 
                 @Override
                 public void run(Copy<?, ?> propertyCopy) {
-                    if (context.evalSuccess(propertyCopy)) {
-                        result.setValue(true);
+                    try {
+                        if (context.evalSuccess(propertyCopy)) {
+                            result.setValue(true);
+                        }
+                    } catch (Exception e) {
+                        log.warn(propertyCopy.toString(), e);
                     }
                 }
             });
