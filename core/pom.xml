@@ -47,7 +47,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
-    <!-- TODO use only internally; shade -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-functor</artifactId>
@@ -74,103 +73,4 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-weaver-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>weave</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>therian</groupId>
-            <artifactId>therian-build-weaver</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-  </build>
-
-  <profiles>
-    <profile>
-      <id>default</id>
-      <activation>
-        <property>
-          <name>!debug</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-weaver-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>weave</goal>
-                </goals>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>therian</groupId>
-                <artifactId>therian-build-weaver</artifactId>
-                <version>${project.version}</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>debug</id>
-      <activation>
-        <property>
-          <name>debug</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-weaver-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>weave</goal>
-                </goals>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>therian</groupId>
-                <artifactId>therian-build-weaver</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                  <exclusion>
-                    <groupId>org.ow2.asm</groupId>
-                    <artifactId>asm</artifactId>
-                  </exclusion>
-                </exclusions>
-              </dependency>
-              <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-debug-all</artifactId>
-                <version>4.1</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
 </project>
