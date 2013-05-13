@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Assert;
@@ -17,9 +19,14 @@ import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.Size;
 import therian.operation.Transform;
+import therian.operator.FromSourceToTarget.FromSource;
+import therian.operator.FromSourceToTarget.ToTarget;
+import therian.operator.convert.CopyingConverter;
+import therian.operator.convert.IterableToIterator;
 import therian.operator.size.SizeOfCollection;
 import therian.operator.size.SizeOfIterable;
 import therian.operator.size.SizeOfIterator;
+import therian.testfixture.Book;
 import therian.testfixture.MetasyntacticVariable;
 
 public class TypesTest {
@@ -44,6 +51,24 @@ public class TypesTest {
         assertEquals(String.class, Types.resolveAt(convert, Transform.class.getTypeParameters()[1]));
         assertEquals(Integer.class, Types.resolveAt(convert, Convert.class.getTypeParameters()[0]));
         assertEquals(String.class, Types.resolveAt(convert, Convert.class.getTypeParameters()[1]));
+    }
+
+    @Test
+    public void testGetInterfaceType() {
+        final IterableToIterator iterableToIterator = new IterableToIterator();
+
+        assertTrue(Types.equals(Types.parameterize(Iterable.class, Types.WILDCARD_ALL),
+            Types.resolveAt(iterableToIterator, FromSource.class.getTypeParameters()[0])));
+        assertEquals(Iterator.class, Types.resolveAt(iterableToIterator, ToTarget.class.getTypeParameters()[0]));
+
+        final CopyingConverter<Object, Book> forBook = CopyingConverter.forTargetType(Book.class);
+        assertEquals(Object.class, Types.resolveAt(forBook, FromSource.class.getTypeParameters()[0]));
+        assertEquals(Book.class, Types.resolveAt(forBook, ToTarget.class.getTypeParameters()[0]));
+
+        assertEquals(Object.class,
+            Types.resolveAt(CopyingConverter.IMPLEMENTING_COLLECTION, FromSource.class.getTypeParameters()[0]));
+        assertEquals(Collection.class,
+            Types.resolveAt(CopyingConverter.IMPLEMENTING_COLLECTION, ToTarget.class.getTypeParameters()[0]));
     }
 
     public void testNonTyped() {
