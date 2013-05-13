@@ -15,22 +15,19 @@
  */
 package therian.operator.copy;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
-import java.util.Map;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import therian.Operator;
-import therian.TherianContext;
 import therian.Operator.DependsOn;
+import therian.TherianContext;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
+import therian.operator.FromSourceToTarget;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.util.Types;
 
 /**
  * {@link Copy} {@link Operator} superclass.
@@ -50,20 +47,13 @@ import therian.util.Types;
  * @param <TARGET>
  */
 @DependsOn(DefaultImmutableChecker.class)
-public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends SOURCE, ? extends TARGET>> {
+public abstract class Copier<SOURCE, TARGET> extends FromSourceToTarget implements
+    Operator<Copy<? extends SOURCE, ? extends TARGET>>, FromSourceToTarget.FromSource<SOURCE>, FromSourceToTarget.ToTarget<TARGET> {
+
     /**
      * {@link Logger} instance.
      */
     protected final Logger log = LoggerFactory.getLogger(getClass());
-
-    private final Type sourceBound;
-    private final Type targetBound;
-
-    {
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Copier.class);
-        sourceBound = Types.unrollVariables(typeArguments, Copier.class.getTypeParameters()[0]);
-        targetBound = Types.unrollVariables(typeArguments, Copier.class.getTypeParameters()[1]);
-    }
 
     // override default parameter name
     @Override
@@ -80,8 +70,8 @@ public abstract class Copier<SOURCE, TARGET> implements Operator<Copy<? extends 
         if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue() && isRejectImmutable()) {
             return false;
         }
-        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), sourceBound)
-            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), targetBound);
+        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), getSourceBound())
+            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), getTargetBound());
     }
 
     /**

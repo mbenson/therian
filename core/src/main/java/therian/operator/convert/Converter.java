@@ -16,8 +16,6 @@
 package therian.operator.convert;
 
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Map;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
@@ -26,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import therian.Operator;
 import therian.TherianContext;
 import therian.operation.Convert;
-import therian.util.Types;
+import therian.operator.FromSourceToTarget;
 
 /**
  * {@link Convert} {@link Operator} superclass.
@@ -48,18 +46,15 @@ import therian.util.Types;
  * @param <TARGET>
  */
 public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implements
-    Operator<Convert<? extends SOURCE, ? super TARGET>> {
+    Operator<Convert<? extends SOURCE, ? super TARGET>>, FromSourceToTarget.FromSource<SOURCE>,
+    FromSourceToTarget.ToTarget<TARGET> {
 
     /**
      * Accommodates the situation where a {@link Converter} applies to multiple target types that share no common
      * descendant as in the case of e.g. array types.
      */
     public static abstract class WithDynamicTarget<SOURCE> extends AbstractConverter implements
-        Operator<Convert<? extends SOURCE, ?>> {
-        private static final TypeVariable<?>[] TYPE_PARAMS = Converter.WithDynamicTarget.class.getTypeParameters();
-
-        private final Type sourceBound = Types.unrollVariables(
-            TypeUtils.getTypeArguments(getClass(), Converter.WithDynamicTarget.class), TYPE_PARAMS[0]);
+        Operator<Convert<? extends SOURCE, ?>>, FromSourceToTarget.FromSource<SOURCE> {
 
         /**
          * {@link Logger} instance.
@@ -73,7 +68,12 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
         @Override
         public boolean supports(TherianContext context, Convert<? extends SOURCE, ?> convert) {
             return !(isNoop(convert) && isRejectNoop())
-                && TypeUtils.isInstance(convert.getSourcePosition().getValue(), sourceBound);
+                && TypeUtils.isInstance(convert.getSourcePosition().getValue(), getSourceBound());
+        }
+
+        @Override
+        protected Type getTargetBound() {
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -81,15 +81,6 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
      * {@link Logger} instance.
      */
     protected final Logger log = LoggerFactory.getLogger(getClass());
-
-    private final Type sourceBound;
-    private final Type targetBound;
-
-    {
-        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(getClass(), Converter.class);
-        sourceBound = Types.unrollVariables(typeArguments, Converter.class.getTypeParameters()[0]);
-        targetBound = Types.unrollVariables(typeArguments, Converter.class.getTypeParameters()[1]);
-    }
 
     // override default parameter name
     @Override
@@ -105,8 +96,8 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
     @Override
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
         return !(isNoop(convert) && isRejectNoop())
-            && TypeUtils.isInstance(convert.getSourcePosition().getValue(), sourceBound)
-            && TypeUtils.isAssignable(targetBound, convert.getTargetPosition().getType());
+            && TypeUtils.isInstance(convert.getSourcePosition().getValue(), getSourceBound())
+            && TypeUtils.isAssignable(getTargetBound(), convert.getTargetPosition().getType());
     }
 
 }
