@@ -96,8 +96,8 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implem
     @Override
     public boolean supports(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
         return !(isNoop(convert) && isRejectNoop())
-            && TypeUtils.isInstance(convert.getSourcePosition().getValue(), getSourceBound())
-            && TypeUtils.isAssignable(getTargetBound(), convert.getTargetPosition().getType());
+            && TypeUtils.isAssignable(convert.getSourceType().getType(), getSourceBound())
+            && TypeUtils.isAssignable(getTargetBound(), convert.getTargetType().getType());
     }
 
 }

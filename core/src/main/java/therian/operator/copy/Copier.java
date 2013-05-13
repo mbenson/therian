@@ -48,7 +48,8 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
  */
 @DependsOn(DefaultImmutableChecker.class)
 public abstract class Copier<SOURCE, TARGET> extends FromSourceToTarget implements
-    Operator<Copy<? extends SOURCE, ? extends TARGET>>, FromSourceToTarget.FromSource<SOURCE>, FromSourceToTarget.ToTarget<TARGET> {
+    Operator<Copy<? extends SOURCE, ? extends TARGET>>, FromSourceToTarget.FromSource<SOURCE>,
+    FromSourceToTarget.ToTarget<TARGET> {
 
     /**
      * {@link Logger} instance.
@@ -70,8 +71,8 @@ public abstract class Copier<SOURCE, TARGET> extends FromSourceToTarget implemen
         if (context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue() && isRejectImmutable()) {
             return false;
         }
-        return TypeUtils.isInstance(copy.getSourcePosition().getValue(), getSourceBound())
-            && TypeUtils.isAssignable(copy.getTargetPosition().getType(), getTargetBound());
+        return TypeUtils.isAssignable(copy.getSourceType().getType(), getSourceBound())
+            && TypeUtils.isAssignable(copy.getTargetType().getType(), getTargetBound());
     }
 
     /**
