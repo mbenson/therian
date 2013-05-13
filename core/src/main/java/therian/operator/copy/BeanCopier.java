@@ -49,6 +49,10 @@ import therian.position.relative.Property;
 public class BeanCopier extends Copier<Object, Object> {
     public static final String[] SKIP_PROPERTIES = { "class" };
 
+    private enum ReturnProperties {
+        ALL, WRITABLE;
+    }
+
     @Override
     public boolean supports(TherianContext context, Copy<?, ?> copy) {
         return super.supports(context, copy)
@@ -60,7 +64,7 @@ public class BeanCopier extends Copier<Object, Object> {
         final Position.Readable<?> source, final Position.Readable<?> target) {
 
         final Set<String> sourceProperties = getPropertyNames(context, source);
-        final Set<String> targetProperties = getPropertyNames(context, target);
+        final Set<String> targetProperties = getPropertyNames(ReturnProperties.WRITABLE, context, target);
         targetProperties.retainAll(sourceProperties);
 
         final UnaryFunction<String, Copy<?, ?>> propertyNameToCopyOperation = new UnaryFunction<String, Copy<?, ?>>() {
@@ -85,13 +89,23 @@ public class BeanCopier extends Copier<Object, Object> {
     }
 
     private Set<String> getPropertyNames(TherianContext context, Position.Readable<?> position) {
+        return getPropertyNames(ReturnProperties.ALL, context, position);
+    }
+
+    private Set<String> getPropertyNames(ReturnProperties returnProperties, TherianContext context,
+        Position.Readable<?> position) {
         final Set<String> result = new HashSet<String>();
         for (final Iterator<FeatureDescriptor> iter =
             context.getELResolver().getFeatureDescriptors(context, position.getValue()); iter.hasNext();) {
             final String name = iter.next().getName();
-            if (!ArrayUtils.contains(SKIP_PROPERTIES, name)) {
-                result.add(name);
+            if (ArrayUtils.contains(SKIP_PROPERTIES, name)) {
+                continue;
             }
+            if (returnProperties == ReturnProperties.WRITABLE
+                && context.getELResolver().isReadOnly(context, position.getValue(), name)) {
+                continue;
+            }
+            result.add(name);
         }
         return result;
     }
