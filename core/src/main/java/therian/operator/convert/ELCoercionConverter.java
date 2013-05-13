@@ -37,37 +37,51 @@ import therian.uelbox.UEL;
  */
 @StandardOperator
 public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
+    /**
+     * Subclass that does not reject noops. The most apparent effect of using this converter is that {@code null} values
+     * will be converted to "default" values per The Expression Language Specification v2.2, section 1.18. As such, this
+     * converter is not enabled as a standard operator.
+     */
+    public static class HandlesNoop extends ELCoercionConverter {
+        @Override
+        protected boolean isRejectNoop() {
+            return false;
+        }
+    }
 
     @Override
-    public boolean perform(TherianContext context, Convert<?, ?> operation) {
+    public boolean perform(TherianContext context, Convert<?, ?> convert) {
         final Object value;
         try {
-            value = UEL.coerceToType(context, getRawTargetType(operation), operation.getSourcePosition().getValue());
+            value = UEL.coerceToType(context, getRawTargetType(convert), convert.getSourcePosition().getValue());
         } catch (final ELException e) {
             return false;
         }
         @SuppressWarnings("unchecked")
-        final Convert<?, Object> raw = (Convert<?, Object>) operation;
+        final Convert<?, Object> raw = (Convert<?, Object>) convert;
         raw.getTargetPosition().setValue(value);
         return true;
     }
 
     @Override
-    public boolean supports(TherianContext context, Convert<?, ?> operation) {
-        final Class<?> rawTargetType = getRawTargetType(operation);
+    public boolean supports(TherianContext context, Convert<?, ?> convert) {
+        if (!super.supports(context, convert)) {
+            return false;
+        }
+        final Class<?> rawTargetType = getRawTargetType(convert);
         final Class<?> useTargetType =
-                ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);
+            ObjectUtils.defaultIfNull(ClassUtils.primitiveToWrapper(rawTargetType), rawTargetType);
 
         // per UEL spec v2.2 section 1.18:
         if (String.class.equals(useTargetType)) {
             return true;
         }
-        final Object source = operation.getSourcePosition().getValue();
+        final Object source = convert.getSourcePosition().getValue();
 
         if (BigDecimal.class.equals(useTargetType) || BigInteger.class.equals(useTargetType)
-                || Number.class.isAssignableFrom(useTargetType) && ClassUtils.wrapperToPrimitive(useTargetType) != null) {
+            || Number.class.isAssignableFrom(useTargetType) && ClassUtils.wrapperToPrimitive(useTargetType) != null) {
             return source == null || source instanceof String || source instanceof Character
-                    || source instanceof Number;
+                || source instanceof Number;
         }
         if (Character.class.equals(useTargetType)) {
             return source == null || source instanceof String || source instanceof Number;
@@ -79,7 +93,7 @@ public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
             return source == null || source instanceof String;
         }
         return source == null || "".equals(source) || source instanceof String
-                && PropertyEditorManager.findEditor(useTargetType) != null;
+            && PropertyEditorManager.findEditor(useTargetType) != null;
     }
 
     private static Class<?> getRawTargetType(Convert<?, ?> operation) {
