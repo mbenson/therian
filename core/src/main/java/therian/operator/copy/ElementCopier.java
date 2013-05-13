@@ -33,8 +33,7 @@ public class ElementCopier implements Operator<Copy<?, ?>> {
         final ElementFactory sourceElementFactory = createElementFactory(copy.getSourcePosition());
         final ElementFactory targetElementFactory = createElementFactory(copy.getTargetPosition());
         for (int i = 0, sz = context.eval(Size.of(copy.getSourcePosition())); i < sz; i++) {
-            if (context
-                .evalSuccessIfSupported(Copy.to(targetElementFactory.element(i), sourceElementFactory.element(i)))) {
+            if (context.evalSuccess(Copy.to(targetElementFactory.element(i), sourceElementFactory.element(i)))) {
                 continue;
             }
             return false;

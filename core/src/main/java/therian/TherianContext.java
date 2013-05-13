@@ -43,13 +43,13 @@ import therian.util.ReadOnlyUtils;
 public class TherianContext extends ELContextWrapper {
     /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
-     * 
+     *
      * @see TherianContext#doWithHints(UnaryFunction, Hint...)
      */
     public static abstract class Hint {
         /**
          * By default, {@link #getClass()}
-         * 
+         *
          * @return Class, of which {@code this} must be an instance
          */
         protected Class<? extends Hint> getTypeImpl() {
@@ -58,7 +58,7 @@ public class TherianContext extends ELContextWrapper {
 
         /**
          * Get the hint type to use.
-         * 
+         *
          * @return Class
          */
         public final Class<? extends Hint> getType() {
@@ -119,7 +119,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get current thread-bound instance.
-     * 
+     *
      * @return {@link TherianContext} or {@code null}
      */
     private static TherianContext getCurrentInstance() {
@@ -128,7 +128,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get some usable {@link TherianContext} instance.
-     * 
+     *
      * @return current thread-bound instance or {@code Therian.standard().context()}
      */
     public static TherianContext getInstance() {
@@ -142,7 +142,7 @@ public class TherianContext extends ELContextWrapper {
     /**
      * Return the result of evaluating {@code function} against {@code this} with {@code hints} specified for the
      * duration.
-     * 
+     *
      * @param function
      * @param hints
      * @return T
@@ -186,7 +186,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Learn whether {@code operation} is supported by this context.
-     * 
+     *
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
@@ -218,7 +218,7 @@ public class TherianContext extends ELContextWrapper {
      * Evaluates {@code operation} if supported; otherwise returns {@code null}. You may distinguish between a
      * {@code null} result and "not supported" by calling {@link #supports(Operation)} and {@link #eval(Operation)}
      * independently.
-     * 
+     *
      * @param operation
      * @return RESULT or {@code null}
      * @throws NullPointerException on {@code null} input
@@ -230,7 +230,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Evaluates {@code operation} if supported; otherwise returns {@code defaultValue}.
-     * 
+     *
      * @param operation
      * @param defaultValue
      * @return RESULT or {@code null}
@@ -244,35 +244,25 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
+     *
      * @param operation
-     * @return boolean
+     * @return whether {@code operation} was supported and successful
      * @throws NullPointerException on {@code null} input
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
     public final synchronized boolean evalSuccess(Operation<?> operation) {
+        if (!supports(operation)) {
+            return false;
+        }
         eval(operation);
         return operation.isSuccessful();
-    }
-
-    /**
-     * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
-     * @param operation
-     * @return boolean
-     * @throws NullPointerException on {@code null} input
-     * @throws OperationException potentially, via {@link Operation#getResult()}
-     * @see #supports(Operation)
-     */
-    public final synchronized boolean evalSuccessIfSupported(Operation<?> operation) {
-        return supports(operation) && evalSuccess(operation);
     }
 
     /**
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
      * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
-     * 
+     *
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -334,7 +324,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Delegate the success of the current operation to that of another.
-     * 
+     *
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -346,7 +336,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Delegate the success of the current operation to that of another.
-     * 
+     *
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -370,7 +360,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Return a read-only view of the current operations stack.
-     * 
+     *
      * @return Deque<Operation<?>>
      */
     public Deque<Operation<?>> getOperations() {

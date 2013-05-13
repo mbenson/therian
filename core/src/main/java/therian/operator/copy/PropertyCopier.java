@@ -32,7 +32,7 @@ import therian.position.relative.Property;
 
 /**
  * Copies based on annotated property mapping.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -66,7 +66,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
         for (Mapping.Value v : mapping.value()) {
             Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
-                    "both from and to cannot be empty for a single @Mapping.Value");
+                "both from and to cannot be empty for a single @Mapping.Value");
         }
     }
 
@@ -83,7 +83,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                 source = Property.at(from).of(source);
             }
             final Copy<?, ?> nested = Copy.to(target, source);
-            if (!context.evalSuccessIfSupported(nested)) {
+            if (!context.evalSuccess(nested)) {
                 throw new OperationException(copy, "nested %s was unsuccessful", nested);
             }
         }
