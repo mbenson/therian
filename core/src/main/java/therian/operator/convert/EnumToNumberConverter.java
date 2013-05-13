@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -15,6 +16,7 @@ import therian.util.Positions;
  * delegation), the destination parameter is unspecified at the class level.
  */
 @StandardOperator
+@DependsOn({ ELCoercionConverter.class, NOPConverter.class })
 public class EnumToNumberConverter extends Converter.WithDynamicTarget<Enum<?>> {
 
     @Override
