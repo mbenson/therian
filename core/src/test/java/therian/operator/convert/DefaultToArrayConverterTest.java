@@ -17,6 +17,7 @@
 package therian.operator.convert;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -73,8 +74,11 @@ public class DefaultToArrayConverterTest extends OperatorTest {
     @Test
     public void testArrayOfIntToArrayOfObject() {
         final int[] beast = { 6, 6, 6 };
-        assertArrayEquals(ArrayUtils.toObject(beast),
-            therianContext.eval(Convert.to(Object[].class, Positions.readOnly(beast))));
+        final Object[] result = therianContext.eval(Convert.to(Object[].class, Positions.readOnly(beast)));
+        assertEquals(beast.length, result.length);
+        for (int i = 0; i < beast.length; i++) {
+            assertEquals(Integer.valueOf(beast[i]), result[i]);
+        }
     }
 
     @Test
