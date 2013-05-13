@@ -15,18 +15,61 @@
  */
 package therian.uelbox;
 
+import java.beans.FeatureDescriptor;
+import java.util.Iterator;
+
 import javax.el.ELContext;
 import javax.el.ELException;
+import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
 
 /**
  * UEL utility methods.
  */
 public class UEL {
+    private static final ELResolver NOP_EL_RESOLVER = new ELResolver() {
+
+        @Override
+        public Class<?> getCommonPropertyType(ELContext arg0, Object arg1) {
+            return null;
+        }
+
+        @Override
+        public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext arg0, Object arg1) {
+            return null;
+        }
+
+        @Override
+        public Class<?> getType(ELContext arg0, Object arg1, Object arg2) throws NullPointerException,
+            PropertyNotFoundException, ELException {
+            return null;
+        }
+
+        @Override
+        public Object getValue(ELContext arg0, Object arg1, Object arg2) throws NullPointerException,
+            PropertyNotFoundException, ELException {
+            return null;
+        }
+
+        @Override
+        public boolean isReadOnly(ELContext arg0, Object arg1, Object arg2) throws NullPointerException,
+            PropertyNotFoundException, ELException {
+            return false;
+        }
+
+        @Override
+        public void setValue(ELContext arg0, Object arg1, Object arg2, Object arg3) throws NullPointerException,
+            PropertyNotFoundException, PropertyNotWritableException, ELException {
+        }
+
+    };
+
     /**
      * Get an ExpressionFactory instance for the specified context, using {@link ELContext#getContext(Class)}, and
      * setting such a context value, if not found, to {@link javax.el.ExpressionFactory#newInstance()}.
-     * 
+     *
      * @param elContext
      * @return ExpressionFactory
      */
@@ -41,7 +84,7 @@ public class UEL {
 
     /**
      * Casts context objects per documented convention.
-     * 
+     *
      * @param context
      * @param key
      * @param <T>
@@ -55,7 +98,7 @@ public class UEL {
 
     /**
      * Embed the specified expression, if necessary, using '#' as the triggering character.
-     * 
+     *
      * @param expression
      * @return String
      */
@@ -65,7 +108,7 @@ public class UEL {
 
     /**
      * Embed the specified expression, if necessary, using the specified triggering character.
-     * 
+     *
      * @param expression
      * @param trigger
      * @return String
@@ -82,7 +125,7 @@ public class UEL {
 
     /**
      * Use EL specification coercion facilities to coerce an object to the specified type.
-     * 
+     *
      * @param context
      * @param toType
      * @param object
@@ -93,5 +136,14 @@ public class UEL {
         @SuppressWarnings("unchecked")
         T result = (T) getExpressionFactory(context).coerceToType(object, toType);
         return result;
+    }
+
+    /**
+     * Get an {@link ELResolver} that handles nothing.
+     *
+     * @return ELResolver
+     */
+    public static ELResolver nopELResolver() {
+        return NOP_EL_RESOLVER;
     }
 }
