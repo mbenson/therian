@@ -53,7 +53,7 @@ public class Therian {
     private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
 
     private Therian(TherianModule... modules) {
-        this.modules = modules == null ? new TherianModule[0] : modules;
+        this.modules = Validate.noNullElements(modules, "modules");
 
         final Set<Class<?>> operatorsPresent = new HashSet<Class<?>>();
         final Set<Class<?>> operatorsNeeded = new HashSet<Class<?>>();

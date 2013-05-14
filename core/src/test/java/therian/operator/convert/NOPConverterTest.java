@@ -16,10 +16,13 @@
 package therian.operator.convert;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 
 import therian.TherianModule;
+import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.testfixture.MetasyntacticVariable;
@@ -39,5 +42,19 @@ public class NOPConverterTest extends OperatorTest {
         assertEquals(Long.valueOf(100L),
             therianContext.eval(Convert.to(Long.class, Positions.readOnly(Long.valueOf(100L)))));
         assertEquals(Boolean.TRUE, therianContext.eval(Convert.to(Boolean.class, Positions.readOnly(Boolean.TRUE))));
+
+        final TypeLiteral<CharSequence> charSequenceType = new TypeLiteral<CharSequence>() {};
+        assertNull(therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(String.class, null))));
+        assertEquals("", therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(""))));
+        assertEquals("", therianContext.eval(Convert.to(String.class, Positions.readOnly(""))));
+        assertSame(MetasyntacticVariable.FOO,
+            therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertSame(MetasyntacticVariable.FOO, therianContext.eval(Convert.to(new TypeLiteral<Enum<?>>() {},
+            Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertEquals(Integer.valueOf(666),
+            therianContext.eval(Convert.to(Integer.class, Positions.readOnly(Integer.valueOf(666)))));
+        assertEquals(Integer.valueOf(666),
+            therianContext.eval(Convert.to(Number.class, Positions.readOnly(Integer.valueOf(666)))));
+
     }
 }
