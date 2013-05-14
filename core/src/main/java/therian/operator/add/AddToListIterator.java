@@ -35,9 +35,9 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean perform(TherianContext context, Add<?, ListIterator<?>> operation) {
+    public boolean perform(TherianContext context, Add<?, ListIterator<?>> add) {
         @SuppressWarnings("rawtypes")
-        final ListIterator listIterator = operation.getTargetPosition().getValue();
+        final ListIterator listIterator = add.getTargetPosition().getValue();
 
         int mark = 0;
         while (listIterator.hasNext()) {
@@ -45,8 +45,8 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
             mark++;
         }
         try {
-            listIterator.add(operation.getSourcePosition().getValue());
-            operation.setResult(true);
+            listIterator.add(add.getSourcePosition().getValue());
+            add.setResult(true);
             return true;
         } catch (UnsupportedOperationException e) {
             return false;
@@ -58,24 +58,24 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
     }
 
     @Override
-    public boolean supports(TherianContext context, Add<?, ListIterator<?>> operation) {
+    public boolean supports(TherianContext context, Add<?, ListIterator<?>> add) {
         // cannot add to immutable types
-        if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
+        if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
             return false;
         }
-        if (!TypeUtils.isAssignable(operation.getTargetPosition().getType(), ListIterator.class)) {
+        if (!TypeUtils.isAssignable(add.getTargetPosition().getType(), ListIterator.class)) {
             return false;
         }
         final Type targetElementType =
             Types.unrollVariables(
-                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), ListIterator.class),
+                TypeUtils.getTypeArguments(add.getTargetPosition().getType(), ListIterator.class),
                 ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw
             return true;
         }
-        return TypeUtils.isAssignable(operation.getSourcePosition().getType(), targetElementType);
+        return TypeUtils.isAssignable(add.getSourcePosition().getType(), targetElementType);
     }
 
 }

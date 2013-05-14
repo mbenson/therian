@@ -34,32 +34,32 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public boolean perform(TherianContext context, Add<?, Collection<?>> operation) {
+    public boolean perform(TherianContext context, Add<?, Collection<?>> add) {
         final boolean result =
-            ((Collection) operation.getTargetPosition().getValue()).add(operation.getSourcePosition().getValue());
-        operation.setResult(result);
+            ((Collection) add.getTargetPosition().getValue()).add(add.getSourcePosition().getValue());
+        add.setResult(result);
         return true;
     }
 
     @Override
-    public boolean supports(TherianContext context, Add<?, Collection<?>> operation) {
+    public boolean supports(TherianContext context, Add<?, Collection<?>> add) {
         // cannot add to immutable types
-        if (context.eval(ImmutableCheck.of(operation.getTargetPosition())).booleanValue()) {
+        if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
             return false;
         }
-        if (!TypeUtils.isAssignable(operation.getTargetPosition().getType(), Collection.class)) {
+        if (!TypeUtils.isAssignable(add.getTargetPosition().getType(), Collection.class)) {
             return false;
         }
         final Type targetElementType =
             Types.unrollVariables(
-                TypeUtils.getTypeArguments(operation.getTargetPosition().getType(), Collection.class),
+                TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class),
                 Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection
             return true;
         }
-        return TypeUtils.isAssignable(operation.getSourcePosition().getType(), targetElementType);
+        return TypeUtils.isAssignable(add.getSourcePosition().getType(), targetElementType);
     }
 
 }
