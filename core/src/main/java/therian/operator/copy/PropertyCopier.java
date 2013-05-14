@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import therian.OperationException;
+import therian.OperatorDefinitionException;
 import therian.TherianContext;
 import therian.operation.Copy;
 import therian.position.Position;
@@ -58,15 +59,19 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     private final Mapping mapping;
     {
-        @SuppressWarnings("rawtypes")
-        final Class<? extends PropertyCopier> c = getClass();
-        mapping = c.getAnnotation(Mapping.class);
-        Validate.validState(mapping != null, "no @Mapping defined for %s", c);
-        Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
+        try {
+            @SuppressWarnings("rawtypes")
+            final Class<? extends PropertyCopier> c = getClass();
+            mapping = c.getAnnotation(Mapping.class);
+            Validate.validState(mapping != null, "no @Mapping defined for %s", c);
+            Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
 
-        for (Mapping.Value v : mapping.value()) {
-            Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
-                "both from and to cannot be empty for a single @Mapping.Value");
+            for (Mapping.Value v : mapping.value()) {
+                Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
+                    "both from and to cannot be empty for a single @Mapping.Value");
+            }
+        } catch (Exception e) {
+            throw new OperatorDefinitionException(this, e);
         }
     }
 
