@@ -80,6 +80,48 @@ public class Positions {
 
     }
 
+    private static class W<T> implements Position.Writable<T> {
+        private final Type type;
+
+        W(Type type) {
+            this.type = type;
+        }
+
+        @Override
+        public Type getType() {
+            return type;
+        }
+
+        @Override
+        public void setValue(T value) {
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj instanceof W == false) {
+                return false;
+            }
+            W<?> other = (W<?>) obj;
+            return other.getType().equals(type);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 53 << 4;
+            result |= type.hashCode();
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Writable Position<%s>", Types.toString(type));
+        }
+
+    }
+
     private static class RW<T> implements Position.ReadWrite<T> {
         private final Type type;
         private T value;
@@ -214,6 +256,16 @@ public class Positions {
     }
 
     /**
+     * Get a read-write position of type {@code type}.
+     *
+     * @param type not {@code null}
+     * @return Position.ReadWrite
+     */
+    public static <T> Position.ReadWrite<T> readWrite(final Class<T> type) {
+        return Positions.<T> readWrite((Type) type);
+    }
+
+    /**
      * Get a read-write position of type {@code type#value}.
      *
      * @param type not {@code null}
@@ -257,6 +309,38 @@ public class Positions {
      */
     public static <T> Position.ReadWrite<T> readWrite(final TypeLiteral<T> type, T initialValue) {
         return readWrite(Validate.notNull(type, "type").value, initialValue);
+    }
+
+    /**
+     * Get a writable position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
+     * {@code T}.
+     *
+     * @param type not {@code null}
+     * @return Position.Writable
+     */
+    public static <T> Position.Writable<T> writable(final Type type) {
+        Validate.notNull(type, "type");
+        return new W<T>(type);
+    }
+
+    /**
+     * Get a writable position of type {@code type#value}.
+     *
+     * @param type not {@code null}
+     * @return Position.Writable
+     */
+    public static <T> Position.Writable<T> writable(final TypeLiteral<T> type) {
+        return writable(Validate.notNull(type, "type").value);
+    }
+
+    /**
+     * Get a writable position of type {@code type}.
+     *
+     * @param type not {@code null}
+     * @return Position.Writable
+     */
+    public static <T> Position.Writable<T> writable(final Class<T> type) {
+        return Positions.<T> readWrite((Type) type);
     }
 
     /**
