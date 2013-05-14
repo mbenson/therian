@@ -180,6 +180,17 @@ public class Positions {
     }
 
     /**
+     * Get a read-only position of type {@code type} and value {@code value}.
+     *
+     * @param type not {@code null}
+     * @param value
+     * @return Position.Readable
+     */
+    public static <T> Position.Readable<T> readOnly(final Class<T> type, final T value) {
+        return Positions.<T> readOnly((Type) type, value);
+    }
+
+    /**
      * Get a read-only position of type {@code type#value} and value {@code value}.
      *
      * @param type not {@code null}
@@ -224,6 +235,17 @@ public class Positions {
         Validate.isTrue(TypeUtils.isInstance(initialValue, type), "%s is not an instance of %s", initialValue,
             Types.toString(type));
         return new RW<T>(type, initialValue);
+    }
+
+    /**
+     * Get a read-write position of type {@code type} and with initial value {@code initialValue}.
+     *
+     * @param type not {@code null}
+     * @param initialValue
+     * @return Position.ReadWrite
+     */
+    public static <T> Position.ReadWrite<T> readWrite(final Class<T> type, T initialValue) {
+        return Positions.<T> readWrite((Type) type, initialValue);
     }
 
     /**
