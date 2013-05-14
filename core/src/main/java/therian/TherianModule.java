@@ -15,8 +15,16 @@
  */
 package therian;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.el.ELContextListener;
 import javax.el.ELResolver;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.Validate;
+
+import therian.Operator.DependsOn;
 
 /**
  * Therian module.
@@ -67,5 +75,68 @@ public class TherianModule {
 
     public static TherianModule create() {
         return new TherianModule();
+    }
+
+    public static TherianModule expandingDependencies(final TherianModule wrapped) {
+        Validate.notNull(wrapped, "wrapped");
+
+        @SuppressWarnings("rawtypes")
+        final Set<Class<? extends Operator>> operatorTypesPresent = new HashSet<Class<? extends Operator>>();
+        @SuppressWarnings("rawtypes")
+        final Set<Class<? extends Operator>> operatorTypesNeeded = new HashSet<Class<? extends Operator>>();
+
+        @SuppressWarnings("rawtypes")
+        class DependencyManager {
+
+            void handle(Operator<?> operator) {
+                final Class<? extends Operator> type = operator.getClass();
+                operatorTypesPresent.add(type);
+                operatorTypesNeeded.remove(type);
+
+                Class<?> c = type;
+                while (c != null) {
+                    handle(c.getAnnotation(DependsOn.class));
+                    c = c.getSuperclass();
+                }
+            }
+
+            void handle(DependsOn deps) {
+                if (deps != null) {
+                    for (Class<? extends Operator> type : deps.value()) {
+                        handle(type);
+                    }
+                }
+            }
+
+            void handle(Class<? extends Operator> type) {
+                if (!operatorTypesPresent.contains(type)) {
+                    operatorTypesNeeded.add(type);
+                }
+                handle(type.getAnnotation(DependsOn.class));
+            }
+
+        }
+
+        final DependencyManager dependencyManager = new DependencyManager();
+        for (Operator<?> op : wrapped.getOperators()) {
+            dependencyManager.handle(op);
+        }
+
+        if (operatorTypesNeeded.isEmpty()) {
+            return wrapped;
+        }
+
+        final Operator<?>[] deps = new Operator[operatorTypesNeeded.size()];
+        int index = 0;
+        for (@SuppressWarnings("rawtypes")
+        Class<? extends Operator> dep : operatorTypesNeeded) {
+            try {
+                deps[index++] = dep.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return TherianModule.create().withELContextListeners(wrapped.getElContextListeners())
+            .withELResolvers(wrapped.getElResolvers()).withOperators(ArrayUtils.addAll(wrapped.getOperators(), deps));
     }
 }
