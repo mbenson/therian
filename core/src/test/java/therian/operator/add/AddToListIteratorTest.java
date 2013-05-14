@@ -16,14 +16,13 @@ import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.Add;
 import therian.operator.OperatorTest;
-import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.util.Positions;
 
 public class AddToListIteratorTest extends OperatorTest {
 
     @Override
     protected TherianModule module() {
-        return TherianModule.create().withOperators(new AddToListIterator(), new DefaultImmutableChecker());
+        return TherianModule.create().withOperators(new AddToListIterator());
     }
 
     @Test

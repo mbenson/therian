@@ -22,15 +22,18 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.util.Types;
 
 /**
  * Add an element to a {@link ListIterator}.
  */
 @StandardOperator
+@DependsOn(DefaultImmutableChecker.class)
 public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
 
     @Override

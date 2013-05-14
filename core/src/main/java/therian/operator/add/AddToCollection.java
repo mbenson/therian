@@ -20,16 +20,19 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.util.Types;
 
 /**
  * Add an element to a {@link Collection}.
  */
 @StandardOperator
+@DependsOn(DefaultImmutableChecker.class)
 public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> {
 
     @Override
@@ -51,8 +54,7 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(
-                TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class),
+            Types.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class),
                 Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
