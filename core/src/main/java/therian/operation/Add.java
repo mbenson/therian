@@ -68,11 +68,6 @@ public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Posi
         return result;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Add %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
-    }
-
     public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
         Position.Readable<SOURCE> sourcePosition) {
         return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
