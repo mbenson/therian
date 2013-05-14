@@ -33,18 +33,36 @@ import therian.position.Position;
 
 /**
  * {@link Position} relative to some other {@link Position.Readable}.
- * 
+ *
  * @param <P>
  * @param <T>
  */
 public interface RelativePosition<P, T> extends Position<T> {
 
+    /**
+     * Readable {@link RelativePosition}.
+     *
+     * @param <P>
+     * @param <T>
+     */
     public interface Readable<P, T> extends RelativePosition<P, T>, Position.Readable<T> {
     }
 
+    /**
+     * Writable {@link RelativePosition}.
+     *
+     * @param <P>
+     * @param <T>
+     */
     public interface Writable<P, T> extends RelativePosition<P, T>, Position.Writable<T> {
     }
 
+    /**
+     * Read/write {@link RelativePosition}.
+     *
+     * @param <P>
+     * @param <T>
+     */
     public interface ReadWrite<P, T> extends RelativePosition<P, T>, Position.ReadWrite<T> {
     }
 
@@ -62,7 +80,7 @@ public interface RelativePosition<P, T> extends Position<T> {
     /**
      * Uses an {@link Implements} annotation to declare the {@link Position} interface(s) for which it provides an
      * implementation, defining corresponding methods prepending the parent position as an argument.
-     * 
+     *
      * @param <T>
      */
     public interface Mixin<T> {
@@ -134,7 +152,7 @@ public interface RelativePosition<P, T> extends Position<T> {
 
     /**
      * Get type relative to parent position.
-     * 
+     *
      * @param <T>
      */
     @Implements(Position.class)
@@ -144,7 +162,7 @@ public interface RelativePosition<P, T> extends Position<T> {
 
     /**
      * Get value relative to parent position.
-     * 
+     *
      * @param <T>
      */
     @Implements(Position.Readable.class)
@@ -154,7 +172,7 @@ public interface RelativePosition<P, T> extends Position<T> {
 
     /**
      * Set value relative to parent position.
-     * 
+     *
      * @param <T>
      */
     @Implements(Position.Writable.class)

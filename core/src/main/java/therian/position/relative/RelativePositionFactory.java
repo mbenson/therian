@@ -17,6 +17,12 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import therian.Typed;
 import therian.position.Position;
 
+/**
+ * Describes an entity capable of producing {@link RelativePosition}s.
+ *
+ * @param <PARENT>
+ * @param <TYPE>
+ */
 public class RelativePositionFactory<PARENT, TYPE> {
     private class RelativePositionInvocationHandler implements InvocationHandler {
         final Position.Readable<? extends PARENT> parentPosition;
@@ -137,7 +143,7 @@ public class RelativePositionFactory<PARENT, TYPE> {
 
     /**
      * Obtain the {@link RelativePosition}.
-     * 
+     *
      * @param parentPosition
      * @return {@link RelativePosition}
      */
@@ -170,7 +176,7 @@ public class RelativePositionFactory<PARENT, TYPE> {
 
     /**
      * Helper to get known composite interfaces. Most implementors should never have to override this.
-     * 
+     *
      * @return Class[]
      */
     @SuppressWarnings({ "rawtypes" })
