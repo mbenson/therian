@@ -59,7 +59,6 @@ public class PropertyTest {
         book.setAuthor(author);
         final RelativePosition.ReadWrite<Author, List<Address>> bookAuthorAddresses =
             Property.<List<Address>> at("addresses").of(Property.<Author> at("author").of(Positions.readOnly(book)));
-        Property.<List<Address>> at("addresses").of(Positions.readOnly(author));
         final Type addressListType = new TypeLiteral<List<Address>>() {}.value;
         assertEquals(addressListType, bookAuthorAddresses.getType());
 
