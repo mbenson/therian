@@ -41,7 +41,7 @@ import therian.util.Types;
 public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object> {
 
     @SuppressWarnings("rawtypes")
-    private static class Delegate extends CopyingConverter {
+    private static class Delegate extends CopyingConverter.DynamicallyTyped {
         private static final Typed<Object> sourceType = Types.wrap(Object.class);
 
         private final Convert<?, ?> convert;

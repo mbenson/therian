@@ -51,6 +51,22 @@ import therian.util.Types;
  */
 public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE, TARGET> {
     /**
+     * Class to be extended to implement dynamically typed {@link CopyingConverter}s.
+     *
+     * @param <SOURCE>
+     * @param <TARGET>
+     */
+    public static abstract class DynamicallyTyped<SOURCE, TARGET> extends CopyingConverter<SOURCE, TARGET> {
+
+        @BindTypeVariable
+        public abstract Typed<SOURCE> getSourceType();
+
+        @BindTypeVariable
+        public abstract Typed<TARGET> getTargetType();
+
+    }
+
+    /**
      * Standard converter to {@link Iterable} (as {@link List}).
      */
     @SuppressWarnings("rawtypes")
@@ -160,7 +176,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         }
     }
 
-    private static abstract class Fluent<TARGET> extends CopyingConverter<Object, TARGET> {
+    private static abstract class Fluent<TARGET> extends CopyingConverter.DynamicallyTyped<Object, TARGET> {
         private static final Typed<Object> sourceType = Types.wrap(Object.class);
 
         private final Constructor<? extends TARGET> constructor;
@@ -212,12 +228,6 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         // failure to perform() instead. We do reject null source values, however.
         return super.supports(context, convert) && convert.getSourcePosition().getValue() != null;
     }
-
-    @BindTypeVariable
-    public abstract Typed<SOURCE> getSourceType();
-
-    @BindTypeVariable
-    public abstract Typed<TARGET> getTargetType();
 
     /**
      * Create copy destination object from source position.
