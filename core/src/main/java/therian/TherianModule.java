@@ -15,6 +15,7 @@
  */
 package therian;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,8 +78,11 @@ public class TherianModule {
         return new TherianModule();
     }
 
-    public static TherianModule expandingDependencies(final TherianModule wrapped) {
-        Validate.notNull(wrapped, "wrapped");
+    protected static Operator<?>[] withDependencies(Operator<?>... operators) {
+        if (operators == null) {
+            return new Operator[0];
+        }
+        Validate.noNullElements(operators, "null operator at index %s");
 
         @SuppressWarnings("rawtypes")
         final Set<Class<? extends Operator>> operatorTypesPresent = new HashSet<Class<? extends Operator>>();
@@ -118,12 +122,12 @@ public class TherianModule {
         }
 
         final DependencyManager dependencyManager = new DependencyManager();
-        for (Operator<?> op : wrapped.getOperators()) {
+        for (Operator<?> op : operators) {
             dependencyManager.handle(op);
         }
 
         if (operatorTypesNeeded.isEmpty()) {
-            return wrapped;
+            return operators;
         }
 
         final Operator<?>[] deps = new Operator[operatorTypesNeeded.size()];
@@ -136,7 +140,17 @@ public class TherianModule {
                 throw new RuntimeException(e);
             }
         }
-        return TherianModule.create().withELContextListeners(wrapped.getElContextListeners())
-            .withELResolvers(wrapped.getElResolvers()).withOperators(ArrayUtils.addAll(wrapped.getOperators(), deps));
+        return ArrayUtils.addAll(operators, deps);
+    }
+
+    public static TherianModule expandingDependencies(final TherianModule module) {
+        Validate.notNull(module, "module");
+
+        final Operator<?>[] expandedOperators = withDependencies(module.getOperators());
+        if (Arrays.equals(expandedOperators, module.getOperators())) {
+            return module;
+        }
+        return TherianModule.create().withELContextListeners(module.getElContextListeners())
+            .withELResolvers(module.getElResolvers()).withOperators(expandedOperators);
     }
 }
