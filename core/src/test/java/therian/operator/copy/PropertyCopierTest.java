@@ -116,4 +116,13 @@ public class PropertyCopierTest extends OperatorTest {
         }
         new PropertyCopierWithEmptyAnnotation();
     }
+
+    @Test(expected = OperatorDefinitionException.class)
+    public void testInvalidAnnotation() {
+        @PropertyCopier.Mapping({ @Value })
+        class PropertyCopierWithInvalidAnnotation extends PropertyCopier<Object, Object> {
+
+        }
+        new PropertyCopierWithInvalidAnnotation();
+    }
 }
