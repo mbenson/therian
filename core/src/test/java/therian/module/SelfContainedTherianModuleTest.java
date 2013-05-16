@@ -201,23 +201,6 @@ public class SelfContainedTherianModuleTest {
         public interface BlahOperatorInterface extends Operator<Blah> {
         }
 
-        @SuppressWarnings("unused")
-        private static class PrivateBlahOperator implements Operator<Blah> {
-            public PrivateBlahOperator() {
-            }
-
-            @Override
-            public boolean perform(TherianContext context, Blah op) {
-                op.setResult(null);
-                return true;
-            }
-
-            @Override
-            public boolean supports(TherianContext context, Blah operation) {
-                return true;
-            }
-        }
-
         public Module(Interfaces interfacesPolicy) {
             super(interfacesPolicy);
             withOperators(new NOPConverter(), new ELCoercionConverter());

@@ -94,7 +94,7 @@ public abstract class SelfContainedTherianModule extends TherianModule {
             paramTypes = new Class[] { getClass() };
             args = new Object[] { this };
         }
-        final Constructor<O> cs = ConstructorUtils.getAccessibleConstructor(c, paramTypes);
+        final Constructor<O> cs = ConstructorUtils.getMatchingAccessibleConstructor(c, paramTypes);
         if (cs == null) {
             return null;
         }
