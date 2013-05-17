@@ -159,16 +159,6 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (!super.supports(context, copy)) {
             return false;
         }
-        final Convert<?, Iterable> sourceToIterable = Convert.to(Iterable.class, copy.getSourcePosition());
-        if (!context.supports(sourceToIterable)) {
-            return false;
-        }
-
-        final Convert<?, Iterable> targetToIterable = Convert.to(Iterable.class, copy.getTargetPosition());
-        if (!context.supports(targetToIterable)) {
-            return false;
-        }
-
         final GetElementType<?> getSourceElementType = GetElementType.of(copy.getSourcePosition());
         if (!context.supports(getSourceElementType)) {
             return false;
@@ -179,8 +169,14 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
             return false;
         }
 
-        final Iterable sourceIterable = context.eval(sourceToIterable);
-        final Iterable targetIterable = context.eval(targetToIterable);
+        final Iterable sourceIterable = context.evalIfSupported(Convert.to(Iterable.class, copy.getSourcePosition()));
+        if (sourceIterable == null) {
+            return false;
+        }
+        final Iterable targetIterable = context.evalIfSupported(Convert.to(Iterable.class, copy.getTargetPosition()));
+        if (targetIterable == null) {
+            return false;
+        }
         final Type sourceElementType = context.eval(getSourceElementType);
         final Type targetElementType = context.eval(getTargetElementType);
 

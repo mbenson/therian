@@ -262,4 +262,23 @@ public class ContainerCopierTest extends OperatorTest {
         }
         assertFalse(eachEmployee.hasNext());
     }
+
+    @Test
+    public void testToArray() {
+        assertFalse(
+            "Cannot use ContainerCopier to copy to null target elements",
+            therianContext.supports(Copy.to(
+                Positions.readWrite(MetasyntacticVariable[].class,
+                    new MetasyntacticVariable[MetasyntacticVariable.values().length]),
+                Positions.readOnly(MetasyntacticVariable.values()))));
+    }
+
+    @Test
+    public void testToNull() {
+        // using a writable target would allow the ELCoercionConverter to convert the null source value to a null target value
+        assertFalse(
+            "Cannot use ContainerCopier to copy to read-only null target",
+            therianContext.supports(Copy.to(Positions.readOnly(MetasyntacticVariable[].class, null),
+                Positions.readOnly(MetasyntacticVariable.values()))));
+    }
 }
