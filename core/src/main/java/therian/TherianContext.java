@@ -225,7 +225,7 @@ public class TherianContext extends ELContextWrapper {
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT evalIfSupported(OPERATION operation) {
-        return supports(operation) ? eval(operation) : null;
+        return evalIfSupported(operation, null);
     }
 
     /**
