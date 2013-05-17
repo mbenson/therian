@@ -16,11 +16,13 @@
 package therian.operator.copy;
 
 import therian.Operator;
+import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.ImmutableCheck;
+import therian.operator.immutablecheck.DefaultImmutableChecker;
 import therian.position.Position;
 import therian.util.Positions;
 
@@ -29,6 +31,7 @@ import therian.util.Positions;
  * values.
  */
 @StandardOperator
+@DependsOn(DefaultImmutableChecker.class)
 public class ConvertingCopier extends Copier<Object, Object> {
 
     @Override
