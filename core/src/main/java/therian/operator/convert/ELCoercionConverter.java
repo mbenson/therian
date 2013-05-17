@@ -35,6 +35,7 @@ import therian.uelbox.UEL;
  * does not extend Converter due to its differing type allowances. Intended as a fallback strategy to implement "simple"
  * conversions (aka coercions) when other approaches have been exhausted.
  */
+//TODO implement a hint that will bypass the null-to-anything rule
 @StandardOperator
 public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
     /**
