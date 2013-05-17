@@ -59,13 +59,7 @@ public abstract class AssignableElementConverter<SOURCE, TARGET> extends Convert
         final Type targetComponentType = targetComponentType(convert.getTargetPosition());
         final Type sourceComponentType = sourceComponentType(convert.getSourcePosition());
 
-        final boolean result =
-            sourceComponentType != null && TypeUtils.isAssignable(sourceComponentType, targetComponentType);
-        if (!result) {
-            log.debug("Source component type [{}] does not seem to be assignable to target component type [{}]",
-                sourceComponentType, targetComponentType);
-        }
-        return result;
+        return sourceComponentType != null && TypeUtils.isAssignable(sourceComponentType, targetComponentType);
     }
 
     protected Type sourceComponentType(Typed<? extends SOURCE> item) {
