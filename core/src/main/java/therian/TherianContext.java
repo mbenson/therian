@@ -25,14 +25,11 @@ import javax.el.ELContext;
 import javax.el.ELResolver;
 
 import org.apache.commons.functor.UnaryFunction;
-import org.apache.commons.functor.UnaryPredicate;
 import org.apache.commons.functor.UnaryProcedure;
-import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
+import therian.OperatorManager.SupportChecker;
 import therian.el.TherianContextELResolver;
 import therian.uelbox.ELContextWrapper;
 import therian.util.ReadOnlyUtils;
@@ -43,13 +40,13 @@ import therian.util.ReadOnlyUtils;
 public class TherianContext extends ELContextWrapper {
     /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
-     *
+     * 
      * @see TherianContext#doWithHints(UnaryFunction, Hint...)
      */
     public static abstract class Hint {
         /**
          * By default, {@link #getClass()}
-         *
+         * 
          * @return Class, of which {@code this} must be an instance
          */
         protected Class<? extends Hint> getTypeImpl() {
@@ -58,36 +55,13 @@ public class TherianContext extends ELContextWrapper {
 
         /**
          * Get the hint type to use.
-         *
+         * 
          * @return Class
          */
         public final Class<? extends Hint> getType() {
             final Class<? extends Hint> result = getTypeImpl();
             Validate.validState(result.isInstance(this), "%s is not an instance of %s", this, result);
             return result;
-        }
-    }
-
-    private class OperatorFilter implements UnaryPredicate<Operator<?>> {
-        private final Operation<?> operation;
-
-        private OperatorFilter(Operation<?> operation) {
-            this.operation = Validate.notNull(operation);
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        public boolean test(Operator operator) {
-            final Pair<Operation<?>, Operator<?>> pair =
-                ImmutablePair.<Operation<?>, Operator<?>> of(operation, operator);
-            if (!supportChecks.contains(pair) && operation.matches(operator)) {
-                supportChecks.push(pair);
-                try {
-                    return operator.supports(TherianContext.this, operation);
-                } finally {
-                    Validate.validState(supportChecks.pop() == pair, "supportChecks out of whack");
-                }
-            }
-            return false;
         }
     }
 
@@ -105,11 +79,11 @@ public class TherianContext extends ELContextWrapper {
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
 
     private final Deque<Operation<?>> operations = new ArrayDeque<Operation<?>>();
-    private final Deque<Pair<Operation<?>, Operator<?>>> supportChecks =
-        new ArrayDeque<Pair<Operation<?>, Operator<?>>>();
+    private final SupportChecker supportChecker;
 
-    TherianContext(ELContext wrapped) {
+    TherianContext(ELContext wrapped, OperatorManager operatorManager) {
         super(wrapped);
+        supportChecker = Validate.notNull(operatorManager, "operatorManager").new SupportChecker(this);
     }
 
     @Override
@@ -119,7 +93,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get current thread-bound instance.
-     *
+     * 
      * @return {@link TherianContext} or {@code null}
      */
     private static TherianContext getCurrentInstance() {
@@ -128,7 +102,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get some usable {@link TherianContext} instance.
-     *
+     * 
      * @return current thread-bound instance or {@code Therian.standard().context()}
      */
     public static TherianContext getInstance() {
@@ -142,7 +116,7 @@ public class TherianContext extends ELContextWrapper {
     /**
      * Return the result of evaluating {@code function} against {@code this} with {@code hints} specified for the
      * duration.
-     *
+     * 
      * @param function
      * @param hints
      * @return T
@@ -186,7 +160,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Learn whether {@code operation} is supported by this context.
-     *
+     * 
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
@@ -198,11 +172,8 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
         try {
-            final Iterator<Operator<?>> filteredOperators =
-                FilteredIterable.of(getTypedContext(Therian.class).getOperators())
-                    .retain(new OperatorFilter(operation)).iterator();
-
-            return filteredOperators.hasNext();
+            final Iterator<Operator<?>> supportingOperators = supportChecker.operatorsSupporting(operation).iterator();
+            return supportingOperators.hasNext();
         } finally {
             if (originalContext == null) {
                 CURRENT_INSTANCE.remove();
@@ -218,7 +189,7 @@ public class TherianContext extends ELContextWrapper {
      * Evaluates {@code operation} if supported; otherwise returns {@code null}. You may distinguish between a
      * {@code null} result and "not supported" by calling {@link #supports(Operation)} and {@link #eval(Operation)}
      * independently.
-     *
+     * 
      * @param operation
      * @return RESULT or {@code null}
      * @throws NullPointerException on {@code null} input
@@ -230,7 +201,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Evaluates {@code operation} if supported; otherwise returns {@code defaultValue}.
-     *
+     * 
      * @param operation
      * @param defaultValue
      * @return RESULT or {@code null}
@@ -244,7 +215,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     *
+     * 
      * @param operation
      * @return whether {@code operation} was supported and successful
      * @throws NullPointerException on {@code null} input
@@ -262,7 +233,7 @@ public class TherianContext extends ELContextWrapper {
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
      * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
-     *
+     * 
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -289,12 +260,10 @@ public class TherianContext extends ELContextWrapper {
             }
             operations.push(operation);
 
-            final FilteredIterable<Operator<?>> applicableOperators =
-                FilteredIterable.of(getTypedContext(Therian.class).getOperators())
-                    .retain(new OperatorFilter(operation));
+            final Iterable<Operator<?>> supportingOperators = supportChecker.operatorsSupporting(operation);
 
             try {
-                for (Operator<?> operator : applicableOperators) {
+                for (Operator<?> operator : supportingOperators) {
                     if (evalRaw(operation, operator)) {
                         operation.setSuccessful(true);
                         break;
@@ -324,7 +293,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Delegate the success of the current operation to that of another.
-     *
+     * 
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -336,7 +305,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Delegate the success of the current operation to that of another.
-     *
+     * 
      * @param operation
      * @param <RESULT>
      * @param <OPERATION>
@@ -360,7 +329,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Return a read-only view of the current operations stack.
-     *
+     * 
      * @return Deque<Operation<?>>
      */
     public Deque<Operation<?>> getOperations() {

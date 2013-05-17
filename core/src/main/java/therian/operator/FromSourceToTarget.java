@@ -29,7 +29,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Describes some type that has a source.
-     *
+     * 
      * @param <S>
      */
     public interface FromSource<S> {
@@ -37,7 +37,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Describes some type that has a target.
-     *
+     * 
      * @param <T>
      */
     public interface ToTarget<T> {
@@ -57,7 +57,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Get the Type detected for type parameter {@code SOURCE}.
-     *
+     * 
      * @return Type
      */
     protected Type getSourceBound() {
@@ -66,10 +66,26 @@ public abstract class FromSourceToTarget {
 
     /**
      * Get the Type detected for type parameter {@code TARGET}.
-     *
+     * 
      * @return Type
      */
     protected Type getTargetBound() {
         return targetBound == null ? Types.resolveAt(this, TARGET) : targetBound;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * By default, any instance that fully binds type parameters is considered equal to an instance of the same class.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        return obj.getClass().equals(getClass()) && sourceBound != null && targetBound != null;
     }
 }

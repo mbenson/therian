@@ -29,11 +29,8 @@ import javax.el.ELContextListener;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 
-import org.apache.commons.functor.UnaryProcedure;
-import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.apache.commons.lang3.Validate;
 
-import therian.Operator.DependsOn;
 import therian.uelbox.ELContextWrapper;
 import therian.uelbox.IterableELResolver;
 import therian.uelbox.SimpleELContext;
@@ -49,49 +46,23 @@ public class Therian {
     private static Therian usingDiscoveredModules;
 
     private final TherianModule[] modules;
-    private final List<Operator<?>> operators = new ArrayList<Operator<?>>();
     private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
+
+    private final OperatorManager operatorManager;
 
     private Therian(TherianModule... modules) {
         this.modules = Validate.noNullElements(modules, "modules");
 
-        final Set<Class<?>> operatorsPresent = new HashSet<Class<?>>();
-        final Set<Class<?>> operatorsNeeded = new HashSet<Class<?>>();
-
+        final Set<Operator<?>> operators = new HashSet<Operator<?>>();
         int moduleNumber = 0;
         for (TherianModule module : this.modules) {
             Validate.noNullElements(module.getOperators(), "null operator at index %2$s of module %1$s", moduleNumber);
             Collections.addAll(operators, module.getOperators());
-            for (Operator<?> operator : module.getOperators()) {
-                final Class<?> opType = operator.getClass();
-                operatorsPresent.add(opType);
-
-                Class<?> c = opType;
-                while (c != null) {
-                    final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
-                    if (dependsOn != null) {
-                        Collections.addAll(operatorsNeeded, dependsOn.value());
-                    }
-                    c = c.getSuperclass();
-                }
-            }
             Collections.addAll(elResolvers, module.getElResolvers());
             moduleNumber++;
         }
-        operatorsNeeded.removeAll(operatorsPresent);
-        Validate.isTrue(operatorsNeeded.isEmpty(), "Missing required operators: %s", operatorsNeeded);
 
-        Collections.sort(operators, Operators.comparator());
-        IteratorToGeneratorAdapter.adapt(operators.iterator()).run(new UnaryProcedure<Operator<?>>() {
-
-            public void run(Operator<?> obj) {
-                Operators.validateImplementation(obj);
-            }
-        });
-    }
-
-    Iterable<Operator<?>> getOperators() {
-        return operators;
+        operatorManager = new OperatorManager(operators);
     }
 
     public TherianContext context() {
@@ -112,8 +83,9 @@ public class Therian {
                 compositeResolver.add(elResolver);
                 return compositeResolver;
             }
-        });
+        }, operatorManager);
         result.putContext(Therian.class, this);
+
         ExpressionFactory expressionFactory = result.getTypedContext(ExpressionFactory.class);
         if (expressionFactory == null) {
             result.putContext(ExpressionFactory.class, ExpressionFactory.newInstance());
@@ -130,7 +102,7 @@ public class Therian {
     /**
      * Return an instance configured as {@link Therian#standard()} + {@link TherianModule}s discovered using the
      * {@link ServiceLoader} mechanism.
-     *
+     * 
      * @return Therian
      */
     public static synchronized Therian usingDiscoveredModules() {
@@ -151,7 +123,7 @@ public class Therian {
 
     /**
      * Get a Therian instance configured with standard {@link Operator}s and {@link ELResolver}s.
-     *
+     * 
      * @return Therian
      */
     public static Therian standard() {

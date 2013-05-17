@@ -36,9 +36,9 @@ public class Operators {
         @Override
         public int compare(Operator<?> o1, Operator<?> o2) {
             final Type opType1 =
-                    Types.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
+                Types.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
             final Type opType2 =
-                    Types.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
+                Types.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
 
             return compareTypes(opType1, opType2);
         }
@@ -64,7 +64,7 @@ public class Operators {
                 final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
                 for (TypeVariable<?> var : raw1.getTypeParameters()) {
                     final int recurse =
-                            compareTypes(Types.unrollVariables(typeArgs1, var), Types.unrollVariables(typeArgs2, var));
+                        compareTypes(Types.unrollVariables(typeArgs1, var), Types.unrollVariables(typeArgs2, var));
                     if (recurse != 0) {
                         return recurse;
                     }
@@ -86,7 +86,7 @@ public class Operators {
 
     /**
      * Get standard operators.
-     *
+     * 
      * @return Operator[]
      * @see Therian#standard()
      */
@@ -96,7 +96,7 @@ public class Operators {
 
     /**
      * Validate an {@link Operator} implementation.
-     *
+     * 
      * @param operator
      * @param <OPERATOR>
      * @return {@code operator}
@@ -105,8 +105,8 @@ public class Operators {
     public static <OPERATOR extends Operator<?>> OPERATOR validateImplementation(OPERATOR operator) {
         for (TypeVariable<?> var : Validate.notNull(operator, "operator").getClass().getTypeParameters()) {
             if (Types.resolveAt(operator, var) == null) {
-                throw new OperatorDefinitionException(operator, "Could not resolve %s.%s against operator %s",
-                    var.getGenericDeclaration(), var.getName(), operator);
+                throw new OperatorDefinitionException(operator, "Could not resolve %s against operator %s",
+                    Types.toLongString(var), operator);
             }
         }
         return operator;
@@ -114,7 +114,7 @@ public class Operators {
 
     /**
      * Get a comparator that compares {@link Operator}s by {@link Operation} type/type parameter assignability.
-     *
+     * 
      * @return a Comparator that does not handle {@code null} values
      */
     public static Comparator<Operator<?>> comparator() {
