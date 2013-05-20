@@ -83,7 +83,7 @@ public class Keyed {
         }
     }
 
-    private static class GetTypeMixin<V> implements RelativePosition.GetType<V> {
+    private static class GetTypeMixin<V> extends RelativePosition.Mixin.CachingType<V> {
         private final Object key;
 
         private GetTypeMixin(Object key) {
@@ -91,7 +91,8 @@ public class Keyed {
             this.key = key;
         }
 
-        public <P> Type getType(Readable<? extends P> parentPosition) {
+        @Override
+        protected <P> Type getTypeImpl(Readable<? extends P> parentPosition) {
             return Types.refine(getBasicType(parentPosition), parentPosition.getType());
         }
 

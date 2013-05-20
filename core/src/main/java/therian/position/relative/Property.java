@@ -46,7 +46,7 @@ import therian.util.Types;
 public class Property {
     private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
-    private static class GetTypeMixin<T> implements RelativePosition.GetType<T> {
+    private static class GetTypeMixin<T> extends RelativePosition.Mixin.CachingType<T> {
         enum FeatureExtractionStrategy {
             GENERIC_TYPE_ATTRIBUTE {
 
@@ -86,14 +86,18 @@ public class Property {
         }
 
         final String propertyName;
+        Type type;
 
         GetTypeMixin(String propertyName) {
             super();
             this.propertyName = propertyName;
         }
 
-        public <P> Type getType(final Position.Readable<? extends P> parentPosition) {
-            return Types.refine(getBasicType(parentPosition), parentPosition.getType());
+        protected <P> Type getTypeImpl(final Position.Readable<? extends P> parentPosition) {
+            if (type == null) {
+                type = Types.refine(getBasicType(parentPosition), parentPosition.getType());
+            }
+            return type;
         }
 
         private <P> Type getBasicType(final Position.Readable<? extends P> parentPosition) {

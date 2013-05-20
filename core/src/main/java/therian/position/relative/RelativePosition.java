@@ -148,6 +148,20 @@ public interface RelativePosition<P, T> extends Position<T> {
             }
 
         }
+
+        public abstract class CachingType<TYPE> implements RelativePosition.GetType<TYPE> {
+            private Type type;
+
+            @Override
+            public synchronized final <P> Type getType(therian.position.Position.Readable<? extends P> parentPosition) {
+                if (type == null) {
+                    type = getTypeImpl(parentPosition);
+                }
+                return type;
+            }
+
+            protected abstract <P> Type getTypeImpl(Position.Readable<? extends P> parentPosition);
+        }
     }
 
     /**
