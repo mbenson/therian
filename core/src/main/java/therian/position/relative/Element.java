@@ -32,6 +32,7 @@ import therian.TherianContext;
 import therian.el.ELConstants;
 import therian.operation.Add;
 import therian.position.Position;
+import therian.position.Position.Readable;
 import therian.uelbox.IterableELResolver;
 import therian.util.Types;
 
@@ -43,7 +44,7 @@ import therian.util.Types;
  * <li>{@link Iterable} elements (requires {@link IterableELResolver})</li>
  * </ul>
  * Because this implementation uses unified EL facilities, growing lists/collections is not supported.
- * 
+ *
  * @see Add
  */
 public class Element {
@@ -78,7 +79,7 @@ public class Element {
         }
     }
 
-    private static abstract class GetTypeMixin<T> implements RelativePosition.GetType<T> {
+    private static abstract class GetTypeMixin<T> implements RelativePosition.GetType<T>, RelativePosition.Mixin.Cacheable {
         final int index;
 
         GetTypeMixin(int index) {
@@ -86,7 +87,8 @@ public class Element {
             this.index = index;
         }
 
-        public <P> Type getType(final Position.Readable<? extends P> parentPosition) {
+        @Override
+        public <P> Type getType(Readable<? extends P> parentPosition) {
             return Types.refine(getBasicType(parentPosition), parentPosition.getType());
         }
 

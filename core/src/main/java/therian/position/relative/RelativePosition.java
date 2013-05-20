@@ -148,6 +148,14 @@ public interface RelativePosition<P, T> extends Position<T> {
             }
 
         }
+
+        /**
+         * Declaring this interface on a {@link RelativePosition.Mixin} will cause the result of a given
+         * no-arg method invocation to be cached per {@link RelativePosition} proxy instance.
+         */
+        public interface Cacheable {
+        }
+
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
@@ -25,6 +26,7 @@ import therian.position.Position;
  */
 public class RelativePositionFactory<PARENT, TYPE> {
     private class RelativePositionInvocationHandler implements InvocationHandler {
+        final Map<Object, Map<String, Object>> resultCache = new WeakHashMap<Object, Map<String, Object>>();
         final Position.Readable<? extends PARENT> parentPosition;
         final Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins;
 
@@ -40,8 +42,24 @@ public class RelativePositionFactory<PARENT, TYPE> {
          */
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             final RelativePosition.Mixin<TYPE> mixin = mixins.get(method.getDeclaringClass());
+            final String m = method.getName();
             if (mixin != null) {
-                return MethodUtils.invokeMethod(mixin, method.getName(), ArrayUtils.add(args, 0, parentPosition));
+                final boolean useCache =
+                    (args == null || args.length == 0) && mixin instanceof RelativePosition.Mixin.Cacheable;
+                Map<String, Object> cache = null;
+                if (useCache) {
+                    cache = resultCache.get(proxy);
+                    if (cache == null) {
+                        cache = new HashMap<String, Object>();
+                        resultCache.put(proxy, cache);
+                    } else if (cache.containsKey(m)) {
+                        return cache.get(m);
+                    }
+                    final Object result = MethodUtils.invokeMethod(mixin, m, parentPosition);
+                    cache.put(m, result);
+                    return result;
+                }
+                return MethodUtils.invokeMethod(mixin, m, ArrayUtils.add(args, 0, parentPosition));
             }
             if (method.equals(Object.class.getMethod("equals", Object.class))) {
                 return args[0] != null && Proxy.isProxyClass(args[0].getClass())
@@ -55,8 +73,8 @@ public class RelativePositionFactory<PARENT, TYPE> {
             if (method.equals(Object.class.getMethod("toString"))) {
                 return String.format("Relative Position: %s of %s", RelativePositionFactory.this, parentPosition);
             }
-            throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType().getName(),
-                method.getName(), ArrayUtils.toString(args, "")));
+            throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType().getName(), m,
+                ArrayUtils.toString(args, "")));
         }
 
         @Override
