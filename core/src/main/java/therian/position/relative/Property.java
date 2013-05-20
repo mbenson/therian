@@ -41,12 +41,13 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.TherianContext;
 import therian.el.ELConstants;
 import therian.position.Position;
+import therian.position.Position.Readable;
 import therian.util.Types;
 
 public class Property {
     private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
-    private static class GetTypeMixin<T> extends RelativePosition.Mixin.CachingType<T> {
+    private static class GetTypeMixin<T> implements RelativePosition.GetType<T>, RelativePosition.Mixin.Cacheable {
         enum FeatureExtractionStrategy {
             GENERIC_TYPE_ATTRIBUTE {
 
@@ -86,18 +87,15 @@ public class Property {
         }
 
         final String propertyName;
-        Type type;
 
         GetTypeMixin(String propertyName) {
             super();
             this.propertyName = propertyName;
         }
 
-        protected <P> Type getTypeImpl(final Position.Readable<? extends P> parentPosition) {
-            if (type == null) {
-                type = Types.refine(getBasicType(parentPosition), parentPosition.getType());
-            }
-            return type;
+        @Override
+        public <P> Type getType(Readable<? extends P> parentPosition) {
+            return Types.refine(getBasicType(parentPosition), parentPosition.getType());
         }
 
         private <P> Type getBasicType(final Position.Readable<? extends P> parentPosition) {

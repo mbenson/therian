@@ -79,7 +79,7 @@ public class Element {
         }
     }
 
-    private static abstract class GetTypeMixin<T> extends RelativePosition.Mixin.CachingType<T> {
+    private static abstract class GetTypeMixin<T> implements RelativePosition.GetType<T>, RelativePosition.Mixin.Cacheable {
         final int index;
 
         GetTypeMixin(int index) {
@@ -88,7 +88,7 @@ public class Element {
         }
 
         @Override
-        protected <P> Type getTypeImpl(Readable<? extends P> parentPosition) {
+        public <P> Type getType(Readable<? extends P> parentPosition) {
             return Types.refine(getBasicType(parentPosition), parentPosition.getType());
         }
 
