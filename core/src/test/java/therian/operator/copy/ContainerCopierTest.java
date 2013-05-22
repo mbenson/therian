@@ -275,7 +275,8 @@ public class ContainerCopierTest extends OperatorTest {
 
     @Test
     public void testToNull() {
-        // using a writable target would allow the ELCoercionConverter to convert the null source value to a null target value
+        // using a writable target would allow the ELCoercionConverter to convert the null source value to a null target
+        // value
         assertFalse(
             "Cannot use ContainerCopier to copy to read-only null target",
             therianContext.supports(Copy.to(Positions.readOnly(MetasyntacticVariable[].class, null),
