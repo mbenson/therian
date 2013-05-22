@@ -1,21 +1,9 @@
 package therian.position.relative;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
-
-import therian.Typed;
+import therian.TherianContext;
 import therian.position.Position;
 
 /**
@@ -24,138 +12,68 @@ import therian.position.Position;
  * @param <PARENT>
  * @param <TYPE>
  */
-public class RelativePositionFactory<PARENT, TYPE> {
-    private class RelativePositionInvocationHandler implements InvocationHandler {
-        final Map<Object, Map<String, Object>> resultCache = new WeakHashMap<Object, Map<String, Object>>();
-        final Position.Readable<? extends PARENT> parentPosition;
-        final Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins;
+public abstract class RelativePositionFactory<PARENT, TYPE> {
+    protected abstract class RelativePositionImpl<P extends PARENT, E> implements RelativePosition<P, TYPE> {
+        protected final Position.Readable<P> parentPosition;
+        private final E name;
 
-        protected RelativePositionInvocationHandler(Position.Readable<? extends PARENT> parentPosition,
-            Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins) {
-            super();
-            this.parentPosition = parentPosition;
-            this.mixins = mixins;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            final RelativePosition.Mixin<TYPE> mixin = mixins.get(method.getDeclaringClass());
-            final String m = method.getName();
-            if (mixin != null) {
-                final boolean useCache =
-                    (args == null || args.length == 0) && mixin instanceof RelativePosition.Mixin.Cacheable;
-                Map<String, Object> cache = null;
-                if (useCache) {
-                    cache = resultCache.get(proxy);
-                    if (cache == null) {
-                        cache = new HashMap<String, Object>();
-                        resultCache.put(proxy, cache);
-                    } else if (cache.containsKey(m)) {
-                        return cache.get(m);
-                    }
-                    final Object result = MethodUtils.invokeMethod(mixin, m, parentPosition);
-                    cache.put(m, result);
-                    return result;
-                }
-                return MethodUtils.invokeMethod(mixin, m, ArrayUtils.add(args, 0, parentPosition));
-            }
-            if (method.equals(Object.class.getMethod("equals", Object.class))) {
-                return args[0] != null && Proxy.isProxyClass(args[0].getClass())
-                    && Proxy.getInvocationHandler(args[0]).equals(this);
-            }
-            if (method.equals(Object.class.getMethod("hashCode"))) {
-                int result = 61 << 4;
-                result |= this.hashCode();
-                return result;
-            }
-            if (method.equals(Object.class.getMethod("toString"))) {
-                return String.format("Relative Position: %s of %s", RelativePositionFactory.this, parentPosition);
-            }
-            throw new UnsupportedOperationException(String.format("%s %s(%s)", method.getReturnType().getName(), m,
-                ArrayUtils.toString(args, "")));
+        protected RelativePositionImpl(Position.Readable<P> parentPosition, E name) {
+            this.parentPosition = Validate.notNull(parentPosition);
+            this.name = name;
         }
 
         @Override
-        public String toString() {
-            Class<?> clazz = getClass();
-            final StringBuilder buf = new StringBuilder();
-            while (clazz != null) {
-                buf.insert(0, clazz.getSimpleName());
-                clazz = clazz.getEnclosingClass();
-                if (clazz != null) {
-                    buf.insert(0, '.');
-                }
-            }
-            return buf.toString();
+        public therian.position.Position.Readable<? extends P> getParentPosition() {
+            return parentPosition;
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        public TYPE getValue() {
+            final TherianContext context = TherianContext.getInstance();
+            final Object value = context.getELResolver().getValue(context, parentPosition.getValue(), name);
+            Validate.validState(context.isPropertyResolved(), "could not get value %s from %s", name, parentPosition);
+            @SuppressWarnings("unchecked")
+            final TYPE result = (TYPE) value;
+            return result;
+        }
+
+        public void setValue(TYPE value) {
+            final TherianContext context = TherianContext.getInstance();
+            context.getELResolver().setValue(context, parentPosition.getValue(), name, value);
+            Validate.validState(context.isPropertyResolved(), "could not set value %s onto %s from %s", value, name,
+                parentPosition);
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof RelativePositionFactory.RelativePositionInvocationHandler == false) {
+            if (obj instanceof RelativePositionFactory.RelativePositionImpl == false) {
                 return false;
             }
-            @SuppressWarnings("rawtypes")
-            final RelativePositionFactory.RelativePositionInvocationHandler other =
-                (RelativePositionFactory.RelativePositionInvocationHandler) obj;
-            return parentPosition.equals(other.parentPosition)
-                && getRelativePositionFactory().equals(other.getRelativePositionFactory());
+            @SuppressWarnings("unchecked")
+            final RelativePositionImpl<?, ?> other = (RelativePositionImpl<?, ?>) obj;
+            return ObjectUtils.equals(getFactory(), other.getFactory())
+                && ObjectUtils.equals(parentPosition, other.parentPosition);
         }
 
         @Override
         public int hashCode() {
-            int result = 53 << 4;
+            int result = 97;
+            result <<= 8;
+            result |= getFactory().hashCode();
+            result <<= 8;
             result |= parentPosition.hashCode();
-            result <<= 4;
-            result |= getRelativePositionFactory().hashCode();
             return result;
         }
 
-        private RelativePositionFactory<PARENT, TYPE> getRelativePositionFactory() {
+        @Override
+        public String toString() {
+            return String.format("Relative Position: %s of %s", getFactory(), parentPosition);
+        }
+
+        private RelativePositionFactory<PARENT, TYPE> getFactory() {
             return RelativePositionFactory.this;
-        }
-    }
-
-    private static final Comparator<Class<?>> CLASS_COMPARATOR = new Comparator<Class<?>>() {
-
-        public int compare(Class<?> o1, Class<?> o2) {
-            return o1.isAssignableFrom(o2) ? -1 : o2.isAssignableFrom(o1) ? 1 : 0;
-        }
-    };
-
-    private final Map<Class<?>, RelativePosition.Mixin<TYPE>> mixins;
-
-    protected RelativePositionFactory(RelativePosition.Mixin<TYPE>... mixins) {
-        super();
-        final Map<Class<?>, RelativePosition.Mixin<TYPE>> m = new HashMap<Class<?>, RelativePosition.Mixin<TYPE>>();
-        for (RelativePosition.Mixin<TYPE> mixin : mixins) {
-            addTo(m, mixin);
-        }
-        if (!m.containsKey(RelativePosition.class)) {
-            addTo(m, new RelativePosition.Mixin.GetParentPosition<TYPE>());
-        }
-        this.mixins = Collections.unmodifiableMap(m);
-    }
-
-    private void addTo(final Map<Class<?>, RelativePosition.Mixin<TYPE>> target,
-        final RelativePosition.Mixin<TYPE> mixin) {
-        for (Class<? extends Position<?>> positionType : RelativePosition.Mixin.HELPER.getImplementedTypes(mixin)) {
-            if (target.containsKey(positionType)) {
-                throw new IllegalArgumentException(String.format("%s implemented by > 1 of mixins %s", positionType,
-                    mixins));
-            }
-            target.put(positionType, mixin);
-            if (Position.class.equals(positionType)) {
-                // this is a hack; this class is already all about Positions, so KMA
-                target.put(Typed.class, mixin);
-            }
         }
     }
 
@@ -165,44 +83,6 @@ public class RelativePositionFactory<PARENT, TYPE> {
      * @param parentPosition
      * @return {@link RelativePosition}
      */
-    public <P extends PARENT> RelativePosition<P, TYPE> of(Position.Readable<P> parentPosition) {
-        @SuppressWarnings("unchecked")
-        final RelativePosition<P, TYPE> result =
-            (RelativePosition<P, TYPE>) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                gatherInterfaces(), new RelativePositionInvocationHandler(parentPosition, mixins));
-        return result;
-    }
-
-    private Class<?>[] gatherInterfaces() {
-        final HashSet<Class<?>> interfaces = new HashSet<Class<?>>();
-        interfaces.add(RelativePosition.class);
-
-        for (Class<?> iface : mixins.keySet()) {
-            interfaces.add(iface);
-            interfaces.addAll(ClassUtils.getAllInterfaces(iface));
-        }
-        final TreeSet<Class<?>> sortedCompositeTypes = new TreeSet<Class<?>>(CLASS_COMPARATOR);
-        Collections.addAll(sortedCompositeTypes, getCompositeInterfaces());
-
-        for (Class<?> compositeType : sortedCompositeTypes) {
-            if (interfaces.containsAll(ClassUtils.getAllInterfaces(compositeType))) {
-                interfaces.add(compositeType);
-            }
-        }
-        return interfaces.toArray(ArrayUtils.EMPTY_CLASS_ARRAY);
-    }
-
-    /**
-     * Helper to get known composite interfaces. Most implementors should never have to override this.
-     *
-     * @return Class[]
-     */
-    @SuppressWarnings({ "rawtypes" })
-    protected Class<? extends Position>[] getCompositeInterfaces() {
-        @SuppressWarnings("unchecked")
-        Class<? extends Position>[] result =
-            ArrayUtils.toArray(Position.ReadWrite.class, RelativePosition.ReadWrite.class);
-        return result;
-    }
+    public abstract <P extends PARENT> RelativePosition<P, TYPE> of(Position.Readable<P> parentPosition);
 
 }
