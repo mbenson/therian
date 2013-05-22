@@ -96,6 +96,9 @@ public abstract class AbstractBeanCopier<SOURCE, TARGET> extends Copier<SOURCE, 
 
                 @Override
                 public void run(Copy<?, ?> propertyCopy) {
+                    if (propertyCopy == null) {
+                        return;
+                    }
                     try {
                         if (context.evalSuccess(propertyCopy)) {
                             result.setValue(true);
