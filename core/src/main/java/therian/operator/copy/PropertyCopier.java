@@ -20,9 +20,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 
 import therian.OperationException;
 import therian.OperatorDefinitionException;
@@ -57,36 +61,41 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         Value[] value();
     }
 
-    private final Mapping mapping;
+    private final List<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>> mappings;
+
     {
+        final List<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>> m =
+            new ArrayList<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>>();
+
         try {
             @SuppressWarnings("rawtypes")
             final Class<? extends PropertyCopier> c = getClass();
-            mapping = c.getAnnotation(Mapping.class);
+            final Mapping mapping = c.getAnnotation(Mapping.class);
             Validate.validState(mapping != null, "no @Mapping defined for %s", c);
             Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
 
             for (Mapping.Value v : mapping.value()) {
-                Validate.validState(StringUtils.isNotBlank(v.from()) || StringUtils.isNotBlank(v.to()),
-                    "both from and to cannot be empty for a single @Mapping.Value");
+                final String from = StringUtils.trimToNull(v.from());
+                final String to = StringUtils.trimToNull(v.to());
+
+                Validate.validState(from != null || to != null,
+                    "both from and to cannot be blank/empty for a single @Mapping.Value");
+
+                final Property.PositionFactory<?> source = from == null ? null : Property.at(from);
+                final Property.PositionFactory<?> target = to == null ? null : Property.at(to);
+
+                m.add(Pair.<Property.PositionFactory<?>, Property.PositionFactory<?>> of(source, target));
             }
+            mappings = Collections.unmodifiableList(m);
         } catch (Exception e) {
             throw new OperatorDefinitionException(this, e);
         }
     }
 
     public boolean perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
-        for (Mapping.Value v : mapping.value()) {
-            Position.Readable<?> target = copy.getTargetPosition();
-            final String to = StringUtils.trimToEmpty(v.to());
-            if (!to.isEmpty()) {
-                target = Property.at(to).of(target);
-            }
-            Position.Readable<?> source = copy.getSourcePosition();
-            final String from = StringUtils.trimToEmpty(v.from());
-            if (!from.isEmpty()) {
-                source = Property.at(from).of(source);
-            }
+        for (Pair<Property.PositionFactory<?>, Property.PositionFactory<?>> mapping : mappings) {
+            final Position.Readable<?> source = dereference(mapping.getLeft(), copy.getSourcePosition());
+            final Position.Readable<?> target = dereference(mapping.getRight(), copy.getTargetPosition());
             final Copy<?, ?> nested = Copy.to(target, source);
             if (!context.evalSuccess(nested)) {
                 throw new OperationException(copy, "nested %s was unsuccessful", nested);
@@ -100,21 +109,20 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (!super.supports(context, copy)) {
             return false;
         }
-        for (Mapping.Value v : mapping.value()) {
-            Position.Readable<?> target = copy.getTargetPosition();
-            final String to = StringUtils.trimToEmpty(v.to());
-            if (!to.isEmpty()) {
-                target = Property.at(to).of(target);
-            }
-            Position.Readable<?> source = copy.getSourcePosition();
-            final String from = StringUtils.trimToEmpty(v.from());
-            if (!from.isEmpty()) {
-                source = Property.at(from).of(source);
-            }
-            if (!context.supports(Copy.to(target, source))) {
+        for (Pair<Property.PositionFactory<?>, Property.PositionFactory<?>> mapping : mappings) {
+            final Position.Readable<?> source = dereference(mapping.getLeft(), copy.getSourcePosition());
+            final Position.Readable<?> target = dereference(mapping.getRight(), copy.getTargetPosition());
+            final Copy<?, ?> nested = Copy.to(target, source);
+            if (!context.supports(nested)) {
                 return false;
             }
         }
         return true;
     }
+
+    private Position.Readable<?> dereference(Property.PositionFactory<?> positionFactory,
+        Position.Readable<?> parentPosition) {
+        return positionFactory == null ? parentPosition : positionFactory.of(parentPosition);
+    }
+
 }
