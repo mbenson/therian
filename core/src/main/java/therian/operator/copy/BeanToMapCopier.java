@@ -80,7 +80,8 @@ public class BeanToMapCopier extends Copier<Object, Map> {
     }
 
     /**
-     * If at least one key can be converted, say the operation is supported and we'll give it a shot.
+     * If at least one property name can be converted to an assignable key, say the operation is supported and we'll
+     * give it a shot.
      */
     @Override
     public boolean supports(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
