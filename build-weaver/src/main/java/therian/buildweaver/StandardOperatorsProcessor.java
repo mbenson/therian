@@ -75,7 +75,8 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
 
             for (Element element : standardOperatorElements) {
                 if (!isValidStandardOperator(element)) {
-                    throw new IllegalStateException(String.format("%s is not a valid @StandardOperator", element));
+                    throw new IllegalStateException(String.format("%s is not a valid @StandardOperator",
+                        appendTo(new StringBuilder(), element).toString()));
                 }
                 if (element.getKind() == ElementKind.CLASS) {
                     operators.add(appendTo(new StringBuilder("new "), element).append("()").toString());
