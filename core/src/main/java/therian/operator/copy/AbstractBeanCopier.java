@@ -24,7 +24,6 @@ import org.apache.commons.functor.generator.FilteredGenerator;
 import org.apache.commons.functor.generator.Generator;
 import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
 import org.apache.commons.functor.generator.TransformedGenerator;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import therian.Operator.DependsOn;
@@ -44,10 +43,10 @@ import therian.util.BeanProperties;
 @DependsOn({ ConvertingCopier.class, NOPConverter.class, ELCoercionConverter.class, DefaultCopyingConverter.class })
 public abstract class AbstractBeanCopier<SOURCE, TARGET> extends Copier<SOURCE, TARGET> {
 
-    public static final String[] IGNORED_PROPERTIES = { "class" };
+    public static final String IGNORE_CLASS_PROPERTY = "class";
 
     protected boolean ignoreProperty(String propertyName) {
-        return ArrayUtils.contains(IGNORED_PROPERTIES, propertyName);
+        return IGNORE_CLASS_PROPERTY.equals(propertyName);
     }
 
     @Override
