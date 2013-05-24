@@ -129,7 +129,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
 
         final AddAll<?, ?> addAll = AddAll.to(copy.getTargetPosition(), targetElements);
         if (context.supports(addAll)) {
-            return context.forwardTo(addAll);
+            return context.evalSuccess(addAll);
         }
 
         // can't add new elements. last try: convert an array of the proper size to the target type and set value
@@ -150,7 +150,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
 
         final Position.Writable<?> convertTarget = (Position.Writable<?>) copy.getTargetPosition();
 
-        return context.forwardTo(Convert.to(convertTarget, targetElements));
+        return context.evalSuccess(Convert.to(convertTarget, targetElements));
     }
 
     @Override

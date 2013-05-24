@@ -217,7 +217,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         } else {
             targetPosition = Positions.readOnly(convert.getTargetPosition().getType(), target);
         }
-        return context.forwardTo(Copy.to(targetPosition, convert.getSourcePosition()));
+        return context.evalSuccess(Copy.to(targetPosition, convert.getSourcePosition()));
     }
 
     @Override

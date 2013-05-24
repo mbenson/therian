@@ -45,7 +45,7 @@ public class DefaultToEnumerationConverter extends Converter<Object, Enumeration
         final Position.ReadWrite<Iterator<?>> iterator =
             Positions.readWrite(Types.parameterize(Iterator.class, targetElementType));
         return context.evalSuccess(Convert.to(iterator, convert.getSourcePosition()))
-            && context.forwardTo(Convert.to(convert.getTargetPosition(), iterator));
+            && context.evalSuccess(Convert.to(convert.getTargetPosition(), iterator));
     }
 
     @Override

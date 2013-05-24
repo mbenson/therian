@@ -21,8 +21,8 @@ public class EnumToNumberConverter extends Converter.WithDynamicTarget<Enum<?>> 
 
     @Override
     public boolean perform(TherianContext context, Convert<? extends Enum<?>, ?> operation) {
-        return context.forwardTo(Convert.to(operation.getTargetPosition(),
-            Positions.readOnly(operation.getSourcePosition().getValue().ordinal())));
+        return context.evalSuccess(Convert.to(operation.getTargetPosition(),
+        Positions.readOnly(operation.getSourcePosition().getValue().ordinal())));
     }
 
     @Override

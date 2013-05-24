@@ -44,7 +44,7 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
         final Position.ReadWrite<List<?>> list = Positions.readWrite(Types.parameterize(List.class, targetElementType));
 
         return context.evalSuccess(Convert.to(list, convert.getSourcePosition()))
-            && context.forwardTo(Convert.to(convert.getTargetPosition(), list));
+            && context.evalSuccess(Convert.to(convert.getTargetPosition(), list));
     }
 
     @Override

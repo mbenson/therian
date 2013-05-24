@@ -36,8 +36,8 @@ public class ConvertingCopier extends Copier<Object, Object> {
 
     @Override
     public boolean perform(TherianContext context, Copy<?, ?> operation) {
-        return context.forwardTo(Convert.to((Position.Writable<?>) operation.getTargetPosition(),
-            operation.getSourcePosition()));
+        return context.evalSuccess(Convert.to((Position.Writable<?>) operation.getTargetPosition(),
+        operation.getSourcePosition()));
     }
 
     @Override
