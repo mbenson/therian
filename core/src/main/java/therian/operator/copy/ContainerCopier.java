@@ -128,8 +128,8 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         }
 
         final AddAll<?, ?> addAll = AddAll.to(copy.getTargetPosition(), targetElements);
-        if (context.supports(addAll)) {
-            return context.evalSuccess(addAll);
+        if (context.evalSuccess(addAll)) {
+            return true;
         }
 
         // can't add new elements. last try: convert an array of the proper size to the target type and set value
