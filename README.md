@@ -1,4 +1,4 @@
-Therian is a "next-generation Java Object transformation library."
+**therian** is a "next-generation Java Object transformation library."
 
 This codebase is currently under development.  Some features and priorities:
 
