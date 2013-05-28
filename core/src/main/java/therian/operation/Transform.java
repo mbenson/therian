@@ -117,9 +117,10 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     @BindTypeVariable
     public Typed<TARGET> getTargetType() {
         final TARGET_POSITION target = getTargetPosition();
-        if (TypeUtils.isAssignable(
-            TypeUtils.getTypeArguments(getClass(), Transform.class).get(Transform.class.getTypeParameters()[3]),
-            Position.Readable.class)) {
+        final Type targetPositionType =
+            Types.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
+                Transform.class.getTypeParameters()[3]);
+        if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
             final Type result = narrow((Position.Readable<TARGET>) target);
             if (!Types.equals(result, target.getType())) {
                 return new Typed<TARGET>() {
