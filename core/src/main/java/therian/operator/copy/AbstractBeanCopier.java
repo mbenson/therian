@@ -17,13 +17,13 @@ package therian.operator.copy;
 
 import java.util.Set;
 
-import org.apache.commons.functor.UnaryFunction;
-import org.apache.commons.functor.UnaryPredicate;
-import org.apache.commons.functor.UnaryProcedure;
+import org.apache.commons.functor.Function;
+import org.apache.commons.functor.Predicate;
+import org.apache.commons.functor.Procedure;
 import org.apache.commons.functor.generator.FilteredGenerator;
 import org.apache.commons.functor.generator.Generator;
-import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
-import org.apache.commons.functor.generator.TransformedGenerator;
+import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
+import org.apache.commons.functor.generator.loop.TransformedGenerator;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import therian.Operator.DependsOn;
@@ -65,7 +65,7 @@ public abstract class AbstractBeanCopier<SOURCE, TARGET> extends Copier<SOURCE, 
             BeanProperties.getPropertyNames(BeanProperties.ReturnProperties.WRITABLE, context, target);
         targetProperties.retainAll(sourceProperties);
 
-        final UnaryFunction<String, Copy<?, ?>> propertyNameToCopyOperation = new UnaryFunction<String, Copy<?, ?>>() {
+        final Function<String, Copy<?, ?>> propertyNameToCopyOperation = new Function<String, Copy<?, ?>>() {
 
             @Override
             public Copy<?, ?> evaluate(String name) {
@@ -74,7 +74,7 @@ public abstract class AbstractBeanCopier<SOURCE, TARGET> extends Copier<SOURCE, 
             }
         };
 
-        final UnaryPredicate<Copy<?, ?>> isSupported = new UnaryPredicate<Copy<?, ?>>() {
+        final Predicate<Copy<?, ?>> isSupported = new Predicate<Copy<?, ?>>() {
 
             @Override
             public boolean test(Copy<?, ?> copyOperation) {
@@ -91,7 +91,7 @@ public abstract class AbstractBeanCopier<SOURCE, TARGET> extends Copier<SOURCE, 
     public boolean perform(final TherianContext context, final Copy<? extends SOURCE, ? extends TARGET> copy) {
         final MutableBoolean result = new MutableBoolean();
         propertyCopyGenerator(context, copy.getSourcePosition(), copy.getTargetPosition()).run(
-            new UnaryProcedure<Copy<?, ?>>() {
+            new Procedure<Copy<?, ?>>() {
 
                 @Override
                 public void run(Copy<?, ?> propertyCopy) {

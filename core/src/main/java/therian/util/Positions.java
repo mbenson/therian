@@ -17,7 +17,7 @@ package therian.util;
 
 import java.lang.reflect.Type;
 
-import org.apache.commons.functor.UnaryProcedure;
+import org.apache.commons.functor.Procedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -350,8 +350,8 @@ public class Positions {
      * @return UnaryProcedure
      * @see TherianContext#forwardTo(therian.Operation, UnaryProcedure)
      */
-    public static <T> UnaryProcedure<T> writeValue(final Position.Writable<? super T> pos) {
-        return new UnaryProcedure<T>() {
+    public static <T> Procedure<T> writeValue(final Position.Writable<? super T> pos) {
+        return new Procedure<T>() {
 
             @Override
             public void run(T value) {

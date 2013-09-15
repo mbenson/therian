@@ -24,8 +24,8 @@ import java.util.Map;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.functor.UnaryFunction;
-import org.apache.commons.functor.UnaryProcedure;
+import org.apache.commons.functor.Function;
+import org.apache.commons.functor.Procedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -121,7 +121,7 @@ public class TherianContext extends ELContextWrapper {
      * @param hints
      * @return T
      */
-    public synchronized <T> T doWithHints(UnaryFunction<TherianContext, T> function, Hint... hints) {
+    public synchronized <T> T doWithHints(Function<TherianContext, T> function, Hint... hints) {
         Validate.notNull(function, "function");
         Validate.noNullElements(hints, "null element at hints[%s]");
 
@@ -301,7 +301,7 @@ public class TherianContext extends ELContextWrapper {
      * @return operation's success
      */
     public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
-        final UnaryProcedure<? super RESULT> callback) {
+        final Procedure<? super RESULT> callback) {
         Validate.validState(!operations.isEmpty(), "cannot forward without an ongoing operation");
         final Operation<?> owner = operations.peek();
         Validate

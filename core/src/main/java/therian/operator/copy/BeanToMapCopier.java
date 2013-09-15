@@ -18,7 +18,7 @@ package therian.operator.copy;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -43,7 +43,7 @@ import therian.util.Types;
 public class BeanToMapCopier extends Copier<Object, Map> {
     public static final String IGNORE_CLASS_PROPERTY = "class";
 
-    private final UnaryPredicate<String> notIgnored = new UnaryPredicate<String>() {
+    private final Predicate<String> notIgnored = new Predicate<String>() {
 
         @Override
         public boolean test(String s) {

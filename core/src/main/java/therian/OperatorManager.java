@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
@@ -101,7 +101,7 @@ class OperatorManager {
     class SupportChecker {
 
         @SuppressWarnings("rawtypes")
-        class Filter implements UnaryPredicate<OperatorInfo> {
+        class Filter implements Predicate<OperatorInfo> {
             final Operation operation;
 
             Filter(Operation operation) {

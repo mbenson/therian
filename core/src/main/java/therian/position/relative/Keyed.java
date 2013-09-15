@@ -20,9 +20,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.functor.UnaryPredicate;
+import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
-import org.apache.commons.functor.generator.IteratorToGeneratorAdapter;
+import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -60,7 +60,7 @@ public class Keyed {
                 private Type getBasicType() {
                     final TherianContext context = TherianContext.getInstance();
                     final P parent = parentPosition.getValue();
-                    final UnaryPredicate<FeatureDescriptor> filter = new UnaryPredicate<FeatureDescriptor>() {
+                    final Predicate<FeatureDescriptor> filter = new Predicate<FeatureDescriptor>() {
                         public boolean test(FeatureDescriptor obj) {
                             return String.valueOf(key).equals(obj.getName());
                         }
