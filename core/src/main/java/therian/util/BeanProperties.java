@@ -50,7 +50,8 @@ public class BeanProperties {
                         continue;
                     }
                 } catch (Exception e) {
-                    // :(
+                    // if we can't even _check_ for readOnly, assume not writable:
+                    continue;
                 }
             }
             result.add(name);

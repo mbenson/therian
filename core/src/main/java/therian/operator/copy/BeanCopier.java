@@ -16,10 +16,12 @@
 package therian.operator.copy;
 
 import therian.buildweaver.StandardOperator;
+import therian.operator.copy.PropertyCopier.Matching;
 
 /**
  * Copies {@link Object} to {@link Object}.
  */
 @StandardOperator
-public class BeanCopier extends AbstractBeanCopier<Object, Object> {
+@Matching
+public class BeanCopier extends PropertyCopier<Object, Object> {
 }
