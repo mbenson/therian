@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 import org.junit.Test;
 
 import therian.TherianModule;
 import therian.TypeLiteral;
-import therian.Typed;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
-import therian.util.Types;
 
 public class GetIterableElementTypeTest extends OperatorTest {
 
@@ -46,10 +46,8 @@ public class GetIterableElementTypeTest extends OperatorTest {
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Collection<String>>() {})));
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Set<String>>() {})));
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<SortedSet<String>>() {})));
-        assertTrue(Types.equals(new TypeLiteral<String[]>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<List<String[]>>() {}))));
-        assertTrue(Types.equals(new TypeLiteral<Typed<?>>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<Iterable<Typed<?>>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<List<String[]>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<Typed<?>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Iterable<Typed<?>>>() {}))));
     }
 
 }

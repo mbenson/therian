@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 /**
  * Decorates a {@link Map} of {@link TypeVariable} to {@link Type} rendering {@link TypeVariable} keys and values for
  * easier inspection.
@@ -120,8 +122,8 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
 
     private static String toString(Type type) {
         if (type instanceof TypeVariable<?>) {
-            return Types.toLongString((TypeVariable<?>) type);
+            return TypeUtils.toLongString((TypeVariable<?>) type);
         }
-        return Types.toString(type);
+        return TypeUtils.toString(type);
     }
 }

@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,9 +58,9 @@ public class TypesTest {
     @Test
     public void testGetInterfaceType() {
         final IterableToIterator iterableToIterator = new IterableToIterator();
+        Type[] typeArguments = { TypeUtils.WILDCARD_ALL };
 
-        assertTrue(Types.equals(Types.parameterize(Iterable.class, Types.WILDCARD_ALL),
-            Types.resolveAt(iterableToIterator, FromSource.class.getTypeParameters()[0])));
+        assertTrue(TypeUtils.equals(TypeUtils.parameterize(Iterable.class, typeArguments), Types.resolveAt(iterableToIterator, FromSource.class.getTypeParameters()[0])));
         assertEquals(Iterator.class, Types.resolveAt(iterableToIterator, ToTarget.class.getTypeParameters()[0]));
 
         final CopyingConverter<Object, Book> forBook = CopyingConverter.forTargetType(Book.class);

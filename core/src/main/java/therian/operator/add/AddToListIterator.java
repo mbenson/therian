@@ -27,7 +27,6 @@ import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.util.Types;
 
 /**
  * Add an element to a {@link ListIterator}.
@@ -70,9 +69,7 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(
-                TypeUtils.getTypeArguments(add.getTargetPosition().getType(), ListIterator.class),
-                ListIterator.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), ListIterator.class), ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw

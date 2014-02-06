@@ -75,7 +75,7 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Only Position<%s>(%s)", Types.toString(type), value);
+            return String.format("Read-Only Position<%s>(%s)", TypeUtils.toString(type), value);
         }
 
     }
@@ -117,7 +117,7 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Writable Position<%s>", Types.toString(type));
+            return String.format("Writable Position<%s>", TypeUtils.toString(type));
         }
 
     }
@@ -173,7 +173,7 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Write Position<%s>(%s)", Types.toString(type), value);
+            return String.format("Read-Write Position<%s>(%s)", TypeUtils.toString(type), value);
         }
 
     }
@@ -217,7 +217,7 @@ public class Positions {
      */
     public static <T> Position.Readable<T> readOnly(final Type type, final T value) {
         Validate.notNull(type, "type");
-        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, Types.toString(type));
+        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, TypeUtils.toString(type));
         return new RO<T>(type, value);
     }
 
@@ -285,7 +285,7 @@ public class Positions {
     public static <T> Position.ReadWrite<T> readWrite(final Type type, T initialValue) {
         Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(initialValue, type), "%s is not an instance of %s", initialValue,
-            Types.toString(type));
+            TypeUtils.toString(type));
         return new RW<T>(type, initialValue);
     }
 

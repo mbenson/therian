@@ -36,9 +36,9 @@ public class Operators {
         @Override
         public int compare(Operator<?> o1, Operator<?> o2) {
             final Type opType1 =
-                Types.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
+                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
             final Type opType2 =
-                Types.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
+                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
 
             return compareTypes(opType1, opType2);
         }
@@ -64,7 +64,7 @@ public class Operators {
                 final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
                 for (TypeVariable<?> var : raw1.getTypeParameters()) {
                     final int recurse =
-                        compareTypes(Types.unrollVariables(typeArgs1, var), Types.unrollVariables(typeArgs2, var));
+                        compareTypes(TypeUtils.unrollVariables(typeArgs1, var), TypeUtils.unrollVariables(typeArgs2, var));
                     if (recurse != 0) {
                         return recurse;
                     }
@@ -106,7 +106,7 @@ public class Operators {
         for (TypeVariable<?> var : Validate.notNull(operator, "operator").getClass().getTypeParameters()) {
             if (Types.resolveAt(operator, var) == null) {
                 throw new OperatorDefinitionException(operator, "Could not resolve %s against operator %s",
-                    Types.toLongString(var), operator);
+                    TypeUtils.toLongString(var), operator);
             }
         }
         return operator;

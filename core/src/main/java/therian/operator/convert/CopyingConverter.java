@@ -34,11 +34,11 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.BindTypeVariable;
 import therian.Operation;
 import therian.TherianContext;
-import therian.Typed;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operation.Copy;
@@ -177,7 +177,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     }
 
     private static abstract class Fluent<TARGET> extends CopyingConverter.DynamicallyTyped<Object, TARGET> {
-        private static final Typed<Object> sourceType = Types.wrap(Object.class);
+        private static final Typed<Object> sourceType = TypeUtils.wrap(Object.class);
 
         private final Constructor<? extends TARGET> constructor;
 
@@ -240,7 +240,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     @Override
     public String toString() {
         return String.format("CopyingConverter for target type %s",
-            Types.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
+            TypeUtils.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
     }
 
     private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {
@@ -256,7 +256,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      * @return CopyingConverter instance
      */
     public static <TARGET> CopyingConverter<Object, TARGET> forTargetType(final Class<TARGET> target) {
-        final Typed<TARGET> targetType = Types.wrap(target);
+        final Typed<TARGET> targetType = TypeUtils.wrap(target);
 
         return new Fluent<TARGET>(requireDefaultConstructor(target)) {
             @Override
@@ -274,7 +274,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      * @return {@link Implementing} step
      */
     public static <TARGET> Implementing<TARGET> implementing(Class<TARGET> targetType) {
-        return new Implementing<TARGET>(Types.wrap(targetType));
+        return new Implementing<TARGET>(TypeUtils.wrap(targetType));
     }
 
     /**

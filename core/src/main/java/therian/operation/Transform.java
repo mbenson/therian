@@ -22,13 +22,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.Typed;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.BindTypeVariable;
 import therian.Operation;
-import therian.Typed;
 import therian.position.Position;
-import therian.util.Types;
 
 /**
  * Abstract transform operation. A "transformer" is an operator over a transform operation. Defining "Transformer" in
@@ -51,9 +50,9 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
                     int index = 0;
                     for (TypeVariable<?> typeVariable : typeParameters) {
-                        args[index++] = ObjectUtils.defaultIfNull(argMappings.get(typeVariable), Types.WILDCARD_ALL);
+                        args[index++] = ObjectUtils.defaultIfNull(argMappings.get(typeVariable), TypeUtils.WILDCARD_ALL);
                     }
-                    result = Types.parameterize(rawValueType, args);
+                    result = TypeUtils.parameterize(rawValueType, args);
                 } else {
                     result = rawValueType;
                 }
@@ -87,7 +86,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     public Typed<SOURCE> getSourceType() {
         final Position.Readable<SOURCE> source = getSourcePosition();
         final Type result = narrow(source);
-        if (!Types.equals(result, source.getType())) {
+        if (!TypeUtils.equals(result, source.getType())) {
             return new Typed<SOURCE>() {
                 @Override
                 public Type getType() {
@@ -118,11 +117,10 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     public Typed<TARGET> getTargetType() {
         final TARGET_POSITION target = getTargetPosition();
         final Type targetPositionType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
-                Transform.class.getTypeParameters()[3]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class), Transform.class.getTypeParameters()[3]);
         if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
             final Type result = narrow((Position.Readable<TARGET>) target);
-            if (!Types.equals(result, target.getType())) {
+            if (!TypeUtils.equals(result, target.getType())) {
                 return new Typed<TARGET>() {
 
                     @Override

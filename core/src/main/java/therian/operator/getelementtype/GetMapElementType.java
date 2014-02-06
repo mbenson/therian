@@ -23,7 +23,6 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
-import therian.util.Types;
 
 @SuppressWarnings("rawtypes")
 @StandardOperator
@@ -31,8 +30,7 @@ public class GetMapElementType implements Operator<GetElementType<Map>> {
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Map> op) {
-        op.setResult(Types.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Map.class),
-            Map.class.getTypeParameters()[1]));
+        op.setResult(TypeUtils.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Map.class), Map.class.getTypeParameters()[1]));
         return true;
     }
 

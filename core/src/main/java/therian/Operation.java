@@ -48,8 +48,8 @@ public abstract class Operation<RESULT> {
                 valid = true;
             } else {
                 final Type resultType =
-                    Types.unrollVariables(TypeUtils.getTypeArguments(type, Operation.class), TYPE_VARIABLE_RESULT);
-                valid = !Types.containsTypeVariables(resultType);
+                    TypeUtils.unrollVariables(TypeUtils.getTypeArguments(type, Operation.class), TYPE_VARIABLE_RESULT);
+                valid = !TypeUtils.containsTypeVariables(resultType);
                 Validate.isTrue(valid, "%s does not fully bind type parameter %s from %s", type,
                     TYPE_VARIABLE_RESULT.getName(), Operation.class);
                 VALID_INFO.put(type, Boolean.valueOf(valid));
@@ -112,14 +112,13 @@ public abstract class Operation<RESULT> {
      */
     public boolean matches(Operator<?> operator) {
         final Type expectedType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
-                Operator.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class), Operator.class.getTypeParameters()[0]);
 
         if (!TypeUtils.isInstance(this, expectedType)) {
             return false;
         }
 
-        for (Class<?> c : Types.hierarchy(TypeUtils.getRawType(expectedType, operator.getClass()))) {
+        for (Class<?> c : ClassUtils.hierarchy(TypeUtils.getRawType(expectedType, operator.getClass()))) {
             if (c.equals(Operation.class)) {
                 break;
             }
@@ -133,7 +132,7 @@ public abstract class Operation<RESULT> {
                 if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
                     type = ClassUtils.primitiveToWrapper((Class<?>) type);
                 }
-                if (!TypeUtils.isAssignable(type, Types.unrollVariables(typeArguments, var))) {
+                if (!TypeUtils.isAssignable(type, TypeUtils.unrollVariables(typeArguments, var))) {
                     return false;
                 }
             }

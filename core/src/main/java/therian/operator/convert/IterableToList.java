@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
@@ -28,7 +30,6 @@ import therian.operation.Convert;
 import therian.operation.GetElementType;
 import therian.operator.getelementtype.GetIterableElementType;
 import therian.util.Positions;
-import therian.util.Types;
 
 /**
  * Supports the rare case that an {@link Iterable} needs to be converted to a {@link List} or supertype (i.e.
@@ -49,9 +50,10 @@ public class IterableToList extends AssignableElementConverter<Iterable<?>, List
     @Override
     public boolean perform(TherianContext context, Convert<? extends Iterable<?>, ? super List> convert) {
         final Type sourceElementType = context.eval(GetElementType.of(convert.getSourcePosition()));
+        Type[] typeArguments = { sourceElementType };
         return context.evalSuccess(Convert.to(
             convert.getTargetPosition(),
-            Positions.readOnly(Types.parameterize(Iterator.class, sourceElementType), convert.getSourcePosition()
+            Positions.readOnly(TypeUtils.parameterize(Iterator.class, typeArguments), convert.getSourcePosition()
                 .getValue().iterator())));
     }
 

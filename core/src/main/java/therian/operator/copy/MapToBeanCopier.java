@@ -35,7 +35,6 @@ import therian.position.relative.Property;
 import therian.util.BeanProperties;
 import therian.util.BeanProperties.ReturnProperties;
 import therian.util.Positions;
-import therian.util.Types;
 
 /**
  * Copy a {@link Map}'s properties onto a bean.
@@ -103,7 +102,6 @@ public class MapToBeanCopier extends Copier<Map, Object> {
 
     private Type getKeyType(Position<? extends Map> target) {
         return ObjectUtils.defaultIfNull(
-            Types.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
-                Map.class.getTypeParameters()[0]), Object.class);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class), Map.class.getTypeParameters()[0]), Object.class);
     }
 }

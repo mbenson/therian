@@ -28,7 +28,6 @@ import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.util.Types;
 
 /**
  *
@@ -59,12 +58,12 @@ public class AddEntryToMap implements Operator<Add<Map.Entry, Map>> {
         final Map<TypeVariable<?>, Type> targetArgs =
             TypeUtils.getTypeArguments(add.getTargetType().getType(), Map.class);
 
-        final Type targetKeyType = Types.unrollVariables(targetArgs, Map.class.getTypeParameters()[0]);
+        final Type targetKeyType = TypeUtils.unrollVariables(targetArgs, Map.class.getTypeParameters()[0]);
 
         if (targetKeyType != null && !TypeUtils.isInstance(add.getSourcePosition().getValue().getKey(), targetKeyType)) {
             return false;
         }
-        final Type targetValueType = Types.unrollVariables(targetArgs, Map.class.getTypeParameters()[1]);
+        final Type targetValueType = TypeUtils.unrollVariables(targetArgs, Map.class.getTypeParameters()[1]);
 
         return targetValueType == null
             || TypeUtils.isInstance(add.getSourcePosition().getValue().getValue(), targetValueType);

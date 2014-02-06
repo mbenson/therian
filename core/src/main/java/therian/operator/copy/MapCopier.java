@@ -33,7 +33,6 @@ import therian.operation.Copy;
 import therian.operator.add.AddEntryToMap;
 import therian.position.Position;
 import therian.util.Positions;
-import therian.util.Types;
 
 /**
  * Copies between maps, handling supported conversions between keys/values.
@@ -54,14 +53,15 @@ public class MapCopier extends Copier<Map, Map> {
         final Map<TypeVariable<?>, Type> targetArgs =
             TypeUtils.getTypeArguments(copy.getTargetType().getType(), Map.class);
 
-        final Type sourceKeyType = Types.unrollVariables(sourceArgs, KEY);
-        final Type sourceValueType = Types.unrollVariables(sourceArgs, VALUE);
-        final Type targetKeyType = Types.unrollVariables(targetArgs, KEY);
-        final Type targetValueType = Types.unrollVariables(targetArgs, VALUE);
+        final Type sourceKeyType = TypeUtils.unrollVariables(sourceArgs, KEY);
+        final Type sourceValueType = TypeUtils.unrollVariables(sourceArgs, VALUE);
+        final Type targetKeyType = TypeUtils.unrollVariables(targetArgs, KEY);
+        final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
         if (targetKeyType != null && targetValueType != null) {
-            targetEntryType = Types.parameterize(Map.Entry.class, targetKeyType, targetValueType);
+            Type[] typeArguments = { targetKeyType, targetValueType };
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
         } else {
             targetEntryType = Map.Entry.class;
         }
@@ -129,14 +129,15 @@ public class MapCopier extends Copier<Map, Map> {
         final Map<TypeVariable<?>, Type> targetArgs =
             TypeUtils.getTypeArguments(copy.getTargetType().getType(), Map.class);
 
-        final Type sourceKeyType = Types.unrollVariables(sourceArgs, KEY);
-        final Type sourceValueType = Types.unrollVariables(sourceArgs, VALUE);
-        final Type targetKeyType = Types.unrollVariables(targetArgs, KEY);
-        final Type targetValueType = Types.unrollVariables(targetArgs, VALUE);
+        final Type sourceKeyType = TypeUtils.unrollVariables(sourceArgs, KEY);
+        final Type sourceValueType = TypeUtils.unrollVariables(sourceArgs, VALUE);
+        final Type targetKeyType = TypeUtils.unrollVariables(targetArgs, KEY);
+        final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
         if (targetKeyType != null && targetValueType != null) {
-            targetEntryType = Types.parameterize(Map.Entry.class, targetKeyType, targetValueType);
+            Type[] typeArguments = { targetKeyType, targetValueType };
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
         } else {
             targetEntryType = Map.Entry.class;
         }

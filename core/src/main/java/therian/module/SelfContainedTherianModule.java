@@ -21,12 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.ClassUtils.Interfaces;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import therian.Operator;
 import therian.TherianModule;
-import therian.util.Types;
-import therian.util.Types.Interfaces;
 
 /**
  * {@link TherianModule} that includes an instance of each instantiable {@link Operator} type defined as an inner class
@@ -64,7 +64,7 @@ public abstract class SelfContainedTherianModule extends TherianModule {
     private Operator<?>[] getSelfContainedOperators() {
         final List<Operator<?>> result = new ArrayList<Operator<?>>();
 
-        for (Class<?> c : Types.hierarchy(getClass(), interfacesPolicy)) {
+        for (Class<?> c : ClassUtils.hierarchy(getClass(), interfacesPolicy)) {
             for (Class<?> inner : c.getDeclaredClasses()) {
                 if (Operator.class.isAssignableFrom(inner)) {
                     final Operator<?> operator = newInstance(inner.asSubclass(Operator.class));

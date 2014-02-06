@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 
+import org.apache.commons.lang3.ClassUtils.Interfaces;
 import org.junit.Test;
 
 import therian.Operation;
@@ -31,7 +32,6 @@ import therian.operator.convert.ELCoercionConverter;
 import therian.operator.convert.NOPConverter;
 import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;
-import therian.util.Types.Interfaces;
 
 /**
  *

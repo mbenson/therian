@@ -22,11 +22,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.TherianContext;
-import therian.Typed;
 import therian.operation.Convert;
-import therian.util.Types;
 
 /**
  * Abstract {@link Converter} of objects with elements that are assignable from source to target.
@@ -62,16 +61,16 @@ public abstract class AssignableElementConverter<SOURCE, TARGET> extends Convert
         return sourceComponentType != null && TypeUtils.isAssignable(sourceComponentType, targetComponentType);
     }
 
-    protected Type sourceComponentType(Typed<? extends SOURCE> item) {
+    protected Type sourceComponentType(Typed<?> item) {
         final Type t = item.getType();
         final Class<?> varOwner = sourceElementType.getGenericDeclaration();
 
         final Map<TypeVariable<?>, Type> args = TypeUtils.getTypeArguments(t, varOwner);
-        return args == null ? null : ObjectUtils.defaultIfNull(Types.unrollVariables(args, sourceElementType),
+        return args == null ? null : ObjectUtils.defaultIfNull(TypeUtils.unrollVariables(args, sourceElementType),
             Object.class);
     }
 
-    protected Type targetComponentType(Typed<? super TARGET> item) {
+    protected Type targetComponentType(Typed<?> item) {
         final Type t = item.getType();
         final Class<?> varOwner = targetElementType.getGenericDeclaration();
 
@@ -81,7 +80,7 @@ public abstract class AssignableElementConverter<SOURCE, TARGET> extends Convert
         }
 
         if (TypeUtils.isAssignable(t, varOwner)) {
-            return Types.unrollVariables(TypeUtils.getTypeArguments(t, varOwner), targetElementType);
+            return TypeUtils.unrollVariables(TypeUtils.getTypeArguments(t, varOwner), targetElementType);
         }
         if (t instanceof ParameterizedType) {
             final Map<TypeVariable<?>, Type> args = TypeUtils.determineTypeArguments(varOwner, (ParameterizedType) t);

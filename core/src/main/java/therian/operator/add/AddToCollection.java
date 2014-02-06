@@ -26,7 +26,6 @@ import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
-import therian.util.Types;
 
 /**
  * Add an element to a {@link Collection}.
@@ -54,8 +53,7 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
             return false;
         }
         final Type targetElementType =
-            Types.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class),
-                Collection.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class), Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection

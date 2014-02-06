@@ -21,13 +21,12 @@ import java.lang.reflect.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.TherianContext;
-import therian.Typed;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.position.Position;
-import therian.util.Types;
 
 /**
  * DefaultCopyingConverter; tries:
@@ -42,7 +41,7 @@ public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object>
 
     @SuppressWarnings("rawtypes")
     private static class Delegate extends CopyingConverter.DynamicallyTyped {
-        private static final Typed<Object> sourceType = Types.wrap(Object.class);
+        private static final Typed<Object> sourceType = TypeUtils.wrap(Object.class);
 
         private final Convert<?, ?> convert;
         private final Class<?> rawTargetType;
@@ -54,7 +53,7 @@ public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object>
         private Delegate(Convert<?, ?> convert) {
             this.convert = convert;
             rawTargetType = TypeUtils.getRawType(convert.getTargetPosition().getType(), null);
-            targetType = Types.wrap(rawTargetType);
+            targetType = TypeUtils.wrap(rawTargetType);
         }
 
         @Override

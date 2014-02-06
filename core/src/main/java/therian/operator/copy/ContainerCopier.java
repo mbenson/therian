@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.BindTypeVariable;
 import therian.Operator.DependsOn;
 import therian.TherianContext;
-import therian.Typed;
 import therian.buildweaver.StandardOperator;
 import therian.operation.AddAll;
 import therian.operation.Convert;
@@ -30,7 +30,6 @@ import therian.operator.convert.NOPConverter;
 import therian.position.Position;
 import therian.position.relative.Element;
 import therian.util.Positions;
-import therian.util.Types;
 
 /**
  * Tries to convert source and target to {@link Iterable}s, copy source elements onto corresponding target elements,
@@ -109,14 +108,15 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
             sourceElementsForConversion.add(sourceIterator.next());
         }
 
-        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
+        final Position.ReadWrite<?> targetElements = Positions.readWrite(TypeUtils.genericArrayType(targetElementType));
         final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
         ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
             sourceElementsForConversion.size()));
+        Type[] typeArguments = { sourceElementType };
 
         final Position.Readable<List<?>> sourceSubList =
             Positions
-                .<List<?>> readOnly(Types.parameterize(List.class, sourceElementType), sourceElementsForConversion);
+                .<List<?>> readOnly(TypeUtils.parameterize(List.class, typeArguments), sourceElementsForConversion);
 
         for (int i = 0, sz = sourceElementsForConversion.size(); i < sz; i++) {
             final Position.ReadWrite<?> targetElement = Element.atArrayIndex(i).of(targetElements);
@@ -222,12 +222,13 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
 
         final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
 
-        final Position.ReadWrite<?> targetElements = Positions.readWrite(Types.genericArrayType(targetElementType));
+        final Position.ReadWrite<?> targetElements = Positions.readWrite(TypeUtils.genericArrayType(targetElementType));
         ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
             sourceElementsForConversion.size()));
+        Type[] typeArguments = { sourceElementType };
 
         final Type sourceSubListType =
-            sourceElementType == null ? List.class : Types.parameterize(List.class, sourceElementType);
+            sourceElementType == null ? List.class : TypeUtils.parameterize(List.class, typeArguments);
         final Position.Readable<List<?>> sourceSubList =
             Positions.<List<?>> readOnly(sourceSubListType, sourceElementsForConversion);
 

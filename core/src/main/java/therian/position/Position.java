@@ -15,7 +15,7 @@
  */
 package therian.position;
 
-import therian.Typed;
+import org.apache.commons.lang3.reflect.Typed;
 
 /**
  * A Position describes the combination of a type and a value, which may be readable, writable, or both.

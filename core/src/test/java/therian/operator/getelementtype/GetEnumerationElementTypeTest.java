@@ -21,13 +21,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
-import therian.util.Types;
 
 public class GetEnumerationElementTypeTest extends OperatorTest {
 
@@ -39,10 +39,8 @@ public class GetEnumerationElementTypeTest extends OperatorTest {
     @Test
     public void test() {
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String>>() {})));
-        assertTrue(Types.equals(new TypeLiteral<List<String>>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<List<String>>>() {}))));
-        assertTrue(Types.equals(new TypeLiteral<String[]>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String[]>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<List<String>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<List<String>>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String[]>>() {}))));
     }
 
 }

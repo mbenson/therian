@@ -63,8 +63,7 @@ class OperatorManager {
         OperatorInfo(Operator operator) {
             this.operator = operator;
             targetType =
-                Types.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
-                    Operator.class.getTypeParameters()[0]);
+                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class), Operator.class.getTypeParameters()[0]);
             rawTargetType = getRawType(targetType);
         }
 
@@ -125,7 +124,7 @@ class OperatorManager {
                     return false;
                 }
 
-                for (Class<?> c : Types.hierarchy(operatorInfo.rawTargetType)) {
+                for (Class<?> c : ClassUtils.hierarchy(operatorInfo.rawTargetType)) {
                     if (c.equals(Operation.class)) {
                         break;
                     }
@@ -141,7 +140,7 @@ class OperatorManager {
                             if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
                                 type = ClassUtils.primitiveToWrapper((Class<?>) type);
                             }
-                            if (!TypeUtils.isAssignable(type, Types.unrollVariables(typeArguments, var))) {
+                            if (!TypeUtils.isAssignable(type, TypeUtils.unrollVariables(typeArguments, var))) {
                                 return false;
                             }
                         }
@@ -161,7 +160,7 @@ class OperatorManager {
         }
 
         public Iterable<Operator<?>> operatorsSupporting(final Operation<?> operation) {
-            for (Class<?> key : Types.hierarchy(operation.getClass())) {
+            for (Class<?> key : ClassUtils.hierarchy(operation.getClass())) {
                 if (subgroups.containsKey(key)) {
                     final Iterable<OperatorInfo> info =
                         FilteredIterable.of(subgroups.get(key)).retain(new Filter(operation));

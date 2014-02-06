@@ -18,10 +18,10 @@ package therian.operation;
 import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.BindTypeVariable;
 import therian.Operation;
-import therian.Typed;
 
 public class GetElementType<T> extends Operation<Type> {
     private final Typed<T> typedItem;

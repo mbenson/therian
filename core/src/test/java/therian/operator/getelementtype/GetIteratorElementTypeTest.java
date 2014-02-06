@@ -20,13 +20,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
 import therian.TypeLiteral;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
-import therian.util.Types;
 
 public class GetIteratorElementTypeTest extends OperatorTest {
 
@@ -38,10 +38,8 @@ public class GetIteratorElementTypeTest extends OperatorTest {
     @Test
     public void test() {
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Iterator<String>>() {})));
-        assertTrue(Types.equals(new TypeLiteral<String[]>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<Iterator<String[]>>() {}))));
-        assertTrue(Types.equals(new TypeLiteral<Class<?>>() {}.value,
-            therianContext.eval(GetElementType.of(new TypeLiteral<Iterator<Class<?>>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Iterator<String[]>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<Class<?>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Iterator<Class<?>>>() {}))));
     }
 
 }

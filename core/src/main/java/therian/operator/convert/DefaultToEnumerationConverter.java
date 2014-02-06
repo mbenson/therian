@@ -29,7 +29,6 @@ import therian.operation.GetElementType;
 import therian.operator.getelementtype.GetEnumerationElementType;
 import therian.position.Position;
 import therian.util.Positions;
-import therian.util.Types;
 
 /**
  * Attempts to convert to {@link Iterator} and thence to {@link Enumeration}.
@@ -42,8 +41,9 @@ public class DefaultToEnumerationConverter extends Converter<Object, Enumeration
     @Override
     public boolean perform(TherianContext context, Convert<? extends Object, ? super Enumeration> convert) {
         final Type targetElementType = context.eval(GetElementType.of(convert.getTargetPosition()));
+        Type[] typeArguments = { targetElementType };
         final Position.ReadWrite<Iterator<?>> iterator =
-            Positions.readWrite(Types.parameterize(Iterator.class, targetElementType));
+            Positions.readWrite(TypeUtils.parameterize(Iterator.class, typeArguments));
         return context.evalSuccess(Convert.to(iterator, convert.getSourcePosition()))
             && context.evalSuccess(Convert.to(convert.getTargetPosition(), iterator));
     }

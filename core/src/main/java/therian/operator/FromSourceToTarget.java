@@ -51,8 +51,8 @@ public abstract class FromSourceToTarget {
 
     {
         // try to set these once from class info alone, skipping @BindTypeVariable stuff:
-        sourceBound = Types.unrollVariables(TypeUtils.getTypeArguments(getClass(), FromSource.class), SOURCE);
-        targetBound = Types.unrollVariables(TypeUtils.getTypeArguments(getClass(), ToTarget.class), TARGET);
+        sourceBound = TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), FromSource.class), SOURCE);
+        targetBound = TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), ToTarget.class), TARGET);
     }
 
     /**

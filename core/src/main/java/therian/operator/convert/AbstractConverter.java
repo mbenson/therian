@@ -25,7 +25,6 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.Operator;
 import therian.operation.Convert;
 import therian.operator.FromSourceToTarget;
-import therian.util.Types;
 
 /**
  * Abstract {@link Convert} {@link Operator} superclass.
@@ -46,7 +45,7 @@ public abstract class AbstractConverter extends FromSourceToTarget {
                 try {
                     final Map<TypeVariable<?>, Type> typeArgMappings =
                         TypeUtils.determineTypeArguments(rt, (ParameterizedType) toCompare);
-                    toCompare = Types.parameterize(rt, typeArgMappings);
+                    toCompare = TypeUtils.parameterize(rt, typeArgMappings);
                 } catch (Exception e) {
                     // use basic parameterized source type
                 }
