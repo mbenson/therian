@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
 import therian.OperationException;
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Add;
 import therian.operator.OperatorTest;
 import therian.util.Positions;

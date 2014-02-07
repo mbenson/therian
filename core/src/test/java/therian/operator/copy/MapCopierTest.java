@@ -23,12 +23,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 
 import therian.OperationException;
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
 import therian.operator.convert.ELCoercionConverter;

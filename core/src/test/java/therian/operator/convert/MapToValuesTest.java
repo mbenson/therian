@@ -21,11 +21,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
 import therian.OperationException;
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.testfixture.MetasyntacticVariable;

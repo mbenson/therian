@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.TypeLiteral;
 import therian.position.Position;
 
 /**
@@ -99,7 +98,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
         return new Convert<S, T>(sourcePosition, targetType);
     }
 
-    public static <S, T> Convert<S, T> to(TypeLiteral<T> targetType, Position.Readable<S> sourcePosition) {
+    public static <S, T> Convert<S, T> to(org.apache.commons.lang3.reflect.TypeLiteral<T> targetType, Position.Readable<S> sourcePosition) {
         return new Convert<S, T>(sourcePosition, targetType.value);
     }
 

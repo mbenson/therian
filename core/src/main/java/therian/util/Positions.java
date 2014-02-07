@@ -20,10 +20,10 @@ import java.lang.reflect.Type;
 import org.apache.commons.functor.Procedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
-import therian.TypeLiteral;
 import therian.position.Position;
 import therian.position.Position.Readable;
 import therian.position.Position.Writable;

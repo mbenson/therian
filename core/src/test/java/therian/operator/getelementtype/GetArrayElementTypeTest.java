@@ -20,11 +20,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
 

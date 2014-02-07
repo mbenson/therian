@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
-import therian.TypeLiteral;
 import therian.position.Position;
 import therian.util.Positions;
 

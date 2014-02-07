@@ -24,10 +24,10 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 
-import therian.TypeLiteral;
 import therian.position.Position;
 import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;

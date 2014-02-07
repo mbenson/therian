@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.util.Positions;

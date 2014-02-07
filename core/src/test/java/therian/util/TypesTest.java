@@ -11,12 +11,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import therian.Operation;
-import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operation.Size;

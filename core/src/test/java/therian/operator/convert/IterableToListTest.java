@@ -23,11 +23,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
 import therian.OperationException;
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operator.OperatorTest;
 import therian.operator.getelementtype.GetIterableElementType;

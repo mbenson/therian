@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.reflect.Typed;
 import org.junit.Test;
 
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.GetElementType;
 import therian.operator.OperatorTest;
 

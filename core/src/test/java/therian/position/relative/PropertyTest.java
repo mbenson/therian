@@ -21,9 +21,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
-import therian.TypeLiteral;
 import therian.position.Position;
 import therian.testfixture.Address;
 import therian.testfixture.Author;

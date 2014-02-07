@@ -20,10 +20,10 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.Test;
 
 import therian.TherianModule;
-import therian.TypeLiteral;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
