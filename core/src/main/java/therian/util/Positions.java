@@ -17,13 +17,13 @@ package therian.util;
 
 import java.lang.reflect.Type;
 
-import org.apache.commons.functor.Procedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
+import therian.TherianContext.Callback;
 import therian.position.Position;
 import therian.position.Position.Readable;
 import therian.position.Position.Writable;
@@ -350,11 +350,11 @@ public class Positions {
      * @return UnaryProcedure
      * @see TherianContext#forwardTo(therian.Operation, UnaryProcedure)
      */
-    public static <T> Procedure<T> writeValue(final Position.Writable<? super T> pos) {
-        return new Procedure<T>() {
+    public static <T> Callback<T> writeValue(final Position.Writable<? super T> pos) {
+        return new Callback<T>() {
 
             @Override
-            public void run(T value) {
+            public void handle(T value) {
                 pos.setValue(value);
             }
         };

@@ -24,8 +24,6 @@ import java.util.Map;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.functor.Function;
-import org.apache.commons.functor.Procedure;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -38,6 +36,24 @@ import therian.util.ReadOnlyUtils;
  * Therian context.
  */
 public class TherianContext extends ELContextWrapper {
+    /**
+     * Callback interface.
+     *
+     * @param <T>
+     */
+    public interface Callback<T> {
+        void handle(T arg);
+    }
+
+    /**
+     * Job interface.
+     *
+     * @param <T>
+     */
+    public interface Job<T> {
+        T evaluate(TherianContext context);
+    }
+
     /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
      *
@@ -121,7 +137,7 @@ public class TherianContext extends ELContextWrapper {
      * @param hints
      * @return T
      */
-    public synchronized <T> T doWithHints(Function<TherianContext, T> function, Hint... hints) {
+    public synchronized <T> T doWithHints(Job<T> function, Hint... hints) {
         Validate.notNull(function, "function");
         Validate.noNullElements(hints, "null element at hints[%s]");
 
@@ -301,7 +317,7 @@ public class TherianContext extends ELContextWrapper {
      * @return operation's success
      */
     public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
-        final Procedure<? super RESULT> callback) {
+        final Callback<? super RESULT> callback) {
         Validate.validState(!operations.isEmpty(), "cannot forward without an ongoing operation");
         final Operation<?> owner = operations.peek();
         Validate
@@ -309,7 +325,7 @@ public class TherianContext extends ELContextWrapper {
         final RESULT result = eval(operation);
         if (operation.isSuccessful()) {
             if (callback != null) {
-                callback.run(result);
+                callback.handle(result);
             }
             return true;
         }
