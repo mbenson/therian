@@ -40,7 +40,7 @@
     </dependency>
     <dependency>
       <groupId>com.github.mbenson.therian</groupId>
-      <artifactId>therian-build-weaver</artifactId>
+      <artifactId>therian-build-processor</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>

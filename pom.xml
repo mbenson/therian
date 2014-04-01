@@ -65,7 +65,7 @@
       </dependency>
       <dependency>
         <groupId>com.github.mbenson.therian</groupId>
-        <artifactId>therian-build-weaver</artifactId>
+        <artifactId>therian-build-processor</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -218,7 +218,7 @@
 
   <modules>
     <module>uelbox</module>
-    <module>build-weaver</module>
+    <module>build-processor</module>
     <module>core</module>
   </modules>
 

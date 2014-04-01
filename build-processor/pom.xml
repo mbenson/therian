@@ -23,8 +23,8 @@
     <artifactId>therian-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>therian-build-weaver</artifactId>
-  <name>therian-build-weaver</name>
+  <artifactId>therian-build-processor</artifactId>
+  <name>therian-build-processor</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <asm.version>4.1</asm.version>
