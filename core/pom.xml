@@ -96,24 +96,8 @@
               <shadedPattern>therian._functor.adapter.__</shadedPattern>
             </relocation>
             <relocation>
-              <pattern>org.apache.commons.functor.aggregator.functions.</pattern>
-              <shadedPattern>therian._functor.aggregator.functions.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.aggregator.</pattern>
-              <shadedPattern>therian._functor.aggregator.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.core.algorithm.</pattern>
-              <shadedPattern>therian._functor.core.algorithm.__</shadedPattern>
-            </relocation>
-            <relocation>
               <pattern>org.apache.commons.functor.core.collection.</pattern>
               <shadedPattern>therian._functor.core.collection.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.core.comparator.</pattern>
-              <shadedPattern>therian._functor.core.comparator.__</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.apache.commons.functor.core.composite.</pattern>
@@ -136,8 +120,8 @@
               <shadedPattern>therian._functor.generator.__</shadedPattern>
             </relocation>
             <relocation>
-              <pattern>org.apache.commons.functor.range.</pattern>
-              <shadedPattern>therian._functor.range.__</shadedPattern>
+              <pattern>org.apache.commons.functor._lang3.</pattern>
+              <shadedPattern>therian._functor._lang3.</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.apache.commons.functor.</pattern>
