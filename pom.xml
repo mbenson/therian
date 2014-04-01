@@ -159,14 +159,14 @@
         <executions>
           <execution>
             <id>attach-sources</id>
-            <phase>verify</phase>
+            <phase>package</phase>
             <goals>
               <goal>jar-no-fork</goal>
             </goals>
           </execution>
           <execution>
             <id>attach-test-sources</id>
-            <phase>verify</phase>
+            <phase>package</phase>
             <goals>
               <goal>test-jar-no-fork</goal>
             </goals>
@@ -182,7 +182,7 @@
         <executions>
           <execution>
             <id>create-test-jar</id>
-            <phase>verify</phase>
+            <phase>package</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
