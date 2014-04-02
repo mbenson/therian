@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -34,6 +35,7 @@ import javax.el.ELResolver;
 import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
+import org.apache.commons.functor.generator.util.CollectionTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -118,19 +120,26 @@ public class Property {
                         }
                     };
 
-                    final Iterable<FeatureDescriptor> featureDescriptors =
-                        parent == null ? Collections.<FeatureDescriptor> emptyList() : FilteredIterable.of(
-                            IteratorToGeneratorAdapter.adapt(
-                                context.getELResolver().getFeatureDescriptors(context, parent)).toCollection()).retain(
-                            filter);
-
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        Type fromGenericTypeAttribute =
-                            FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(feature);
+                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+                    if (parent != null) {
+                        try {
+                            final Iterator<FeatureDescriptor> fd =
+                                context.getELResolver().getFeatureDescriptors(context, parent);
+                            featureDescriptors =
+                                FilteredIterable.of(
+                                    CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
+                                        IteratorToGeneratorAdapter.adapt(fd))).retain(filter);
+                        } catch (Exception e) {
+                        }
+                    }
+                    for (FeatureDescriptor fd : featureDescriptors) {
+                        final Type fromGenericTypeAttribute =
+                                FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
                         if (fromGenericTypeAttribute != null) {
                             return fromGenericTypeAttribute;
                         }
                     }
+
                     final Type parentType = parentPosition.getType();
                     final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
                     try {

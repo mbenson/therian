@@ -18,11 +18,13 @@ package therian.position.relative;
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
+import org.apache.commons.functor.generator.util.CollectionTransformer;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -66,12 +68,18 @@ public class Keyed {
                         }
                     };
 
-                    final Iterable<FeatureDescriptor> featureDescriptors =
-                        parent == null ? Collections.<FeatureDescriptor> emptyList() : FilteredIterable.of(
-                            IteratorToGeneratorAdapter.adapt(
-                                context.getELResolver().getFeatureDescriptors(context, parent)).toCollection()).retain(
-                            filter);
-
+                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+                    if (parent != null) {
+                        try {
+                            final Iterator<FeatureDescriptor> fd =
+                                context.getELResolver().getFeatureDescriptors(context, parent);
+                            featureDescriptors =
+                                FilteredIterable.of(
+                                    CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
+                                        IteratorToGeneratorAdapter.adapt(fd))).retain(filter);
+                        } catch (Exception e) {
+                        }
+                    }
                     for (FeatureDescriptor feature : featureDescriptors) {
                         final Type fromGenericTypeAttribute =
                             Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
