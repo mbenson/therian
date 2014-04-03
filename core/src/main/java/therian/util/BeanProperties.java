@@ -16,9 +16,16 @@
 package therian.util;
 
 import java.beans.FeatureDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
+import org.apache.commons.functor.generator.util.CollectionTransformer;
+import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
 import therian.position.Position;
@@ -40,10 +47,33 @@ public class BeanProperties {
 
     public static Set<String> getPropertyNames(ReturnProperties returnProperties, TherianContext context,
         Position.Readable<?> position) {
+
+        Iterable<? extends FeatureDescriptor> descriptors;
+        // first try ELResolver:
+
+        try {
+            descriptors =
+                CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
+                    IteratorToGeneratorAdapter.adapt(context.getELResolver().getFeatureDescriptors(context,
+                        position.getValue())));
+        } catch (Exception e) {
+            // java.beans introspection; on RT type if available, else raw position type:
+            final Class<?> beanType;
+            if (position.getValue() == null) {
+                beanType = TypeUtils.getRawType(position.getType(), null);
+            } else {
+                beanType = position.getValue().getClass();
+            }
+            try {
+                descriptors = Arrays.asList(Introspector.getBeanInfo(beanType).getPropertyDescriptors());
+            } catch (IntrospectionException e1) {
+                return Collections.emptySet();
+            }
+        }
+
         final Set<String> result = new HashSet<String>();
-        for (final Iterator<FeatureDescriptor> iter =
-            context.getELResolver().getFeatureDescriptors(context, position.getValue()); iter.hasNext();) {
-            final String name = iter.next().getName();
+        for (final FeatureDescriptor fd : descriptors) {
+            final String name = fd.getName();
             if (returnProperties == ReturnProperties.WRITABLE) {
                 try {
                     if (context.getELResolver().isReadOnly(context, position.getValue(), name)) {
