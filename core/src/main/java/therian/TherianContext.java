@@ -20,6 +20,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -92,6 +94,7 @@ public class TherianContext extends ELContextWrapper {
         }
     }
 
+    private static final Logger LOG = Logger.getLogger(TherianContext.class.getName());
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
 
     private final Deque<Operation<?>> operations = new ArrayDeque<Operation<?>>();
@@ -281,6 +284,9 @@ public class TherianContext extends ELContextWrapper {
             try {
                 for (Operator<?> operator : supportingOperators) {
                     if (evalRaw(operation, operator)) {
+                        if (LOG.isLoggable(Level.FINE)) {
+                            LOG.fine(String.format("Successfully evaluated %s with operator %s", operation, operator));
+                        }
                         operation.setSuccessful(true);
                         break;
                     }
