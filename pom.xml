@@ -233,6 +233,7 @@
           <!-- permit this only because we are shading commons-functor -->
           <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
           <autoVersionSubmodules>true</autoVersionSubmodules>
+          <tagNameFormat>therian-@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
     </plugins>
