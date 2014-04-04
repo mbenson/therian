@@ -28,7 +28,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
-import therian.uelbox.UEL;
+import uelbox.UEL;
 
 /**
  * Special operator that handles conversions by applying EL coercion rules. Quintessential example of a "converter" that

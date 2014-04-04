@@ -33,7 +33,7 @@ import therian.TherianContext;
 import therian.el.ELConstants;
 import therian.operation.Add;
 import therian.position.Position;
-import therian.uelbox.IterableELResolver;
+import uelbox.IterableELResolver;
 import therian.util.Types;
 
 /**

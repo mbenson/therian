@@ -41,7 +41,7 @@ import therian.operator.convert.NOPConverter;
 import therian.position.Position;
 import therian.testfixture.Author;
 import therian.testfixture.Employee;
-import therian.uelbox.IterableELResolver;
+import uelbox.IterableELResolver;
 import therian.util.Positions;
 
 /**

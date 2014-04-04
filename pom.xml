@@ -60,13 +60,18 @@
     <dependencies>
       <dependency>
         <groupId>com.github.mbenson.therian</groupId>
-        <artifactId>uelbox</artifactId>
+        <artifactId>therian-build-processor</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.mbenson.therian</groupId>
-        <artifactId>therian-build-processor</artifactId>
+        <artifactId>therian</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.mbenson</groupId>
+        <artifactId>uelbox</artifactId>
+        <version>0.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -217,7 +222,6 @@
   </build>
 
   <modules>
-    <module>uelbox</module>
     <module>build-processor</module>
     <module>core</module>
   </modules>

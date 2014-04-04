@@ -31,9 +31,9 @@ import javax.el.ExpressionFactory;
 
 import org.apache.commons.lang3.Validate;
 
-import therian.uelbox.ELContextWrapper;
-import therian.uelbox.IterableELResolver;
-import therian.uelbox.SimpleELContext;
+import uelbox.ELContextWrapper;
+import uelbox.IterableELResolver;
+import uelbox.SimpleELContext;
 
 /**
  * Therian entry point.

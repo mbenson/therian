@@ -31,8 +31,8 @@ import org.apache.commons.lang3.Validate;
 
 import therian.OperatorManager.SupportChecker;
 import therian.el.TherianContextELResolver;
-import therian.uelbox.ELContextWrapper;
 import therian.util.ReadOnlyUtils;
+import uelbox.ELContextWrapper;
 
 /**
  * Therian context.

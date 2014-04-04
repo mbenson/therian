@@ -36,12 +36,12 @@
   <dependencies>
     <dependency>
       <groupId>com.github.mbenson.therian</groupId>
-      <artifactId>uelbox</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.mbenson.therian</groupId>
       <artifactId>therian-build-processor</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.mbenson</groupId>
+      <artifactId>uelbox</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
