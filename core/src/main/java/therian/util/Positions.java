@@ -201,7 +201,7 @@ public class Positions {
     /**
      * Get a read-only position of value {@code value} (type of {@code value#getClass()}.
      *
-     * @param value, not {@code null}
+     * @param value not {@code null}
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final T value) {
@@ -348,7 +348,7 @@ public class Positions {
      *
      * @param pos
      * @return UnaryProcedure
-     * @see TherianContext#forwardTo(therian.Operation, UnaryProcedure)
+     * @see TherianContext#forwardTo(therian.Operation, Callback)
      */
     public static <T> Callback<T> writeValue(final Position.Writable<? super T> pos) {
         return new Callback<T>() {

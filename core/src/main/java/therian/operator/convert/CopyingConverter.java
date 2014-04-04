@@ -251,7 +251,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     /**
      * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
      *
-     * @param targetType which must have an accessible no-arg constructor
+     * @param target type which must have an accessible no-arg constructor
      * @param <TARGET>
      * @return CopyingConverter instance
      */

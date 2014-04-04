@@ -108,7 +108,6 @@ public abstract class Operation<RESULT> {
      *
      * @param operator
      * @return boolean
-     * @see #getType(TypeVariable)
      */
     public boolean matches(Operator<?> operator) {
         final Type expectedType =

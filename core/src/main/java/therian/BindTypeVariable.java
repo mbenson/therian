@@ -21,6 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.commons.lang3.reflect.Typed;
+
 /**
  * Binds a method that returns a {@link Typed} object to a type parameter of the declaring class.
  * Such a method must accept no parameters, and is expected never to return {@code null}.

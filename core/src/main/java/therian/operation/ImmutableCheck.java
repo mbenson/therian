@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import therian.Operation;
 import therian.BindTypeVariable;
+import therian.Operator;
 import therian.position.Position;
 import therian.position.Position.Readable;
 
@@ -76,7 +77,7 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
     /**
      * Create an {@link ImmutableCheck} operation against {@code position}.
      * 
-     * @param T
+     * @param <T>
      * @param position
      * @return operation
      */

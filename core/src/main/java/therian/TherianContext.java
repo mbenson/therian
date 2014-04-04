@@ -59,7 +59,7 @@ public class TherianContext extends ELContextWrapper {
     /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
      *
-     * @see TherianContext#doWithHints(UnaryFunction, Hint...)
+     * @see TherianContext#doWithHints(Job, Hint...)
      */
     public static abstract class Hint {
         /**
@@ -319,7 +319,6 @@ public class TherianContext extends ELContextWrapper {
      * @param operation
      * @param callback
      * @param <RESULT>
-     * @param <OPERATION>
      * @return operation's success
      */
     public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
