@@ -37,29 +37,34 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     Operation<RESULT> {
 
     private static Type narrow(Position.Readable<?> pos) {
-        if (pos.getValue() != null) {
-            final Type type = pos.getType();
-            if (!pos.getValue().getClass().equals(TypeUtils.getRawType(type, null))) {
-                final Class<?> rawValueType = pos.getValue().getClass();
+        final Type type = pos.getType();
+        Object value;
+        try {
+            value = pos.getValue();
+        } catch (Exception e) {
+            value = null;
+        }
+        if (value != null) {
+            final Class<?> rawValueType = value.getClass();
+
+            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType().equals(rawValueType)) {
                 final TypeVariable<?>[] typeParameters = rawValueType.getTypeParameters();
-                final Type result;
-                if (typeParameters.length > 0 && type instanceof ParameterizedType) {
+                if (typeParameters.length > 0) {
                     final Map<TypeVariable<?>, Type> argMappings =
                         TypeUtils.determineTypeArguments(rawValueType, (ParameterizedType) type);
                     final Type[] args = new Type[typeParameters.length];
 
                     int index = 0;
                     for (TypeVariable<?> typeVariable : typeParameters) {
-                        args[index++] = ObjectUtils.defaultIfNull(argMappings.get(typeVariable), TypeUtils.WILDCARD_ALL);
+                        args[index++] =
+                            ObjectUtils.defaultIfNull(argMappings.get(typeVariable), TypeUtils.WILDCARD_ALL);
                     }
-                    result = TypeUtils.parameterize(rawValueType, args);
-                } else {
-                    result = rawValueType;
+                    return TypeUtils.parameterize(rawValueType, args);
                 }
-                return result;
+                return rawValueType;
             }
         }
-        return pos.getType();
+        return type;
     }
 
     private final Position.Readable<SOURCE> sourcePosition;
@@ -67,7 +72,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Create a new Transform instance.
-     *
+     * 
      * @param sourcePosition
      * @param targetPosition
      */
@@ -79,7 +84,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the narrowest possible source type, deduced from source position type/value.
-     *
+     * 
      * @return Typed
      */
     @BindTypeVariable
@@ -99,7 +104,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the sourcePosition.
-     *
+     * 
      * @return Position.Readable<SOURCE>
      */
     public Position.Readable<SOURCE> getSourcePosition() {
@@ -110,14 +115,15 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
      * Get the narrowest possible target type. If this {@link Transform} operation maps its {@code TARGET_POSITION} type
      * parameter as some {@link Readable} then this will be deduced from target position type/value, else the target
      * position will be returned.
-     *
+     * 
      * @return Typed
      */
     @BindTypeVariable
     public Typed<TARGET> getTargetType() {
         final TARGET_POSITION target = getTargetPosition();
         final Type targetPositionType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class), Transform.class.getTypeParameters()[3]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
+                Transform.class.getTypeParameters()[3]);
         if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
             final Type result = narrow((Position.Readable<TARGET>) target);
             if (!TypeUtils.equals(result, target.getType())) {
@@ -135,7 +141,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     /**
      * Get the targetPosition.
-     *
+     * 
      * @return TARGET_POSITION
      */
     public TARGET_POSITION getTargetPosition() {
