@@ -66,8 +66,7 @@ public abstract class Operation<RESULT> {
     {
         @SuppressWarnings("unchecked")
         final Class<? extends Operation<?>> c = (Class<? extends Operation<?>>) getClass();
-        init(c);
-        Validate.isTrue(VALID_INFO.get(c).booleanValue(), "Invalid %s: %s", Operation.class.getName(), c);
+        Validate.isTrue(init(c), "Invalid %s: %s", Operation.class.getName(), c);
     }
 
     private boolean successful;
@@ -117,14 +116,13 @@ public abstract class Operation<RESULT> {
             return false;
         }
 
+        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(expectedType, Operation.class);
         for (Class<?> c : ClassUtils.hierarchy(TypeUtils.getRawType(expectedType, operator.getClass()))) {
             if (c.equals(Operation.class)) {
                 break;
             }
-            final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(expectedType, c);
-
             for (TypeVariable<?> var : c.getTypeParameters()) {
-                Type type = Types.resolveAt(this, var);
+                Type type = Types.resolveAt(this, var, typeArguments);
                 if (type == null || typeArguments == null) {
                     continue;
                 }

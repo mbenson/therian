@@ -1,5 +1,6 @@
 package therian.util;
 
+import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,7 +31,7 @@ public class Types {
      * <li>If {@code type} is a {@link TypeVariable}, return its normalized upper bound.</li>
      * <li>If {@code type} is a {@link WildcardType}, return its normalized upper bound.</li>
      * </ul>
-     *
+     * 
      * @param type
      * @param parentType
      * @return Type
@@ -48,25 +49,48 @@ public class Types {
     /**
      * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
      * {@link Typed} before falling back to basic type
-     *
+     * 
      * @param o
      * @param var
      * @return Type resolved or {@code null}
      */
     public static Type resolveAt(Object o, TypeVariable<?> var) {
-        final Class<?> rt = Validate.notNull(o, "null target").getClass();
-        final String v = String.format("Type variable [%s].<%s>", var.getGenericDeclaration(), var.getName());
-        Validate.isTrue(var.getGenericDeclaration() instanceof Class<?>, "%s is not declared by a Class", v);
-        final Class<?> declaring = (Class<?>) var.getGenericDeclaration();
-        Validate.isTrue(declaring.isInstance(o), "%s does not belong to %s", v, rt);
+        Validate.notNull(var, "no variable to read");
+        final GenericDeclaration genericDeclaration = var.getGenericDeclaration();
+        if (genericDeclaration instanceof Class == false) {
+            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " is not declared by a Class");
+        }
+        return resolveAt(o, var, TypeUtils.getTypeArguments(o.getClass(), (Class<?>) genericDeclaration));
+    }
 
+    /**
+     * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
+     * {@link Typed} before falling back to basic type.
+     * 
+     * @param o
+     * @param var
+     * @param variablesMap
+     *            prepopulated map for efficiency
+     * @return Type resolved or {@code null}
+     */
+    public static Type resolveAt(Object o, TypeVariable<?> var, Map<TypeVariable<?>, Type> variablesMap) {
+        final Class<?> rt = Validate.notNull(o, "null target").getClass();
+        Validate.notNull(var, "no variable to read");
+        final GenericDeclaration genericDeclaration = var.getGenericDeclaration();
+        if (genericDeclaration instanceof Class == false) {
+            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " is not declared by a Class");
+        }
+        final Class<?> declaring = (Class<?>) genericDeclaration;
+        if (!declaring.isInstance(o)) {
+            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " does not belong to " + rt);
+        }
         for (Class<?> c : init(rt)) {
             final Map<TypeVariable<?>, Method> gettersForType = TYPED_GETTERS.get(c);
             if (gettersForType != null && gettersForType.containsKey(var)) {
                 return readTyped(gettersForType.get(var), o);
             }
         }
-        return TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o.getClass(), declaring), var);
+        return TypeUtils.unrollVariables(variablesMap, var);
     }
 
     private static Type readTyped(Method method, Object target) {
@@ -159,7 +183,7 @@ public class Types {
 
     /**
      * Get a map of all {@link TypeVariable} assignments for a given type.
-     *
+     * 
      * @param t
      * @return Map<TypeVariable<?>, Type>
      */
@@ -197,7 +221,7 @@ public class Types {
 
     /**
      * Return the inverse map of {@code m} for all entries whose value is a {@link TypeVariable}.
-     *
+     * 
      * @param m
      * @return Map<TypeVariable<?>, Type>
      */
