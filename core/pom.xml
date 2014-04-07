@@ -31,6 +31,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <annotationGeneratedSources>${project.build.directory}/generated-sources/annotations</annotationGeneratedSources>
+
   </properties>
 
   <dependencies>
@@ -133,6 +135,23 @@
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-annotation-generated-source</id>
+            <configuration>
+              <sources>
+                <source>${annotationGeneratedSources}</source>
+              </sources>
+            </configuration>
+            <goals>
+              <goal>add-source</goal>
             </goals>
           </execution>
         </executions>
