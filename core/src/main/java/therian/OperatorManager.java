@@ -30,10 +30,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.functor.Predicate;
-import org.apache.commons.functor.core.collection.FilteredIterable;
+import org.apache.commons.functor.core.collection.FilteredIterator;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -63,7 +64,8 @@ class OperatorManager {
         OperatorInfo(Operator operator) {
             this.operator = operator;
             targetType =
-                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class), Operator.class.getTypeParameters()[0]);
+                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
+                    Operator.class.getTypeParameters()[0]);
             rawTargetType = getRawType(targetType);
         }
 
@@ -159,39 +161,47 @@ class OperatorManager {
             this.context = context;
         }
 
-        public Iterable<Operator<?>> operatorsSupporting(final Operation<?> operation) {
-            for (Class<?> key : ClassUtils.hierarchy(operation.getClass())) {
-                if (subgroups.containsKey(key)) {
-                    final Iterable<OperatorInfo> info =
-                        FilteredIterable.of(subgroups.get(key)).retain(new Filter(operation));
+        Iterable<Operator<?>> operatorsSupporting(final Operation<?> operation) {
+            final Filter filter = new Filter(operation);
+            final Iterator<Class<?>> hierarchy = ClassUtils.hierarchy(operation.getClass()).iterator();
 
-                    return new Iterable<Operator<?>>() {
+            return new Iterable<Operator<?>>() {
+
+                @Override
+                public Iterator<Operator<?>> iterator() {
+                    return new Iterator<Operator<?>>() {
+                        Iterator<OperatorInfo> currentInfo;
 
                         @Override
-                        public Iterator<Operator<?>> iterator() {
-                            final Iterator<OperatorInfo> wrapped = info.iterator();
-                            return new Iterator<Operator<?>>() {
-
-                                @Override
-                                public boolean hasNext() {
-                                    return wrapped.hasNext();
+                        public boolean hasNext() {
+                            while (currentInfo == null || !currentInfo.hasNext()) {
+                                if (hierarchy.hasNext()) {
+                                    final Class<?> c = hierarchy.next();
+                                    if (subgroups.containsKey(c)) {
+                                        currentInfo = FilteredIterator.filter(subgroups.get(c).iterator(), filter);
+                                    }
+                                    continue;
                                 }
+                                return false;
+                            }
+                            return true;
+                        }
 
-                                @Override
-                                public Operator<?> next() {
-                                    return wrapped.next().operator;
-                                }
+                        @Override
+                        public Operator<?> next() {
+                            if (hasNext()) {
+                                return currentInfo.next().operator;
+                            }
+                            throw new NoSuchElementException();
+                        }
 
-                                @Override
-                                public void remove() {
-                                    throw new UnsupportedOperationException();
-                                }
-                            };
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException();
                         }
                     };
                 }
-            }
-            return Collections.emptySet();
+            };
         }
     }
 
