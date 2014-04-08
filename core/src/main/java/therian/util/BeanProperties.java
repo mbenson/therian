@@ -57,6 +57,10 @@ public class BeanProperties {
                     IteratorToGeneratorAdapter.adapt(context.getELResolver().getFeatureDescriptors(context,
                         position.getValue())));
         } catch (Exception e) {
+            descriptors = null;
+        }
+
+        if (descriptors == null || !descriptors.iterator().hasNext()) {
             // java.beans introspection; on RT type if available, else raw position type:
             final Class<?> beanType;
             if (position.getValue() == null) {
