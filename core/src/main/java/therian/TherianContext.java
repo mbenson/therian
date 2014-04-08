@@ -61,26 +61,14 @@ public class TherianContext extends ELContextWrapper {
      *
      * @see TherianContext#doWithHints(Job, Hint...)
      */
-    public static abstract class Hint {
-        /**
-         * By default, {@link #getClass()}
-         *
-         * @return Class, of which {@code this} must be an instance
-         */
-        protected Class<? extends Hint> getTypeImpl() {
-            return getClass();
-        }
+    public interface Hint {
 
         /**
          * Get the hint type to use.
          *
          * @return Class
          */
-        public final Class<? extends Hint> getType() {
-            final Class<? extends Hint> result = getTypeImpl();
-            Validate.validState(result.isInstance(this), "%s is not an instance of %s", this, result);
-            return result;
-        }
+        Class<? extends Hint> getType();
     }
 
     /**
