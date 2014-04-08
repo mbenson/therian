@@ -48,7 +48,7 @@ import therian.util.BeanProperties.ReturnProperties;
 /**
  * Copies based on annotated property mapping. Concrete subclasses must specify one or both of {@link Mapping} and
  * {@link Matching}.
- *
+ * 
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -104,7 +104,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     /**
      * Describes the {@link PropertyCopier}'s behavior when presented with a {@code null} source value.
-     *
+     * 
      * @since 0.2
      */
     public enum NullBehavior implements Hint {
@@ -170,7 +170,13 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     @Override
     public boolean perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
-        final NullBehavior nullBehavior = copy.getSourcePosition().getValue() == null ? getNullBehavior(context) : null;
+        final NullBehavior nullBehavior;
+        if (copy.getSourcePosition().getValue() == null) {
+            nullBehavior = context.getTypedContext(NullBehavior.class, defaultNullBehavior());
+        } else {
+            nullBehavior = null;
+        }
+
         if (nullBehavior == NullBehavior.UNSUPPORTED) {
             return false;
         }
@@ -193,9 +199,10 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (!super.supports(context, copy)) {
             return false;
         }
-        final NullBehavior nullBehavior = copy.getSourcePosition().getValue() == null ? getNullBehavior(context) : null;
-        if (nullBehavior == NullBehavior.UNSUPPORTED) {
-            return false;
+        if (copy.getSourcePosition().getValue() == null) {
+            if (context.getTypedContext(NullBehavior.class, defaultNullBehavior()) == NullBehavior.UNSUPPORTED) {
+                return false;
+            }
         }
 
         return handle(context, Phase.SUPPORT_CHECK, map(context, copy))
@@ -228,11 +235,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     protected NullBehavior defaultNullBehavior() {
         return NullBehavior.NOOP;
-    }
-
-    private NullBehavior getNullBehavior(TherianContext context) {
-        final NullBehavior nullBehavior = context.getTypedContext(NullBehavior.class);
-        return nullBehavior == null ? defaultNullBehavior() : nullBehavior;
     }
 
     private Position.Readable<?> dereference(Property.PositionFactory<?> positionFactory,

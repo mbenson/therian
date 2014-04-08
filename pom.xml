@@ -71,7 +71,7 @@
       <dependency>
         <groupId>com.github.mbenson</groupId>
         <artifactId>uelbox</artifactId>
-        <version>0.1</version>
+        <version>0.2-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
