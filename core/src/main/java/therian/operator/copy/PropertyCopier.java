@@ -35,7 +35,6 @@ import therian.OperationException;
 import therian.OperatorDefinitionException;
 import therian.TherianContext;
 import therian.Operator.DependsOn;
-import therian.TherianContext.Hint;
 import therian.operation.Copy;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
@@ -44,7 +43,6 @@ import therian.position.Position;
 import therian.position.relative.Property;
 import therian.util.BeanProperties;
 import therian.util.BeanProperties.ReturnProperties;
-import therian.util.Positions;
 
 /**
  * Copies based on annotated property mapping. Concrete subclasses must specify one or both of {@link Mapping} and
@@ -103,33 +101,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         String[] exclude() default {};
     }
 
-    /**
-     * Describes the {@link PropertyCopier}'s behavior when presented with a {@code null} source value.
-     * @since 0.2
-     */
-    public enum NullBehavior implements Hint {
-        /**
-         * Indicates that the operation will be unsupported.
-         */
-        UNSUPPORTED,
-
-        /**
-         * Indicates that the operation will be supported, but will do nothing.
-         */
-        NOOP,
-
-        /**
-         * Indicates that the operation will be implemented by writing(/converting) {@code null} values to target
-         * properties.
-         */
-        SET_NULLS;
-
-        @Override
-        public Class<? extends Hint> getType() {
-            return NullBehavior.class;
-        }
-    }
-
     private final List<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>> mappings;
     private final Matching matching;
 
@@ -170,26 +141,20 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     @Override
     public boolean perform(TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
-        final NullBehavior nullBehavior = copy.getSourcePosition().getValue() == null ? getNullBehavior(context) : null;
-        if (nullBehavior == NullBehavior.UNSUPPORTED) {
-            return false;
+        boolean didCopy = false;
+        for (Copy<?, ?> mappedCopy : map(context, copy)) {
+            if (!context.evalSuccess(mappedCopy)) {
+                throw new OperationException(copy, "nested %s was unsuccessful", mappedCopy);
+            }
+            didCopy = true;
         }
-        final Iterable<Copy<?, ?>> mapped = map(context, copy);
-        if (nullBehavior == NullBehavior.NOOP && mapped.iterator().hasNext()) {
-            return true;
+        for (Copy<?, ?> matchingCopy : match(context, copy)) {
+            if (!context.evalSuccess(matchingCopy)) {
+                throw new OperationException(copy, "nested %s was unsuccessful", matchingCopy);
+            }
+            didCopy = true;
         }
-        final Iterable<Copy<?, ?>> matched = match(context, copy);
-        if (nullBehavior == NullBehavior.NOOP && matched.iterator().hasNext()) {
-            return true;
-        }
-        try {
-            final boolean result =
-                handle(context, Phase.EVALUATION, mapped) || handle(context, Phase.EVALUATION, matched);
-
-            return result;
-        } catch (OperationException e) {
-            throw new OperationException(copy, e, "nested %s was unsuccessful", e);
-        }
+        return didCopy;
     }
 
     @Override
@@ -197,54 +162,20 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (!super.supports(context, copy)) {
             return false;
         }
-        final NullBehavior nullBehavior = copy.getSourcePosition().getValue() == null ? getNullBehavior(context) : null;
-        if (nullBehavior == NullBehavior.UNSUPPORTED) {
-            return false;
-        }
-        final boolean willCopy =
-            handle(context, Phase.SUPPORT_CHECK, map(context, copy))
-                || handle(context, Phase.SUPPORT_CHECK, match(context, copy));
-
-        return willCopy;
-    }
-
-    private boolean handle(TherianContext context, Phase phase, Iterable<Copy<?, ?>> nestedOperations) {
-        boolean result = false;
-        for (Copy<?, ?> nestedCopy : nestedOperations) {
-            switch (phase) {
-            case SUPPORT_CHECK:
-                // safe copies have already been verified supported:
-                if (!(nestedCopy instanceof Copy.Safely || context.supports(nestedCopy))) {
-                    return false;
-                }
-                result = true;
-                break;
-            case EVALUATION:
-                if (!context.evalSuccess(nestedCopy)) {
-                    throw new OperationException(nestedCopy);
-                }
-                result = true;
-                break;
-            default:
-                throw new IllegalArgumentException("phase " + phase);
+        boolean willCopy = false;
+        for (Copy<?, ?> mappedCopy : map(context, copy)) {
+            if (!context.supports(mappedCopy)) {
+                return false;
             }
+            willCopy = true;
         }
-        return result;
-    }
-
-    /**
-     * Get the default {@link NullBehavior} for this {@link PropertyCopier}.
-     * 
-     * @return {@link NullBehavior#NOOP}
-     * @since 0.2
-     */
-    protected NullBehavior defaultNullBehavior() {
-        return NullBehavior.NOOP;
-    }
-
-    private NullBehavior getNullBehavior(TherianContext context) {
-        context.getTypedContext(NullBehavior.class);
-        return defaultNullBehavior();
+        for (Copy<?, ?> matchingCopy : match(context, copy)) {
+            if (!context.supports(matchingCopy)) {
+                return false;
+            }
+            willCopy = true;
+        }
+        return willCopy;
     }
 
     private Position.Readable<?> dereference(Property.PositionFactory<?> positionFactory,
@@ -256,13 +187,9 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
 
         for (Pair<Property.PositionFactory<?>, Property.PositionFactory<?>> mapping : mappings) {
-            final Position.Readable<?> target = dereference(mapping.getRight(), copy.getTargetPosition());
-            Position.Readable<?> source = dereference(mapping.getLeft(), copy.getSourcePosition());
-            if (copy.getSourcePosition().getValue() == null) {
-                // force to typed null position
-                source = Positions.readOnly(source.getType(), null);
-            }
-            result.add(Copy.to(target, source));
+            final Position.Readable<?> propertySource = dereference(mapping.getLeft(), copy.getSourcePosition());
+            final Position.Readable<?> propertyTarget = dereference(mapping.getRight(), copy.getTargetPosition());
+            result.add(Copy.to(propertyTarget, propertySource));
         }
         return result;
     }
@@ -272,8 +199,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             return Collections.emptySet();
         }
         final Set<String> properties = new HashSet<String>(Arrays.asList(matching.value()));
-
-        // if no properties were explicitly specified for matching, take whatever we can get
         final boolean lenient = properties.isEmpty();
         if (lenient) {
             properties.addAll(BeanProperties.getPropertyNames(ReturnProperties.WRITABLE, context,
@@ -285,12 +210,9 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
         final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
         for (String property : properties) {
+            final Position.ReadWrite<?> source = Property.at(property).of(copy.getSourcePosition());
             final Position.ReadWrite<?> target = Property.at(property).of(copy.getTargetPosition());
-            Position.Readable<?> source = Property.at(property).of(copy.getSourcePosition());
-            if (copy.getSourcePosition().getValue() == null) {
-                // force to typed null position
-                source = Positions.readOnly(source.getType(), null);
-            }
+
             if (lenient) {
                 final Copy<?, ?> propertyCopy = Copy.Safely.to(target, source);
                 if (context.supports(propertyCopy)) {

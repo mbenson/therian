@@ -52,15 +52,4 @@ public class BeanCopierTest extends OperatorTest {
         assertEquals(source, target);
     }
 
-    /**
-     * Default behavior of a {@link PropertyCopier} should noop a null source value.
-     */
-    @Test
-    public void testNullSource() {
-        final Address control = new Address();
-        final Address target = new Address();
-        assertEquals(control, target);
-        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(Address.class, null)));
-        assertEquals(control, target);
-    }
 }
