@@ -16,12 +16,18 @@
 package therian.operator.copy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import therian.OperationException;
 import therian.TherianModule;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
+import therian.operator.copy.PropertyCopier.NullBehavior;
 import therian.testfixture.Address;
 import therian.testfixture.Country;
 import therian.util.Positions;
@@ -30,6 +36,25 @@ import therian.util.Positions;
  * Also tests some {@link PropertyCopier} functionality, e.g. matching and NullBehavior.
  */
 public class BeanCopierTest extends OperatorTest {
+    private Address fullAddress;
+    private Address emptyAddress;
+
+    @Override
+    @Before
+    public void setup() throws Exception {
+        super.setup();
+        emptyAddress = new Address();
+        fullAddress = new Address();
+        fullAddress.setAddressline1("123 foo street");
+        fullAddress.setAddressline2("unit 666");
+        fullAddress.setCity("fooville");
+        fullAddress.setZipCode("98765");
+        Country country = new Country();
+        country.setName("FOO.S.A.");
+        country.setISO2Code("FS");
+        country.setISO3Code("FSA");
+        fullAddress.setCountry(country);
+    }
 
     @Override
     protected TherianModule module() {
@@ -38,21 +63,9 @@ public class BeanCopierTest extends OperatorTest {
 
     @Test
     public void testBasic() {
-        final Address source = new Address();
-        source.setAddressline1("123 foo street");
-        source.setAddressline2("unit 666");
-        source.setCity("fooville");
-        source.setZipCode("98765");
-        Country country = new Country();
-        country.setName("FOO.S.A.");
-        country.setISO2Code("FS");
-        country.setISO3Code("FSA");
-        source.setCountry(country);
-
         final Address target = new Address();
-
-        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(source)));
-        assertEquals(source, target);
+        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(fullAddress)));
+        assertEquals(fullAddress, target);
     }
 
     /**
@@ -60,10 +73,31 @@ public class BeanCopierTest extends OperatorTest {
      */
     @Test
     public void testNullSource() {
-        final Address control = new Address();
         final Address target = new Address();
-        assertEquals(control, target);
+        assertEquals(emptyAddress, target);
         therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(Address.class, null)));
-        assertEquals(control, target);
+        assertEquals(emptyAddress, target);
     }
+
+    @Test
+    public void testNullSourceSetNulls() {
+        therianContext.eval(Copy.to(Positions.readOnly(fullAddress), Positions.readOnly(Address.class, null)),
+            NullBehavior.COPY_NULLS);
+
+        assertNull(fullAddress.getAddressline1());
+        assertNull(fullAddress.getAddressline2());
+        assertNull(fullAddress.getCity());
+        assertNull(fullAddress.getZipCode());
+        assertNotNull(fullAddress.getCountry());
+        assertNull(fullAddress.getCountry().getName());
+        assertNull(fullAddress.getCountry().getISO2Code());
+        assertNull(fullAddress.getCountry().getISO3Code());
+    }
+
+    @Test(expected = OperationException.class)
+    public void testNullSourceUnsupportedHint() {
+        therianContext.eval(Copy.to(Positions.readOnly(new Address()), Positions.readOnly(Address.class, null)),
+            NullBehavior.UNSUPPORTED);
+    }
+
 }

@@ -119,10 +119,9 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         NOOP,
 
         /**
-         * Indicates that the operation will be implemented by writing(/converting) {@code null} values to target
-         * properties.
+         * Indicates that the operation will be implemented by copying {@code null} values to target properties.
          */
-        SET_NULLS;
+        COPY_NULLS;
 
         @Override
         public Class<? extends Hint> getType() {

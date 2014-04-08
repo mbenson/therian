@@ -48,15 +48,6 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
-     * Job interface.
-     *
-     * @param <T>
-     */
-    public interface Job<T> {
-        T evaluate(TherianContext context);
-    }
-
-    /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context.
      *
      * @see TherianContext#doWithHints(Job, Hint...)
@@ -118,51 +109,6 @@ public class TherianContext extends ELContextWrapper {
             return current;
         }
         return Therian.standard().context();
-    }
-
-    /**
-     * Return the result of evaluating {@code function} against {@code this} with {@code hints} specified for the
-     * duration.
-     *
-     * @param function
-     * @param hints
-     * @return T
-     */
-    public synchronized <T> T doWithHints(Job<T> function, Hint... hints) {
-        Validate.notNull(function, "function");
-        Validate.noNullElements(hints, "null element at hints[%s]");
-
-        final Map<Class<? extends Hint>, Hint> localHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
-        for (Hint hint : hints) {
-            final Class<? extends Hint> key = hint.getType();
-            if (localHints.containsKey(key)) {
-                throw new IllegalArgumentException(String.format("Found hints [%s, %s] with same type %s",
-                    localHints.get(key), hint, key));
-            }
-            localHints.put(key, hint);
-        }
-        final Map<Class<? extends Hint>, Hint> restoreHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
-        for (final Iterator<Map.Entry<Class<? extends Hint>, Hint>> entries = localHints.entrySet().iterator(); entries
-            .hasNext();) {
-            final Map.Entry<Class<? extends Hint>, Hint> e = entries.next();
-            final Hint existingHint = getTypedContext(e.getKey());
-            if (e.getValue().equals(existingHint)) {
-                entries.remove();
-            } else {
-                restoreHints.put(e.getKey(), existingHint);
-            }
-        }
-        for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
-            putContext(e.getKey(), e.getValue());
-        }
-
-        try {
-            return function.evaluate(this);
-        } finally {
-            for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
-                putContext(e.getKey(), restoreHints.get(e.getKey()));
-            }
-        }
     }
 
     /**
@@ -234,6 +180,50 @@ public class TherianContext extends ELContextWrapper {
         }
         eval(operation);
         return operation.isSuccessful();
+    }
+
+    /**
+     * Return the result of evaluating {@code operation} against {@code this} with {@code hints} specified for the
+     * duration.
+     *
+     * @param operation
+     * @param hints
+     * @return T
+     */
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation, Hint... hints) {
+        Validate.noNullElements(hints, "null element at hints[%s]");
+
+        final Map<Class<? extends Hint>, Hint> localHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
+        for (Hint hint : hints) {
+            final Class<? extends Hint> key = hint.getType();
+            if (localHints.containsKey(key)) {
+                throw new IllegalArgumentException(String.format("Found hints [%s, %s] with same type %s",
+                    localHints.get(key), hint, key));
+            }
+            localHints.put(key, hint);
+        }
+        final Map<Class<? extends Hint>, Hint> restoreHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();
+        for (final Iterator<Map.Entry<Class<? extends Hint>, Hint>> entries = localHints.entrySet().iterator(); entries
+            .hasNext();) {
+            final Map.Entry<Class<? extends Hint>, Hint> e = entries.next();
+            final Hint existingHint = getTypedContext(e.getKey());
+            if (e.getValue().equals(existingHint)) {
+                entries.remove();
+            } else {
+                restoreHints.put(e.getKey(), existingHint);
+            }
+        }
+        for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
+            putContext(e.getKey(), e.getValue());
+        }
+
+        try {
+            return eval(operation);
+        } finally {
+            for (Map.Entry<Class<? extends Hint>, Hint> e : localHints.entrySet()) {
+                putContext(e.getKey(), restoreHints.get(e.getKey()));
+            }
+        }
     }
 
     /**
