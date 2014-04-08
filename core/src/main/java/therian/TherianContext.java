@@ -16,9 +16,11 @@
 package therian;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -191,6 +193,19 @@ public class TherianContext extends ELContextWrapper {
      * @return T
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation, Hint... hints) {
+        Validate.noNullElements(hints, "null element at hints[%s]");
+        return eval(operation, new LinkedHashSet<Hint>(Arrays.asList(hints)));
+    }
+
+    /**
+     * Return the result of evaluating {@code operation} against {@code this} with {@code hints} specified for the
+     * duration.
+     *
+     * @param operation
+     * @param hints
+     * @return T
+     */
+    public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(OPERATION operation, Iterable<Hint> hints) {
         Validate.noNullElements(hints, "null element at hints[%s]");
 
         final Map<Class<? extends Hint>, Hint> localHints = new HashMap<Class<? extends Hint>, TherianContext.Hint>();

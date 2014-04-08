@@ -19,11 +19,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.junit.Assert;
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import therian.OperationException;
+import therian.TherianContext.Hint;
 import therian.TherianModule;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
@@ -82,7 +84,7 @@ public class BeanCopierTest extends OperatorTest {
     @Test
     public void testNullSourceSetNulls() {
         therianContext.eval(Copy.to(Positions.readOnly(fullAddress), Positions.readOnly(Address.class, null)),
-            NullBehavior.COPY_NULLS);
+            Arrays.<Hint> asList(NullBehavior.COPY_NULLS));
 
         assertNull(fullAddress.getAddressline1());
         assertNull(fullAddress.getAddressline2());
