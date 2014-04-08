@@ -43,6 +43,22 @@ public interface Operator<OPERATION extends Operation<?>> {
     }
 
     /**
+     * Describes the "lifecycle", such as it is, of an {@link Operator}, in case it is convenient
+     * for a given implementation to use this as a "strategy trigger."
+     */
+    public enum Phase {
+        /**
+         * Corresponds to {@link Operator#supports(TherianContext, Operation)}.
+         */
+        SUPPORT_CHECK,
+
+        /**
+         * Corresponds to {@link Operator#perform(TherianContext, Operation)}.
+         */
+        EVALUATION;
+    }
+
+    /**
      * Perform the specified operation.
      * 
      * @param context active
