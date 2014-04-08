@@ -26,6 +26,9 @@ import therian.testfixture.Address;
 import therian.testfixture.Country;
 import therian.util.Positions;
 
+/**
+ * Also tests some {@link PropertyCopier} functionality, e.g. matching and NullBehavior.
+ */
 public class BeanCopierTest extends OperatorTest {
 
     @Override
