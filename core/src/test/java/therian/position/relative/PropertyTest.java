@@ -16,6 +16,7 @@
 package therian.position.relative;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -73,5 +74,10 @@ public class PropertyTest {
         final Position.Readable<Book> bookRef = Positions.readOnly(new Book());
         assertEquals(String.format("Relative Position: Property author of %s", bookRef),
             Property.at("author").of(bookRef).toString());
+    }
+
+    @Test
+    public void testOptional() {
+        assertNull(Property.optional("author").of(Positions.readOnly(Book.class, null)).getValue());
     }
 }

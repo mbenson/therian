@@ -89,9 +89,15 @@ public class Property {
     public static class PositionFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
 
         private final String propertyName;
+        private final boolean optional;
 
         private PositionFactory(final String propertyName) {
+            this(propertyName, false);
+        }
+
+        private PositionFactory(final String propertyName, boolean optional) {
             this.propertyName = propertyName;
+            this.optional = optional;
         }
 
         public String getPropertyName() {
@@ -134,7 +140,7 @@ public class Property {
                     }
                     for (FeatureDescriptor fd : featureDescriptors) {
                         final Type fromGenericTypeAttribute =
-                                FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
+                            FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
                         if (fromGenericTypeAttribute != null) {
                             return fromGenericTypeAttribute;
                         }
@@ -168,6 +174,22 @@ public class Property {
                         propertyName, parentPosition);
                     return type;
                 }
+
+                @Override
+                public TYPE getValue() {
+                    final TherianContext context = TherianContext.getInstance();
+                    final P parent = parentPosition.getValue();
+                    final Object value = context.getELResolver().getValue(context, parent, propertyName);
+                    if (context.isPropertyResolved()) {
+                        @SuppressWarnings("unchecked")
+                        final TYPE result = (TYPE) value;
+                        return result;
+                    }
+                    if (optional && parent == null) {
+                        return null;
+                    }
+                    throw new IllegalStateException(String.format("could not get value %s from %s", propertyName, parentPosition));
+                }
             }
             return new Result(parentPosition, propertyName);
         }
@@ -194,7 +216,25 @@ public class Property {
         }
     }
 
+    /**
+     * Create a {@link Property.PositionFactory} for the specified property.
+     *
+     * @param propertyName
+     * @return {@link PositionFactory}
+     */
     public static <T> PositionFactory<T> at(String propertyName) {
         return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"));
+    }
+
+    /**
+     * Create a {@link Property.PositionFactory} for an optional property. A position created from such a factory will
+     * silently return {@code null} as its value if its parent's value is {@code null}.
+     *
+     * @param propertyName
+     * @return {@link PositionFactory}
+     */
+    public static <T> PositionFactory<T> optional(String propertyName) {
+        final boolean optional = true;
+        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"), optional);
     }
 }
