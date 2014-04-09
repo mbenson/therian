@@ -39,12 +39,7 @@ public class Size<T> extends Operation<Integer> {
     }
 
     public void setResult(int result) {
-        this.result = result;
-    }
-
-    @Override
-    protected Integer provideResult() {
-        return Integer.valueOf(result);
+        setResult(Integer.valueOf(result));
     }
 
     @Override

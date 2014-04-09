@@ -15,10 +15,13 @@
  */
 package therian.operator.convert;
 
+import static therian.Operator.Phase.SUPPORT_CHECK;
+
 import java.util.Enumeration;
 import java.util.Iterator;
 
 import therian.Operator.DependsOn;
+import therian.Reusable;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -30,6 +33,7 @@ import therian.operator.getelementtype.GetIteratorElementType;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@Reusable(SUPPORT_CHECK)
 @DependsOn({ GetIteratorElementType.class, GetEnumerationElementType.class })
 public class IteratorToEnumeration extends AssignableElementConverter<Iterator<?>, Enumeration> {
     public IteratorToEnumeration() {

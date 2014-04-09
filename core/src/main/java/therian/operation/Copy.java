@@ -43,7 +43,7 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
          */
         @Override
         public Void getResult() {
-            return provideResult();
+            return null;
         }
 
         public static <S, T> Safely<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
@@ -53,11 +53,6 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
 
     protected Copy(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
-    }
-
-    @Override
-    protected Void provideResult() {
-        return null;
     }
 
     public static <S, T> Copy<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {

@@ -17,13 +17,13 @@ package therian.util;
 
 import java.lang.reflect.Type;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
 import therian.TherianContext.Callback;
+import therian.position.AbstractPosition;
 import therian.position.Position;
 import therian.position.Position.Readable;
 import therian.position.Position.Writable;
@@ -33,7 +33,7 @@ import therian.position.Position.Writable;
  */
 public class Positions {
 
-    private static class RO<T> implements Position.Readable<T> {
+    private static class RO<T> extends AbstractPosition.Readable<T> {
         private final Type type;
         private final T value;
 
@@ -53,34 +53,13 @@ public class Positions {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof RO == false) {
-                return false;
-            }
-            RO<?> other = (RO<?>) obj;
-            return other.getType().equals(type) && ObjectUtils.equals(other.getValue(), value);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = 37 << 4;
-            result |= type.hashCode();
-            result <<= 4;
-            result |= ObjectUtils.hashCode(value);
-            return result;
-        }
-
-        @Override
         public String toString() {
             return String.format("Read-Only Position<%s>(%s)", TypeUtils.toString(type), value);
         }
 
     }
 
-    private static class W<T> implements Position.Writable<T> {
+    private static class W<T> extends AbstractPosition.Writable<T> {
         private final Type type;
 
         W(Type type) {
@@ -94,25 +73,6 @@ public class Positions {
 
         @Override
         public void setValue(T value) {
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof W == false) {
-                return false;
-            }
-            W<?> other = (W<?>) obj;
-            return other.getType().equals(type);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = 53 << 4;
-            result |= type.hashCode();
-            return result;
         }
 
         @Override
@@ -152,23 +112,12 @@ public class Positions {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof RW == false) {
-                return false;
-            }
-            RW<?> other = (RW<?>) obj;
-            return other.getType().equals(type) && ObjectUtils.equals(other.getValue(), value);
+            return super.equals(obj);
         }
 
         @Override
         public int hashCode() {
-            int result = 43 << 4;
-            result |= type.hashCode();
-            result <<= 4;
-            result |= ObjectUtils.hashCode(value);
-            return result;
+            return super.hashCode();
         }
 
         @Override
@@ -180,7 +129,7 @@ public class Positions {
 
     /**
      * Learn whether {@code pos} is {@link Readable}.
-     *
+     * 
      * @param pos
      * @return boolean
      */
@@ -190,7 +139,7 @@ public class Positions {
 
     /**
      * Learn whether {@code pos} is {@link Writable}.
-     *
+     * 
      * @param pos
      * @return boolean
      */
@@ -200,7 +149,7 @@ public class Positions {
 
     /**
      * Get a read-only position of value {@code value} (type of {@code value#getClass()}.
-     *
+     * 
      * @param value not {@code null}
      * @return Position.Readable
      */
@@ -210,20 +159,21 @@ public class Positions {
 
     /**
      * Get a read-only position of type {@code type} and value {@code value}.
-     *
+     * 
      * @param type not {@code null}
      * @param value
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final Type type, final T value) {
         Validate.notNull(type, "type");
-        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, TypeUtils.toString(type));
+        Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value,
+            TypeUtils.toString(type));
         return new RO<T>(type, value);
     }
 
     /**
      * Get a read-only position of type {@code type} and value {@code value}.
-     *
+     * 
      * @param type not {@code null}
      * @param value
      * @return Position.Readable
@@ -234,7 +184,7 @@ public class Positions {
 
     /**
      * Get a read-only position of type {@code type#value} and value {@code value}.
-     *
+     * 
      * @param type not {@code null}
      * @param value
      * @return Position.Readable
@@ -246,7 +196,7 @@ public class Positions {
     /**
      * Get a read-write position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
      * {@code T}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.ReadWrite
      */
@@ -257,7 +207,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.ReadWrite
      */
@@ -267,7 +217,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type#value}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.ReadWrite
      */
@@ -277,7 +227,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type} and with initial value {@code initialValue}.
-     *
+     * 
      * @param type not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -291,7 +241,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type} and with initial value {@code initialValue}.
-     *
+     * 
      * @param type not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -302,7 +252,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type#value} and with initial value {@code initialValue}.
-     *
+     * 
      * @param type not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -314,7 +264,7 @@ public class Positions {
     /**
      * Get a writable position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
      * {@code T}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.Writable
      */
@@ -325,7 +275,7 @@ public class Positions {
 
     /**
      * Get a writable position of type {@code type#value}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.Writable
      */
@@ -335,7 +285,7 @@ public class Positions {
 
     /**
      * Get a writable position of type {@code type}.
-     *
+     * 
      * @param type not {@code null}
      * @return Position.Writable
      */
@@ -345,7 +295,7 @@ public class Positions {
 
     /**
      * Get a UnaryProcedure callback for writing a position value.
-     *
+     * 
      * @param pos
      * @return UnaryProcedure
      * @see TherianContext#forwardTo(therian.Operation, Callback)

@@ -45,7 +45,6 @@ public class MapCopier extends Copier<Map, Map> {
     private static final TypeVariable<?> VALUE = Map.class.getTypeParameters()[1];
     private static final Map.Entry<?, ?> EMPTY_ENTRY = Pair.of(null, null);
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean perform(TherianContext context, Copy<? extends Map, ? extends Map> copy) {
         final Map<TypeVariable<?>, Type> sourceArgs =
@@ -59,55 +58,27 @@ public class MapCopier extends Copier<Map, Map> {
         final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
-        if (targetKeyType != null && targetValueType != null) {
-            Type[] typeArguments = { targetKeyType, targetValueType };
-            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
-        } else {
+        if (targetKeyType == null || targetValueType == null) {
             targetEntryType = Map.Entry.class;
+        } else {
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, targetKeyType, targetValueType);
         }
 
-        final MutablePair<Object, Object> newEntry = MutablePair.of(null, null);
-        final Position.Readable<Map.Entry> targetElement = Positions.<Map.Entry> readOnly(targetEntryType, newEntry);
-        final Position.Writable<?> targetKey = new Position.Writable() {
-
-            @Override
-            public Type getType() {
-                return targetKeyType;
-            }
-
-            @Override
-            public void setValue(Object value) {
-                newEntry.setLeft(value);
-            }
-        };
-
-        final Position.Writable<?> targetValue = new Position.Writable() {
-
-            @Override
-            public Type getType() {
-                return targetValueType;
-            }
-
-            @Override
-            public void setValue(Object value) {
-                newEntry.setRight(value);
-            }
-        };
-
-        final Position.ReadWrite sourceKey = Positions.readWrite(sourceKeyType);
-        final Position.ReadWrite sourceValue = Positions.readWrite(sourceValueType);
 
         final Map<?, ?> sourceMap = copy.getSourcePosition().getValue();
         for (Map.Entry<?, ?> e : sourceMap.entrySet()) {
-            sourceKey.setValue(e.getKey());
-            if (!context.evalSuccess(Convert.to(targetKey, sourceKey))) {
+            final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
+            final Position.ReadWrite<?> targetValue = Positions.readWrite(targetValueType);
+            
+            if (!context.evalSuccess(Convert.to(targetKey, Positions.readOnly(sourceKeyType, e.getKey())))) {
                 return false;
             }
-            sourceValue.setValue(e.getValue());
-            if (!context.evalSuccess(Convert.to(targetValue, sourceValue))) {
+            if (!context.evalSuccess(Convert.to(targetValue, Positions.readOnly(sourceValueType, e.getValue())))) {
                 return false;
             }
-            if (!context.evalSuccess(Add.to(copy.getTargetPosition(), targetElement))) {
+            
+            final MutablePair<?, ?> newEntry = MutablePair.of(targetKey.getValue(), targetValue.getValue());
+            if (!context.evalSuccess(Add.to(copy.getTargetPosition(), Positions.<Map.Entry> readOnly(targetEntryType, newEntry)))) {
                 return false;
             }
         }
@@ -135,11 +106,10 @@ public class MapCopier extends Copier<Map, Map> {
         final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
-        if (targetKeyType != null && targetValueType != null) {
-            Type[] typeArguments = { targetKeyType, targetValueType };
-            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
-        } else {
+        if (targetKeyType == null || targetValueType == null) {
             targetEntryType = Map.Entry.class;
+        } else {
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, targetKeyType, targetValueType);
         }
         // assume that if we can add a single entry we can add them all :|
         if (!context.supports(Add.to(copy.getTargetPosition(),

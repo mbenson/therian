@@ -112,11 +112,9 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         final Class<?> rawTargetElementType = TypeUtils.getRawType(targetElementType, null);
         ((Position.Writable) targetElements).setValue(Array.newInstance(rawTargetElementType,
             sourceElementsForConversion.size()));
-        Type[] typeArguments = { sourceElementType };
-
         final Position.Readable<List<?>> sourceSubList =
-            Positions
-                .<List<?>> readOnly(TypeUtils.parameterize(List.class, typeArguments), sourceElementsForConversion);
+            Positions.<List<?>> readOnly(TypeUtils.parameterize(List.class, sourceElementType),
+                sourceElementsForConversion);
 
         for (int i = 0, sz = sourceElementsForConversion.size(); i < sz; i++) {
             final Position.ReadWrite<?> targetElement = Element.atArrayIndex(i).of(targetElements);

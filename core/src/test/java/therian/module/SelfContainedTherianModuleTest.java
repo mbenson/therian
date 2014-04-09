@@ -38,16 +38,6 @@ import therian.util.Positions;
  */
 public class SelfContainedTherianModuleTest {
     public static abstract class Op extends Operation<MetasyntacticVariable> {
-        private MetasyntacticVariable result;
-
-        public void setResult(MetasyntacticVariable result) {
-            this.result = result;
-        }
-
-        @Override
-        protected MetasyntacticVariable provideResult() {
-            return result;
-        }
     }
 
     public static class Foo extends Op {

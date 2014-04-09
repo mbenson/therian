@@ -47,6 +47,7 @@ public interface Operator<OPERATION extends Operation<?>> {
 	 * Describes the "lifecycle", such as it is, of an {@link Operator}, in case
 	 * it is convenient for a given implementation to use this as a
 	 * "strategy trigger."
+	 * @since 0.2
 	 */
 	public enum Phase {
 		/**

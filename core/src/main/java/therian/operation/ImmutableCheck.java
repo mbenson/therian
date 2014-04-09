@@ -20,6 +20,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import therian.Operation;
 import therian.BindTypeVariable;
 import therian.Operator;
+import therian.Reusable;
 import therian.position.Position;
 import therian.position.Position.Readable;
 
@@ -27,6 +28,7 @@ import therian.position.Position.Readable;
  * Operation to check an object for immutability. Uses success as its result, because it wants to run until some
  * {@link Operator} gives it a {@code true} value.
  */
+@Reusable({/* NEVER */})
 public final class ImmutableCheck<T> extends Operation<Boolean> {
     private final Position.Readable<T> position;
 
