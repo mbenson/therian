@@ -36,7 +36,6 @@ import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.collection.FilteredIterable;
 import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
 import org.apache.commons.functor.generator.util.CollectionTransformer;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -188,7 +187,8 @@ public class Property {
                     if (optional && parent == null) {
                         return null;
                     }
-                    throw new IllegalStateException(String.format("could not get value %s from %s", propertyName, parentPosition));
+                    throw new IllegalStateException(String.format("could not get value %s from %s", propertyName,
+                        parentPosition));
                 }
             }
             return new Result(parentPosition, propertyName);
@@ -199,10 +199,7 @@ public class Property {
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof PositionFactory == false) {
-                return false;
-            }
-            return StringUtils.equals(((PositionFactory<?>) obj).propertyName, propertyName);
+            return obj instanceof PositionFactory && propertyName.equals(((PositionFactory<?>) obj).propertyName);
         }
 
         @Override
@@ -218,7 +215,7 @@ public class Property {
 
     /**
      * Create a {@link Property.PositionFactory} for the specified property.
-     *
+     * 
      * @param propertyName
      * @return {@link PositionFactory}
      */
@@ -229,7 +226,7 @@ public class Property {
     /**
      * Create a {@link Property.PositionFactory} for an optional property. A position created from such a factory will
      * silently return {@code null} as its value if its parent's value is {@code null}.
-     *
+     * 
      * @param propertyName
      * @return {@link PositionFactory}
      */
