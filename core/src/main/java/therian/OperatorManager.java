@@ -20,11 +20,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +36,6 @@ import org.apache.commons.functor.core.collection.FilteredIterator;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import therian.Operator.DependsOn;
 import therian.util.Types;
@@ -102,7 +99,7 @@ class OperatorManager {
     class SupportChecker {
 
         @SuppressWarnings("rawtypes")
-        class Filter implements Predicate<OperatorInfo> {
+        private class Filter implements Predicate<OperatorInfo> {
             final Operation operation;
 
             Filter(Operation operation) {
@@ -112,11 +109,8 @@ class OperatorManager {
             @SuppressWarnings("unchecked")
             @Override
             public boolean test(OperatorInfo info) {
-                final Pair<Operation, Operator> check = Pair.of(operation, info.operator);
-                if (!supportChecks.contains(check)) {
-                    if (matches(operation, info)) {
-                        return info.operator.supports(context, operation);
-                    }
+                if (matches(operation, info)) {
+                    return info.operator.supports(context, operation);
                 }
                 return false;
             }
@@ -153,8 +147,6 @@ class OperatorManager {
 
         }
 
-        private final Deque<Pair<Operation<?>, Operator<?>>> supportChecks =
-            new ArrayDeque<Pair<Operation<?>, Operator<?>>>();
         private final TherianContext context;
 
         SupportChecker(TherianContext context) {

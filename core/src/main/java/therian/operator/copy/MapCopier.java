@@ -31,6 +31,7 @@ import therian.operation.Add;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operator.add.AddEntryToMap;
+import therian.position.AbstractPosition;
 import therian.position.Position;
 import therian.util.Positions;
 
@@ -68,7 +69,8 @@ public class MapCopier extends Copier<Map, Map> {
 
         final MutablePair<Object, Object> newEntry = MutablePair.of(null, null);
         final Position.Readable<Map.Entry> targetElement = Positions.<Map.Entry> readOnly(targetEntryType, newEntry);
-        final Position.Writable<?> targetKey = new Position.Writable() {
+
+        final Position.Writable<?> targetKey = new AbstractPosition.Writable() {
 
             @Override
             public Type getType() {
@@ -79,9 +81,10 @@ public class MapCopier extends Copier<Map, Map> {
             public void setValue(Object value) {
                 newEntry.setLeft(value);
             }
+            
         };
 
-        final Position.Writable<?> targetValue = new Position.Writable() {
+        final Position.Writable<?> targetValue = new AbstractPosition.Writable() {
 
             @Override
             public Type getType() {
@@ -94,17 +97,12 @@ public class MapCopier extends Copier<Map, Map> {
             }
         };
 
-        final Position.ReadWrite sourceKey = Positions.readWrite(sourceKeyType);
-        final Position.ReadWrite sourceValue = Positions.readWrite(sourceValueType);
-
         final Map<?, ?> sourceMap = copy.getSourcePosition().getValue();
         for (Map.Entry<?, ?> e : sourceMap.entrySet()) {
-            sourceKey.setValue(e.getKey());
-            if (!context.evalSuccess(Convert.to(targetKey, sourceKey))) {
+            if (!context.evalSuccess(Convert.to(targetKey, Positions.readOnly(sourceKeyType, e.getKey())))) {
                 return false;
             }
-            sourceValue.setValue(e.getValue());
-            if (!context.evalSuccess(Convert.to(targetValue, sourceValue))) {
+            if (!context.evalSuccess(Convert.to(targetValue, Positions.readOnly(sourceValueType, e.getValue())))) {
                 return false;
             }
             if (!context.evalSuccess(Add.to(copy.getTargetPosition(), targetElement))) {

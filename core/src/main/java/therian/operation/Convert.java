@@ -20,39 +20,47 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.position.AbstractPosition;
 import therian.position.Position;
 
 /**
  * Convert operation.
- *
+ * 
  * @param <SOURCE>
  * @param <TARGET>
  */
 public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, Position.Writable<TARGET>> {
-    private class Result implements Position.Writable<TARGET> {
+    private class Result extends AbstractPosition.Writable<TARGET> {
         TARGET value;
 
         @Override
         public Type getType() {
-            return Convert.super.getTargetPosition().getType();
+            return getTarget().getType();
         }
 
         @Override
         public void setValue(final TARGET value) {
-            final Type type = getType();
-            Validate.isTrue(!(value == null && isPrimitive(type)), "Illegal value %s for type %s", value, type);
+            if (value == null) {
+                final Type type = getType();
+                Validate.isTrue(!isPrimitive(type), "Null value illegal for type %s", value, type);
+            }
             this.value = value;
-            Convert.super.getTargetPosition().setValue(value);
+            getTarget().setValue(value);
         }
 
         @Override
         public String toString() {
-            return Convert.super.getTargetPosition().toString();
+            return getTarget().toString();
         }
 
         private boolean isPrimitive(Type type) {
             return type instanceof Class && ((Class<?>) type).isPrimitive();
         }
+
+        private Position.Writable<TARGET> getTarget() {
+            return Convert.super.getTargetPosition();
+        }
+
     }
 
     private final Result result;
@@ -98,7 +106,8 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
         return new Convert<S, T>(sourcePosition, targetType);
     }
 
-    public static <S, T> Convert<S, T> to(org.apache.commons.lang3.reflect.TypeLiteral<T> targetType, Position.Readable<S> sourcePosition) {
+    public static <S, T> Convert<S, T> to(org.apache.commons.lang3.reflect.TypeLiteral<T> targetType,
+        Position.Readable<S> sourcePosition) {
         return new Convert<S, T>(sourcePosition, targetType.value);
     }
 
