@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.functor.Function;
 import org.apache.commons.functor.Predicate;
 import org.apache.commons.functor.core.Constant;
 import org.apache.commons.lang3.ObjectUtils;
@@ -203,6 +204,7 @@ public class TherianContext extends ELContextWrapper {
 
     private final Deque<Frame> evalStack = new ArrayDeque<Frame>();
     private final Deque<Frame> supportStack = new ArrayDeque<Frame>();
+    private final Map<OperationRequest, Function<Operation<?>, ?>> cache = new HashMap<OperationRequest, Function<Operation<?>,?>>();
 
     private final SupportChecker supportChecker;
 
@@ -286,13 +288,13 @@ public class TherianContext extends ELContextWrapper {
         final boolean dummyRoot = evalStack.isEmpty();
         if (dummyRoot) {
             // add a root frame to preserve our cache "around" the supports/eval lifecycle:
-            evalStack.push(Frame.ROOT);
+            push(Frame.ROOT, evalStack);
         }
         try {
             return supports(operation) ? eval(operation) : defaultValue;
         } finally {
             if (dummyRoot) {
-                Validate.validState(evalStack.pop() == Frame.ROOT, "Stack imbalance detected");
+                pop(Frame.ROOT, evalStack);
             }
         }
     }
@@ -310,7 +312,7 @@ public class TherianContext extends ELContextWrapper {
         final boolean dummyRoot = evalStack.isEmpty();
         if (dummyRoot) {
             // add a root frame to preserve our cache "around" the supports/eval lifecycle:
-            evalStack.push(Frame.ROOT);
+            push(Frame.ROOT, evalStack);
         }
         try {
             if (supports(operation, hints)) {
@@ -319,7 +321,7 @@ public class TherianContext extends ELContextWrapper {
             }
         } finally {
             if (dummyRoot) {
-                Validate.validState(evalStack.pop() == Frame.ROOT, "Stack imbalance detected");
+                pop(Frame.ROOT, evalStack);
             }
         }
         return false;
@@ -408,8 +410,7 @@ public class TherianContext extends ELContextWrapper {
             throw new OperationRequest.RecursionException();
         }
 
-        stack.push(f);
-        f.join(this);
+        push(f, stack);
 
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
@@ -433,11 +434,23 @@ public class TherianContext extends ELContextWrapper {
                 // thread:
                 CURRENT_INSTANCE.set(originalContext);
             }
-            final Frame popFrame = stack.pop();
-            Validate.validState(popFrame == f, "operation stack out of whack; found %s where %s was expected",
-                popFrame, f.key);
-            f.part(this);
+            pop(f, stack);
         }
     }
 
+    private synchronized void push(Frame frame, Deque<Frame> stack) {
+        stack.push(frame);
+        frame.join(this);
+    }
+
+    private synchronized void pop(Frame frame, Deque<Frame> stack) {
+        final Frame popFrame = stack.pop();
+        Validate.validState(popFrame == frame, "operation stack out of whack; found %s where %s was expected",
+                popFrame.key, frame.key);
+        frame.part(this);
+        // if no ongoing evaluations or support checks, clear cache:
+        if (evalStack.isEmpty() && supportStack.isEmpty()) {
+            cache.clear();
+        }
+    }
 }
