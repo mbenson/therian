@@ -35,7 +35,9 @@ import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -59,10 +61,26 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
+            final FileObject resource =
+                processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT,
+                    StringUtils.substringBeforeLast(TARGET_CLASSNAME, ".").replace('.', '/'),
+                    StringUtils.substringAfterLast(TARGET_CLASSNAME, ".") + ".class");
+
+            if (resource.getLastModified() > 0L) {
+                processingEnv.getMessager().printMessage(Kind.NOTE,
+                    String.format("%s already generated", TARGET_CLASSNAME));
+                return false;
+            }
+        } catch (IOException e1) {
+            // expected, swallow
+        }
+        try {
             ClassUtils.getClass(TARGET_CLASSNAME);
-            processingEnv.getMessager().printMessage(Kind.ERROR, String.format("%s already exists", TARGET_CLASSNAME));
+            processingEnv.getMessager().printMessage(Kind.ERROR,
+                String.format("%s exists on classpath", TARGET_CLASSNAME));
             return false;
         } catch (ClassNotFoundException e) {
+            // expected, swallow
         }
 
         if (roundEnv.processingOver()) {
@@ -130,7 +148,7 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
     /**
      * Must be a public static concrete class with a default constructor, public static zero-arg method, or public
      * static final field.
-     *
+     * 
      * @param e
      * @return boolean
      */
