@@ -27,9 +27,7 @@ import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.functor.Function;
 import org.apache.commons.functor.Predicate;
-import org.apache.commons.functor.core.Constant;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,6 +35,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
 import therian.el.TherianContextELResolver;
 import uelbox.ELContextWrapper;
@@ -84,6 +83,12 @@ public class TherianContext extends ELContextWrapper {
     private static class OperationRequest {
         static class RecursionException extends Exception {
             private static final long serialVersionUID = 1L;
+
+            private final OperationRequest duplicate;
+
+            RecursionException(OperationRequest duplicate) {
+                this.duplicate = duplicate;
+            }
         }
 
         final Operation<?> operation;
@@ -193,10 +198,41 @@ public class TherianContext extends ELContextWrapper {
                 context.putContext(e.getKey(), isRoot() ? null : parent.getHint(e.getKey()));
             }
         }
-        
-        boolean find(OperationRequest key) {
-            return this.key.equals(key) || !isRoot() && parent.find(key);
+
+        OperationRequest find(OperationRequest key) {
+            if (this.key.equals(key)) {
+                return this.key;
+            }
+            return isRoot() ? null : parent.find(key);
         }
+
+        void validate() throws OperationRequest.RecursionException {
+            if (!isRoot()) {
+                OperationRequest duplicateKey = parent.find(key);
+                if (duplicateKey != null) {
+                    throw new OperationRequest.RecursionException(duplicateKey);
+                }
+            }
+        }
+    }
+
+    private class CachedEvaluator implements Predicate<Operation<?>> {
+        final Operator<?> operator;
+
+        CachedEvaluator(Operator<?> operator) {
+            super();
+            this.operator = operator;
+        }
+
+        @Override
+        public boolean test(Operation<?> operation) {
+            if (evalRaw(operation, operator)) {
+                operation.setSuccessful(true);
+                return true;
+            }
+            return false;
+        }
+
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
@@ -204,7 +240,7 @@ public class TherianContext extends ELContextWrapper {
 
     private final Deque<Frame> evalStack = new ArrayDeque<Frame>();
     private final Deque<Frame> supportStack = new ArrayDeque<Frame>();
-    private final Map<OperationRequest, Function<Operation<?>, ?>> cache = new HashMap<OperationRequest, Function<Operation<?>,?>>();
+    private final Map<OperationRequest, CachedEvaluator> cache = new HashMap<OperationRequest, CachedEvaluator>();
 
     private final SupportChecker supportChecker;
 
@@ -249,8 +285,7 @@ public class TherianContext extends ELContextWrapper {
      */
     public synchronized boolean supports(final Operation<?> operation, Hint... hints) {
         try {
-            // TODO cache
-            return handle(Constant.truePredicate(), supportStack, operation, hints);
+            return handle(Operator.Phase.SUPPORT_CHECK, operation, hints);
         } catch (OperationRequest.RecursionException e) {
             return false;
         }
@@ -284,19 +319,7 @@ public class TherianContext extends ELContextWrapper {
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT evalIfSupported(OPERATION operation,
         RESULT defaultValue, Hint... hints) {
-
-        final boolean dummyRoot = evalStack.isEmpty();
-        if (dummyRoot) {
-            // add a root frame to preserve our cache "around" the supports/eval lifecycle:
-            push(Frame.ROOT, evalStack);
-        }
-        try {
-            return supports(operation) ? eval(operation) : defaultValue;
-        } finally {
-            if (dummyRoot) {
-                pop(Frame.ROOT, evalStack);
-            }
-        }
+        return evalSuccess(operation, hints) ? operation.getResult() : defaultValue;
     }
 
     /**
@@ -345,34 +368,25 @@ public class TherianContext extends ELContextWrapper {
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(final OPERATION operation,
         Hint... hints) {
         try {
-            handle(new Predicate<Operator<?>>() {
-
-                @Override
-                public boolean test(Operator<?> operator) {
-                    if (evalRaw(operation, operator)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Successfully evaluated {} with operator {}", operation, operator);
-                        }
-                        operation.setSuccessful(true);
-                        return true;
-                    }
-                    return false;
-                }
-            }, evalStack, operation, hints);
+            handle(Operator.Phase.EVALUATION, operation, hints);
         } catch (OperationRequest.RecursionException e) {
+            if (e.duplicate.operation.isSuccessful()) {
+                @SuppressWarnings("unchecked")
+                final RESULT result = (RESULT) e.duplicate.operation.getResult();
+                operation.setSuccessful(true);
+                return result;
+            }
             throw new OperationException(operation, "recursive operation detected");
         }
-        // TODO cache result
         return operation.getResult();
     }
 
     /**
      * Delegate the success of the current operation to that of another.
-     * 
-     * @param <RESULT>
      * @param operation
      * @param callback
      * @param hints
+     * @param <RESULT>
      * @return operation's success
      */
     public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
@@ -398,17 +412,28 @@ public class TherianContext extends ELContextWrapper {
         return operator.perform(this, operation);
     }
 
-    private synchronized <OPERATION extends Operation<?>> boolean handle(Predicate<? super Operator<?>> handler,
-        Deque<Frame> stack, OPERATION operation, Hint... hints)
-        throws OperationRequest.RecursionException {
+    private synchronized <OPERATION extends Operation<?>> boolean handle(Phase phase, OPERATION operation,
+        Hint... hints) throws OperationRequest.RecursionException {
         Validate.notNull(operation, "operation");
         Validate.noNullElements(hints, "null element at hints[%s]");
 
+        final Deque<Frame> stack;
+        switch (phase) {
+        case SUPPORT_CHECK:
+            stack = supportStack;
+            break;
+
+        case EVALUATION:
+            stack = evalStack;
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unknown phase");
+        }
+
         final Frame top = stack.peek();
         final Frame f = new Frame(top, operation, hints);
-        if (top != null && top.find(f.key)) {
-            throw new OperationRequest.RecursionException();
-        }
+        f.validate();
 
         push(f, stack);
 
@@ -418,10 +443,46 @@ public class TherianContext extends ELContextWrapper {
         }
 
         try {
+            final CachedEvaluator cachedEvaluator = cache.get(f.key);
+
+            if (cachedEvaluator != null) {
+                switch (phase) {
+                case SUPPORT_CHECK:
+                    return true;
+
+                case EVALUATION:
+                    if (cachedEvaluator.test(operation)) {
+                        return true;
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
             final Iterable<Operator<?>> supportingOperators = supportChecker.operatorsSupporting(operation);
 
-            for (Operator<?> operator : supportingOperators) {
-                if (handler.test(operator)) {
+            for (final Operator<?> operator : supportingOperators) {
+                boolean success = false;
+                switch (phase) {
+                case SUPPORT_CHECK:
+                    success = true;
+                    break;
+
+                case EVALUATION:
+                    if (evalRaw(operation, operator)) {
+                        LOG.debug("Successfully evaluated {} with operator {}", operation, operator);
+                        success = true;
+                        break;
+                    }
+
+                default:
+                    break;
+                }
+                if (success) {
+                    cache.put(f.key, new CachedEvaluator(operator));
+                    operation.setSuccessful(true);
                     return true;
                 }
             }
@@ -430,8 +491,7 @@ public class TherianContext extends ELContextWrapper {
             if (originalContext == null) {
                 CURRENT_INSTANCE.remove();
             } else if (originalContext != this) {
-                // restore original context in the unlikely event that multiple contexts are being used on the same
-                // thread:
+                // restore original context
                 CURRENT_INSTANCE.set(originalContext);
             }
             pop(f, stack);
@@ -446,8 +506,9 @@ public class TherianContext extends ELContextWrapper {
     private synchronized void pop(Frame frame, Deque<Frame> stack) {
         final Frame popFrame = stack.pop();
         Validate.validState(popFrame == frame, "operation stack out of whack; found %s where %s was expected",
-                popFrame.key, frame.key);
+            popFrame.key, frame.key);
         frame.part(this);
+
         // if no ongoing evaluations or support checks, clear cache:
         if (evalStack.isEmpty() && supportStack.isEmpty()) {
             cache.clear();
