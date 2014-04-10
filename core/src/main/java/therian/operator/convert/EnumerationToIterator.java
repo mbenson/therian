@@ -20,6 +20,7 @@ import java.util.Iterator;
 
 import therian.Operator.DependsOn;
 import therian.TherianContext;
+import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operator.getelementtype.GetEnumerationElementType;
@@ -41,8 +42,9 @@ public class EnumerationToIterator extends AssignableElementConverter<Enumeratio
     @Override
     public boolean perform(TherianContext context, final Convert<? extends Enumeration<?>, ? super Iterator> operation) {
         final Position.ReadWrite<Iterable> rw = Positions.readWrite(Iterable.class);
+        Hint[] hints = {};
         return context.evalSuccess(Convert.to(rw, operation.getSourcePosition()))
-            && context.forwardTo(Convert.to(Iterator.class, rw), Positions.writeValue(operation.getTargetPosition()));
+            && context.evalSuccess(Positions.writeValue(operation.getTargetPosition()), Convert.to(Iterator.class, rw),  hints);
     }
 
 }

@@ -428,20 +428,6 @@ public class TherianContext extends ELContextWrapper {
         return (RESULT) frame.operation.getResult();
     }
 
-    /**
-     * Delegate the success of the current operation to that of another.
-     * 
-     * @param operation
-     * @param callback
-     * @param hints
-     * @param <RESULT>
-     * @return operation's success
-     */
-    public final synchronized <RESULT> boolean forwardTo(final Operation<RESULT> operation,
-        final Callback<? super RESULT> callback, Hint... hints) {
-        return evalSuccess(callback, operation,  hints);
-    }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private boolean evalRaw(Operation operation, Operator operator) {
         return operator.perform(this, operation);
