@@ -26,19 +26,8 @@ import therian.Operation;
 public class GetElementType<T> extends Operation<Type> {
     private final Typed<T> typedItem;
 
-    private Type result;
-
     private GetElementType(Typed<T> typedItem) {
         this.typedItem = typedItem;
-    }
-
-    public void setResult(Type result) {
-        this.result = result;
-    }
-
-    @Override
-    protected Type provideResult() {
-        return result;
     }
 
     @Override

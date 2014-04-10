@@ -27,8 +27,6 @@ import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.functor.Function;
-import org.apache.commons.functor.Predicate;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -226,7 +224,8 @@ public class TherianContext extends ELContextWrapper {
 
     }
 
-    private interface CachedEvaluator<T> extends Predicate<Operation<T>>, Function<Operation<T>, T> {
+    private interface CachedEvaluator<T> {
+        boolean evaluate(Operation<T> operation);
     }
 
     private class CachedOperator<T> implements CachedEvaluator<T> {
@@ -238,7 +237,7 @@ public class TherianContext extends ELContextWrapper {
         }
 
         @Override
-        public boolean test(Operation<T> operation) {
+        public boolean evaluate(Operation<T> operation) {
             if (evalRaw(operation, operator)) {
                 operation.setSuccessful(true);
                 return true;
@@ -246,12 +245,20 @@ public class TherianContext extends ELContextWrapper {
             return false;
         }
 
+    }
+
+    private class CachedResult<T> implements CachedEvaluator<T> {
+        final T value;
+
+        CachedResult(T value) {
+            super();
+            this.value = value;
+        }
+
         @Override
-        public T evaluate(Operation<T> operation) {
-            if (test(operation)) {
-                return operation.getResult();
-            }
-            throw new OperationException(operation);
+        public boolean evaluate(Operation<T> operation) {
+            operation.setResult(value);
+            return true;
         }
 
     }
@@ -354,8 +361,8 @@ public class TherianContext extends ELContextWrapper {
      * @throws NullPointerException on {@code null} input
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
-    public final synchronized <RESULT> boolean evalSuccess(Callback<? super RESULT> callback, Operation<RESULT> operation,
-        Hint... hints) {
+    public final synchronized <RESULT> boolean evalSuccess(Callback<? super RESULT> callback,
+        Operation<RESULT> operation, Hint... hints) {
         if (evalSuccess(operation, hints)) {
             if (callback != null) {
                 callback.handle(operation.getResult());
@@ -421,6 +428,10 @@ public class TherianContext extends ELContextWrapper {
                 @SuppressWarnings("unchecked")
                 final RESULT result = (RESULT) e.duplicate.operation.getResult();
                 frame.operation.setSuccessful(true);
+                frame.operation.setResult(result);
+
+                cache.put(frame.getKey(), new CachedResult<RESULT>(result));
+
                 return result;
             }
             throw new OperationException(frame.operation, "recursive operation detected");
@@ -434,7 +445,6 @@ public class TherianContext extends ELContextWrapper {
     }
 
     private synchronized <RESULT> boolean handle(Phase phase, Frame<RESULT> frame) throws Frame.RecursionException {
-
         final Deque<Frame<?>> stack;
         switch (phase) {
         case SUPPORT_CHECK:
@@ -467,7 +477,7 @@ public class TherianContext extends ELContextWrapper {
 
                 case EVALUATION:
                     @SuppressWarnings("unchecked")
-                    boolean eval = cachedEvaluator.test(frame.operation);
+                    boolean eval = cachedEvaluator.evaluate(frame.operation);
                     if (eval) {
                         return true;
                     }
@@ -529,8 +539,10 @@ public class TherianContext extends ELContextWrapper {
 
     private synchronized void pop(Frame<?> frame, Deque<Frame<?>> stack) {
         final Frame<?> popFrame = stack.pop();
-        Validate.validState(popFrame == frame, "operation stack out of whack; found %s where %s was expected",
-            popFrame.key, frame.key);
+        if (popFrame != frame) {
+            throw new IllegalStateException(String.format(
+                "operation stack out of whack; found %s where %s was expected", popFrame.getKey(), frame.getKey()));
+        }
         frame.part(this);
 
         // if no ongoing evaluations or support checks, clear cache:

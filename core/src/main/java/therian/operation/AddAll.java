@@ -36,12 +36,7 @@ public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, P
     }
 
     public void setResult(boolean result) {
-        this.result = result;
-    }
-
-    @Override
-    protected Boolean provideResult() {
-        return Boolean.valueOf(result);
+        setResult(Boolean.valueOf(result));
     }
 
     @Override

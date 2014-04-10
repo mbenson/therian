@@ -33,12 +33,6 @@ public class OperatorsTest {
     }
 
     public static abstract class Surgery extends Operation<Success> {
-        Success result;
-
-        @Override
-        protected Success provideResult() {
-            return result;
-        }
     }
 
     public static class Appendectomy extends Surgery {
@@ -51,7 +45,7 @@ public class OperatorsTest {
 
         @Override
         public boolean perform(TherianContext context, S operation) {
-            operation.result = Success.FAILURE;
+            operation.setResult(Success.FAILURE);
             return true;
         }
 

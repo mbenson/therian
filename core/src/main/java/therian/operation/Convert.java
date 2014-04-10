@@ -31,7 +31,6 @@ import therian.position.Position;
  */
 public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, Position.Writable<TARGET>> {
     private class Result extends AbstractPosition.Writable<TARGET> {
-        TARGET value;
 
         @Override
         public Type getType() {
@@ -44,8 +43,8 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
                 final Type type = getType();
                 Validate.isTrue(!isPrimitive(type), "Null value illegal for type %s", value, type);
             }
-            this.value = value;
             getTarget().setValue(value);
+            Convert.this.setResult(value);
         }
 
         @Override
@@ -90,11 +89,6 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
                 return TypeUtils.toString(targetType);
             }
         });
-    }
-
-    @Override
-    protected TARGET provideResult() {
-        return result.value;
     }
 
     @Override

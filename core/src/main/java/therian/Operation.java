@@ -30,10 +30,9 @@ import therian.util.Types;
 /**
  * Some operation; note that these are not intended for use on multiple threads. A concrete {@link Operation} class
  * should have its {@code RESULT} type parameter fully bound.
- *
+ * 
  * @param <RESULT>
  */
-// TODO should we just store the result here and provide a setter?
 public abstract class Operation<RESULT> {
     private static final TypeVariable<?> TYPE_VARIABLE_RESULT = Operation.class.getTypeParameters()[0];
 
@@ -70,11 +69,12 @@ public abstract class Operation<RESULT> {
     }
 
     private boolean successful;
+    private RESULT result;
 
     /**
      * Get the result. Default implementation throws {@link OperationException} if the operation was unsuccessful, else
      * defers to {@link #provideResult()}.
-     *
+     * 
      * @return RESULT
      * @see #provideResult()
      */
@@ -82,16 +82,16 @@ public abstract class Operation<RESULT> {
         if (!isSuccessful()) {
             throw new OperationException(this, "result unavailable");
         }
-        return provideResult();
+        return result;
     }
 
     /**
-     * Template method; must be implemented unless {@link #getResult()} is overridden.
-     *
-     * @return RESULT
+     * Set the result of this {@link Operation}.
+     * 
+     * @param result
      */
-    protected RESULT provideResult() {
-        throw new OperationException(this, "no result provided");
+    public void setResult(RESULT result) {
+        this.result = result;
     }
 
     public boolean isSuccessful() {
@@ -104,13 +104,14 @@ public abstract class Operation<RESULT> {
 
     /**
      * Learn whether {@code operator} seems to implement {@code this}.
-     *
+     * 
      * @param operator
      * @return boolean
      */
     public boolean matches(Operator<?> operator) {
         final Type expectedType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class), Operator.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
+                Operator.class.getTypeParameters()[0]);
 
         if (!TypeUtils.isInstance(this, expectedType)) {
             return false;
