@@ -438,25 +438,7 @@ public class TherianContext extends ELContextWrapper {
             }
             throw new OperationException(frame.operation, "recursive operation detected");
         }
-        final RESULT result = operation.getResult();
-        final OperationRequest<RESULT> request = frame.getKey();
-
-        if (Reusable.CHECKER.canReuse(operation, Phase.EVALUATION)) {
-            final boolean cacheResult;
-            final CachedEvaluator<?> cachedEvaluator = cache.get(request);
-            if (cachedEvaluator instanceof CachedResult<?>) {
-                cacheResult = false;
-            } else if (cachedEvaluator instanceof CachedOperator<?>) {
-                cacheResult =
-                    Reusable.CHECKER.canReuse(((CachedOperator<?>) cachedEvaluator).operator, Phase.EVALUATION);
-            } else {
-                cacheResult = true;
-            }
-            if (cacheResult) {
-                cache.put(request, new CachedResult<RESULT>(result));
-            }
-        }
-        return result;
+        return operation.getResult();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -518,15 +500,29 @@ public class TherianContext extends ELContextWrapper {
                     break;
                 }
                 if (success) {
-                    if (reusableOperation && !cache.containsKey(request)
-                        && Reusable.CHECKER.canReuse(operator, frame.phase)) {
-                        @SuppressWarnings("unchecked")
-                        // supports; therefore safe:
-                        final Operator<? extends Operation<RESULT>> strongOperator =
-                            (Operator<? extends Operation<RESULT>>) operator;
-                        cache.put(request, new CachedOperator<RESULT>(strongOperator));
-                    }
                     frame.operation.setSuccessful(true);
+
+                    if (reusableOperation && Reusable.CHECKER.canReuse(operator, frame.phase)) {
+
+                        switch (frame.phase) {
+                        case SUPPORT_CHECK:
+                            if (!cache.containsKey(request)) {
+                                @SuppressWarnings("unchecked")
+                                // supports; therefore safe:
+                                final Operator<? extends Operation<RESULT>> strongOperator =
+                                    (Operator<? extends Operation<RESULT>>) operator;
+                                cache.put(request, new CachedOperator<RESULT>(strongOperator));
+                            }
+                            break;
+                        case EVALUATION:
+                            if (cache.get(request) instanceof CachedResult<?> == false) {
+                                cache.put(request, new CachedResult<RESULT>(frame.operation.getResult()));
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
                     return true;
                 }
             }
