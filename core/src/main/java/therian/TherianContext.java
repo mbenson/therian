@@ -129,6 +129,9 @@ public class TherianContext extends ELContextWrapper {
         static final Frame<Void> ROOT = new Frame<Void>();
 
         static Map<Class<? extends Hint>, Hint> toMap(Hint[] hints) {
+            if (hints.length == 0) {
+                return Collections.emptyMap();
+            }
             final Map<Class<? extends Hint>, Hint> localHints = new LinkedHashMap<Class<? extends Hint>, Hint>();
             for (Hint hint : hints) {
                 final Class<? extends Hint> key = hint.getType();
@@ -198,7 +201,10 @@ public class TherianContext extends ELContextWrapper {
         private Set<Hint> effectiveHints() {
             final Map<Class<? extends Hint>, Hint> m = new HashMap<Class<? extends Hint>, Hint>();
             populate(m);
-            return new LinkedHashSet<Hint>(m.values());
+            if (m.isEmpty()) {
+                return Collections.emptySet();
+            }
+            return Collections.unmodifiableSet(new LinkedHashSet<Hint>(m.values()));
         }
 
         private synchronized OperationRequest<RESULT> getKey() {
@@ -417,10 +423,7 @@ public class TherianContext extends ELContextWrapper {
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(final OPERATION operation,
         Hint... hints) {
-        return eval(new Frame<RESULT>(operation, hints));
-    }
-
-    private synchronized <RESULT> RESULT eval(final Frame<RESULT> frame) {
+        final Frame<RESULT> frame = new Frame<RESULT>(operation, hints);
         try {
             handle(Operator.Phase.EVALUATION, frame);
         } catch (Frame.RecursionException e) {
@@ -429,14 +432,29 @@ public class TherianContext extends ELContextWrapper {
                 final RESULT result = (RESULT) e.duplicate.operation.getResult();
                 frame.operation.setSuccessful(true);
                 frame.operation.setResult(result);
-
-                cache.put(frame.getKey(), new CachedResult<RESULT>(result));
-
                 return result;
             }
             throw new OperationException(frame.operation, "recursive operation detected");
         }
-        return (RESULT) frame.operation.getResult();
+        final RESULT result = operation.getResult();
+        final OperationRequest<RESULT> request = frame.getKey();
+
+        if (Reusable.CHECKER.canReuse(operation, Phase.EVALUATION)) {
+            final boolean cacheResult;
+            final CachedEvaluator<?> cachedEvaluator = cache.get(request);
+            if (cachedEvaluator instanceof CachedEvaluator<?>) {
+                cacheResult = false;
+            } else if (cachedEvaluator instanceof CachedOperator<?>) {
+                cacheResult =
+                    Reusable.CHECKER.canReuse(((CachedOperator<?>) cachedEvaluator).operator, Phase.EVALUATION);
+            } else {
+                cacheResult = true;
+            }
+            if (cacheResult) {
+                cache.put(request, new CachedResult<RESULT>(result));
+            }
+        }
+        return result;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -466,25 +484,29 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
+        final boolean reusableOperation = Reusable.CHECKER.canReuse(frame.operation, phase);
         try {
-            @SuppressWarnings("rawtypes")
-            final CachedEvaluator cachedEvaluator = cache.get(request);
+            if (reusableOperation) {
+                @SuppressWarnings("rawtypes")
+                final CachedEvaluator cachedEvaluator = cache.get(request);
 
-            if (cachedEvaluator != null) {
-                switch (phase) {
-                case SUPPORT_CHECK:
-                    return true;
-
-                case EVALUATION:
-                    @SuppressWarnings("unchecked")
-                    boolean eval = cachedEvaluator.evaluate(frame.operation);
-                    if (eval) {
+                if (cachedEvaluator != null) {
+                    switch (phase) {
+                    case SUPPORT_CHECK:
                         return true;
-                    }
-                    break;
 
-                default:
-                    break;
+                    case EVALUATION:
+                        @SuppressWarnings("unchecked")
+                        boolean eval = cachedEvaluator.evaluate(frame.operation);
+                        if (eval) {
+                            frame.operation.setSuccessful(true);
+                            return true;
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
                 }
             }
 
@@ -508,11 +530,13 @@ public class TherianContext extends ELContextWrapper {
                     break;
                 }
                 if (success) {
-                    @SuppressWarnings("unchecked")
-                    // supports; therefore safe:
-                    final Operator<? extends Operation<RESULT>> strongOperator =
-                        (Operator<? extends Operation<RESULT>>) operator;
-                    cache.put(frame.key, new CachedOperator<RESULT>(strongOperator));
+                    if (reusableOperation && !cache.containsKey(request) && Reusable.CHECKER.canReuse(operator, phase)) {
+                        @SuppressWarnings("unchecked")
+                        // supports; therefore safe:
+                        final Operator<? extends Operation<RESULT>> strongOperator =
+                            (Operator<? extends Operation<RESULT>>) operator;
+                        cache.put(request, new CachedOperator<RESULT>(strongOperator));
+                    }
                     frame.operation.setSuccessful(true);
                     return true;
                 }

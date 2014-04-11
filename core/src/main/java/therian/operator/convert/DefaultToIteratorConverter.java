@@ -15,12 +15,15 @@
  */
 package therian.operator.convert;
 
+import static therian.Operator.Phase.SUPPORT_CHECK;
+
 import java.lang.reflect.Type;
 import java.util.Iterator;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator.DependsOn;
+import therian.Reusable;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -32,6 +35,7 @@ import therian.operator.getelementtype.GetIteratorElementType;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
+@Reusable(SUPPORT_CHECK)
 @DependsOn({ DefaultToListConverter.class, GetIteratorElementType.class })
 public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
 

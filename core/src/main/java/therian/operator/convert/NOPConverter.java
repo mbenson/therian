@@ -16,7 +16,9 @@
 package therian.operator.convert;
 
 import therian.Operators;
+import therian.Reusable;
 import therian.TherianContext;
+import therian.Operator.Phase;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
@@ -27,6 +29,7 @@ import therian.operation.Convert;
  * 
  * @see Operators#standard()
  */
+@Reusable(Phase.SUPPORT_CHECK) // simpler to reinvoke than store value
 @StandardOperator
 public class NOPConverter extends Converter.WithDynamicTarget<Object> {
 
