@@ -547,7 +547,9 @@ public class TherianContext extends ELContextWrapper {
                     break;
                 }
                 if (success) {
-                    frame.operation.setSuccessful(true);
+                    if (frame.phase == Phase.EVALUATION) {
+                        frame.operation.setSuccessful(true);
+                    }
 
                     if (caching && Caching.isReusable(operator, frame.phase)) {
 
