@@ -272,8 +272,7 @@ public class TherianContext extends ELContextWrapper {
     private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
 
-    private final Deque<Frame<?>> evalStack = new ArrayDeque<Frame<?>>();
-    private final Deque<Frame<?>> supportStack = new ArrayDeque<Frame<?>>();
+    private final Deque<Frame<?>> stack = new ArrayDeque<Frame<?>>();
     private final Map<OperationRequest<?>, CachedEvaluator<?>> cache =
         new HashMap<OperationRequest<?>, CachedEvaluator<?>>();
 
@@ -388,10 +387,10 @@ public class TherianContext extends ELContextWrapper {
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
     public final synchronized boolean evalSuccess(Operation<?> operation, Hint... hints) {
-        final boolean dummyRoot = evalStack.isEmpty();
+        final boolean dummyRoot = stack.isEmpty();
         if (dummyRoot) {
             // add a root frame to preserve our cache "around" the supports/eval lifecycle, bypassing #push():
-            evalStack.push(Frame.ROOT);
+            stack.push(Frame.ROOT);
         }
         try {
             if (supports(operation, hints)) {
@@ -400,7 +399,7 @@ public class TherianContext extends ELContextWrapper {
             }
         } finally {
             if (dummyRoot) {
-                pop(Frame.ROOT, evalStack);
+                pop(Frame.ROOT);
             }
         }
         return false;
@@ -463,21 +462,7 @@ public class TherianContext extends ELContextWrapper {
     }
 
     private synchronized <RESULT> boolean handle(Phase phase, Frame<RESULT> frame) throws Frame.RecursionException {
-        final Deque<Frame<?>> stack;
-        switch (phase) {
-        case SUPPORT_CHECK:
-            stack = supportStack;
-            break;
-
-        case EVALUATION:
-            stack = evalStack;
-            break;
-
-        default:
-            throw new IllegalArgumentException("Unknown phase");
-        }
-
-        final OperationRequest<?> request = push(frame, stack);
+        final OperationRequest<?> request = push(frame);
 
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
@@ -549,19 +534,18 @@ public class TherianContext extends ELContextWrapper {
                 // restore original context
                 CURRENT_INSTANCE.set(originalContext);
             }
-            pop(frame, stack);
+            pop(frame);
         }
     }
 
-    private synchronized OperationRequest<?> push(Frame<?> frame, Deque<Frame<?>> stack)
-        throws Frame.RecursionException {
+    private synchronized OperationRequest<?> push(Frame<?> frame) throws Frame.RecursionException {
         final OperationRequest<?> result = frame.setParent(stack.peek());
         stack.push(frame);
         frame.join(this);
         return result;
     }
 
-    private synchronized void pop(Frame<?> frame, Deque<Frame<?>> stack) {
+    private synchronized void pop(Frame<?> frame) {
         final Frame<?> popFrame = stack.pop();
         if (popFrame != frame) {
             throw new IllegalStateException(String.format(
@@ -569,8 +553,8 @@ public class TherianContext extends ELContextWrapper {
         }
         frame.part(this);
 
-        // if no ongoing evaluations or support checks, clear cache:
-        if (evalStack.isEmpty() && supportStack.isEmpty()) {
+        // clear cache when stack is empty:
+        if (stack.isEmpty()) {
             cache.clear();
         }
     }
