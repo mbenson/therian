@@ -444,7 +444,7 @@ public class TherianContext extends ELContextWrapper {
         if (Reusable.CHECKER.canReuse(operation, Phase.EVALUATION)) {
             final boolean cacheResult;
             final CachedEvaluator<?> cachedEvaluator = cache.get(request);
-            if (cachedEvaluator instanceof CachedEvaluator<?>) {
+            if (cachedEvaluator instanceof CachedResult<?>) {
                 cacheResult = false;
             } else if (cachedEvaluator instanceof CachedOperator<?>) {
                 cacheResult =
