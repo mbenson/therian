@@ -294,10 +294,7 @@ public class TherianContext extends ELContextWrapper {
 
         @Override
         public boolean evaluate(Operation<T> operation) {
-            if (evalRaw(operation, operator)) {
-                return true;
-            }
-            return false;
+            return evalRaw(operation, operator);
         }
 
     }
