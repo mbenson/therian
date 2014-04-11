@@ -33,12 +33,10 @@ public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
     public boolean perform(TherianContext context, AddAll<?, ?> addAll) {
         final Type sourceElementType = context.eval(GetElementType.of(addAll.getSourcePosition()));
 
-        final Position.ReadWrite<Object> sourceElement = Positions.readWrite(sourceElementType);
-
         boolean result = false;
 
         for (Object o : context.eval(Convert.to(Iterable.class, addAll.getSourcePosition()))) {
-            sourceElement.setValue(o);
+            final Position.Readable<Object> sourceElement = Positions.readOnly(sourceElementType, o);
             final Add<Object, ?> add = Add.to(addAll.getTargetPosition(), sourceElement);
             result = context.eval(add).booleanValue() || result;
             if (!add.isSuccessful()) {
