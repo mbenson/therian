@@ -68,6 +68,19 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
+     * Caching {@link Hint}. Note that to turn caching off for the entire context, it's more performant to use
+     * {@link TherianContext#putContext(Class, Object)}.
+     */
+    public enum Caching implements Hint {
+        ON, OFF;
+
+        @Override
+        public Class<? extends Hint> getType() {
+            return Caching.class;
+        }
+    }
+
+    /**
      * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
      * "utility" {@link ELResolver} wrappers.
      */
@@ -455,9 +468,12 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
-        final boolean reusableOperation = Reusable.CHECKER.canReuse(frame.operation, frame.phase);
+        final boolean caching =
+            getTypedContext(Hint.class, Caching.ON) == Caching.ON
+                && Reusable.CHECKER.canReuse(frame.operation, frame.phase);
+
         try {
-            if (reusableOperation) {
+            if (caching) {
                 @SuppressWarnings("rawtypes")
                 final CachedEvaluator cachedEvaluator = cache.get(request);
 
@@ -503,7 +519,7 @@ public class TherianContext extends ELContextWrapper {
                 if (success) {
                     frame.operation.setSuccessful(true);
 
-                    if (reusableOperation && Reusable.CHECKER.canReuse(operator, frame.phase)) {
+                    if (caching && Reusable.CHECKER.canReuse(operator, frame.phase)) {
 
                         switch (frame.phase) {
                         case SUPPORT_CHECK:
@@ -559,4 +575,5 @@ public class TherianContext extends ELContextWrapper {
             cache.clear();
         }
     }
+
 }
