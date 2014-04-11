@@ -321,8 +321,9 @@ public class TherianContext extends ELContextWrapper {
      * @throws NullPointerException on {@code null} input
      */
     public synchronized <RESULT> boolean supports(final Operation<RESULT> operation, Hint... hints) {
+        final Frame<RESULT> frame = new Frame<RESULT>(Phase.SUPPORT_CHECK, operation, hints);
         try {
-            return handle(new Frame<RESULT>(Phase.SUPPORT_CHECK, operation, hints));
+            return handle(frame);
         } catch (Frame.RecursionException e) {
             return false;
         }
@@ -432,8 +433,8 @@ public class TherianContext extends ELContextWrapper {
             if (e.duplicate.operation.isSuccessful()) {
                 @SuppressWarnings("unchecked")
                 final RESULT result = (RESULT) e.duplicate.operation.getResult();
-                frame.operation.setSuccessful(true);
-                frame.operation.setResult(result);
+                operation.setSuccessful(true);
+                operation.setResult(result);
                 return result;
             }
             throw new OperationException(frame.operation, "recursive operation detected");
