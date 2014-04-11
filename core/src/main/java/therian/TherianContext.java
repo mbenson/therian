@@ -503,7 +503,7 @@ public class TherianContext extends ELContextWrapper {
         }
 
         final boolean caching =
-            getTypedContext(Hint.class, Caching.ON) == Caching.ON
+            getTypedContext(Caching.class, Caching.ON) == Caching.ON
                 && Caching.isReusable(frame.operation, frame.phase);
 
         try {
