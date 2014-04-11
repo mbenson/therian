@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -73,6 +74,39 @@ public class TherianContext extends ELContextWrapper {
      */
     public enum Caching implements Hint {
         ON, OFF;
+
+        /**
+         * Test whether an object is reusable, i.e. cacheable. By default, everything is considered reusable, so to mark
+         * an item as *not* being reusable one would declare the {@link Reusable} annotation with the desired operator
+         * phases. i.e., if the item is never reusable, it should be declared as:
+         * 
+         * <pre>
+         * @Reusable({ })
+         * </pre>
+         * 
+         * It is considered nonsensical that the evaluation of a given operation/operator be reusable, without the
+         * corresponding support check being likewise reusable; therefore specifying {@link Phase#EVALUATION} is
+         * understood to imply {@link Phase#SUPPORT_CHECK} whether or not it is explicitly included.
+         * 
+         * @param o
+         * @param phase
+         * @return whether
+         * @since 0.2
+         */
+        public static boolean isReusable(Object o, Operator.Phase phase) {
+            for (Class<?> c : ClassUtils.hierarchy(o.getClass())) {
+                if (c.isAnnotationPresent(Reusable.class)) {
+                    for (Phase p : c.getAnnotation(Reusable.class).value()) {
+                        if (p.compareTo(phase) >= 0) {
+                            return true;
+                        }
+                    }
+                    // stop on the nearest ancestor bearing the annotation:
+                    return false;
+                }
+            }
+            return true;
+        }
 
         @Override
         public Class<? extends Hint> getType() {
@@ -470,7 +504,7 @@ public class TherianContext extends ELContextWrapper {
 
         final boolean caching =
             getTypedContext(Hint.class, Caching.ON) == Caching.ON
-                && Reusable.CHECKER.canReuse(frame.operation, frame.phase);
+                && Caching.isReusable(frame.operation, frame.phase);
 
         try {
             if (caching) {
@@ -519,7 +553,7 @@ public class TherianContext extends ELContextWrapper {
                 if (success) {
                     frame.operation.setSuccessful(true);
 
-                    if (caching && Reusable.CHECKER.canReuse(operator, frame.phase)) {
+                    if (caching && Caching.isReusable(operator, frame.phase)) {
 
                         switch (frame.phase) {
                         case SUPPORT_CHECK:
