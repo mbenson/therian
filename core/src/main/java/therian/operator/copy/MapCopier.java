@@ -46,7 +46,6 @@ public class MapCopier extends Copier<Map, Map> {
     private static final TypeVariable<?> VALUE = Map.class.getTypeParameters()[1];
     private static final Map.Entry<?, ?> EMPTY_ENTRY = Pair.of(null, null);
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean perform(TherianContext context, Copy<? extends Map, ? extends Map> copy) {
         final Map<TypeVariable<?>, Type> sourceArgs =
