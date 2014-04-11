@@ -31,7 +31,6 @@ import therian.operation.Add;
 import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operator.add.AddEntryToMap;
-import therian.position.AbstractPosition;
 import therian.position.Position;
 import therian.util.Positions;
 
@@ -59,52 +58,27 @@ public class MapCopier extends Copier<Map, Map> {
         final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
-        if (targetKeyType != null && targetValueType != null) {
-            Type[] typeArguments = { targetKeyType, targetValueType };
-            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
-        } else {
+        if (targetKeyType == null || targetValueType == null) {
             targetEntryType = Map.Entry.class;
+        } else {
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, targetKeyType, targetValueType);
         }
 
-        final MutablePair<Object, Object> newEntry = MutablePair.of(null, null);
-        final Position.Readable<Map.Entry> targetElement = Positions.<Map.Entry> readOnly(targetEntryType, newEntry);
-
-        final Position.Writable<?> targetKey = new AbstractPosition.Writable() {
-
-            @Override
-            public Type getType() {
-                return targetKeyType;
-            }
-
-            @Override
-            public void setValue(Object value) {
-                newEntry.setLeft(value);
-            }
-            
-        };
-
-        final Position.Writable<?> targetValue = new AbstractPosition.Writable() {
-
-            @Override
-            public Type getType() {
-                return targetValueType;
-            }
-
-            @Override
-            public void setValue(Object value) {
-                newEntry.setRight(value);
-            }
-        };
 
         final Map<?, ?> sourceMap = copy.getSourcePosition().getValue();
         for (Map.Entry<?, ?> e : sourceMap.entrySet()) {
+            final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
+            final Position.ReadWrite<?> targetValue = Positions.readWrite(targetValueType);
+            
             if (!context.evalSuccess(Convert.to(targetKey, Positions.readOnly(sourceKeyType, e.getKey())))) {
                 return false;
             }
             if (!context.evalSuccess(Convert.to(targetValue, Positions.readOnly(sourceValueType, e.getValue())))) {
                 return false;
             }
-            if (!context.evalSuccess(Add.to(copy.getTargetPosition(), targetElement))) {
+            
+            final MutablePair<?, ?> newEntry = MutablePair.of(targetKey.getValue(), targetValue.getValue());
+            if (!context.evalSuccess(Add.to(copy.getTargetPosition(), Positions.<Map.Entry> readOnly(targetEntryType, newEntry)))) {
                 return false;
             }
         }
@@ -132,11 +106,10 @@ public class MapCopier extends Copier<Map, Map> {
         final Type targetValueType = TypeUtils.unrollVariables(targetArgs, VALUE);
 
         final Type targetEntryType;
-        if (targetKeyType != null && targetValueType != null) {
-            Type[] typeArguments = { targetKeyType, targetValueType };
-            targetEntryType = TypeUtils.parameterize(Map.Entry.class, typeArguments);
-        } else {
+        if (targetKeyType == null || targetValueType == null) {
             targetEntryType = Map.Entry.class;
+        } else {
+            targetEntryType = TypeUtils.parameterize(Map.Entry.class, targetKeyType, targetValueType);
         }
         // assume that if we can add a single entry we can add them all :|
         if (!context.supports(Add.to(copy.getTargetPosition(),
