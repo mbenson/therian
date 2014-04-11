@@ -144,17 +144,20 @@ public class TherianContext extends ELContextWrapper {
             return Collections.unmodifiableMap(localHints);
         }
 
+        final Phase phase;
         final Operation<RESULT> operation;
         final Map<Class<? extends Hint>, Hint> hints;
         private Frame<?> parent;
         private OperationRequest<RESULT> key;
 
         private Frame() {
+            this.phase = Phase.EVALUATION;
             this.operation = null;
             this.hints = Collections.emptyMap();
         }
 
-        Frame(Operation<RESULT> operation, Hint... hints) {
+        Frame(Phase phase, Operation<RESULT> operation, Hint... hints) {
+            this.phase = Validate.notNull(phase, "phase");
             this.operation = Validate.notNull(operation, "operation");
             this.hints = toMap(Validate.noNullElements(hints, "null element at hints[%s]"));
         }
@@ -319,7 +322,7 @@ public class TherianContext extends ELContextWrapper {
      */
     public synchronized <RESULT> boolean supports(final Operation<RESULT> operation, Hint... hints) {
         try {
-            return handle(Operator.Phase.SUPPORT_CHECK, new Frame<RESULT>(operation, hints));
+            return handle(new Frame<RESULT>(Phase.SUPPORT_CHECK, operation, hints));
         } catch (Frame.RecursionException e) {
             return false;
         }
@@ -422,9 +425,9 @@ public class TherianContext extends ELContextWrapper {
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(final OPERATION operation,
         Hint... hints) {
-        final Frame<RESULT> frame = new Frame<RESULT>(operation, hints);
+        final Frame<RESULT> frame = new Frame<RESULT>(Phase.EVALUATION, operation, hints);
         try {
-            handle(Operator.Phase.EVALUATION, frame);
+            handle(frame);
         } catch (Frame.RecursionException e) {
             if (e.duplicate.operation.isSuccessful()) {
                 @SuppressWarnings("unchecked")
@@ -461,7 +464,7 @@ public class TherianContext extends ELContextWrapper {
         return operator.perform(this, operation);
     }
 
-    private synchronized <RESULT> boolean handle(Phase phase, Frame<RESULT> frame) throws Frame.RecursionException {
+    private synchronized <RESULT> boolean handle(Frame<RESULT> frame) throws Frame.RecursionException {
         final OperationRequest<?> request = push(frame);
 
         final TherianContext originalContext = getCurrentInstance();
@@ -469,14 +472,14 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
-        final boolean reusableOperation = Reusable.CHECKER.canReuse(frame.operation, phase);
+        final boolean reusableOperation = Reusable.CHECKER.canReuse(frame.operation, frame.phase);
         try {
             if (reusableOperation) {
                 @SuppressWarnings("rawtypes")
                 final CachedEvaluator cachedEvaluator = cache.get(request);
 
                 if (cachedEvaluator != null) {
-                    switch (phase) {
+                    switch (frame.phase) {
                     case SUPPORT_CHECK:
                         return true;
 
@@ -499,7 +502,7 @@ public class TherianContext extends ELContextWrapper {
 
             for (final Operator<?> operator : supportingOperators) {
                 boolean success = false;
-                switch (phase) {
+                switch (frame.phase) {
                 case SUPPORT_CHECK:
                     success = true;
                     break;
@@ -515,7 +518,8 @@ public class TherianContext extends ELContextWrapper {
                     break;
                 }
                 if (success) {
-                    if (reusableOperation && !cache.containsKey(request) && Reusable.CHECKER.canReuse(operator, phase)) {
+                    if (reusableOperation && !cache.containsKey(request)
+                        && Reusable.CHECKER.canReuse(operator, frame.phase)) {
                         @SuppressWarnings("unchecked")
                         // supports; therefore safe:
                         final Operator<? extends Operation<RESULT>> strongOperator =
