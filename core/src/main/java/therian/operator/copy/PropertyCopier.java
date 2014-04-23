@@ -242,6 +242,9 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
     }
 
     private Iterable<Copy<?, ?>> map(final TherianContext context, Copy<? extends SOURCE, ? extends TARGET> copy) {
+        if (mappings.isEmpty()) {
+            return Collections.emptySet();
+        }
         final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
 
         for (Pair<Property.PositionFactory<?>, Property.PositionFactory<?>> mapping : mappings) {
