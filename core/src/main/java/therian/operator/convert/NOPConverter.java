@@ -19,6 +19,7 @@ import therian.Operators;
 import therian.Reusable;
 import therian.TherianContext;
 import therian.Operator.Phase;
+import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
@@ -32,10 +33,33 @@ import therian.operation.Convert;
 @Reusable(Phase.SUPPORT_CHECK) // simpler to reinvoke than store value
 @StandardOperator
 public class NOPConverter extends Converter.WithDynamicTarget<Object> {
+    /**
+     * NullBehavior {@link Hint}
+     */
+    public enum NullBehavior implements Hint {
+        /**
+         * Indicates that a null source value will be considered unsupported.
+         */
+        UNSUPPORTED,
+        
+        /**
+         * Indicates that a {@code null} source value will yield a {@code null} target value.
+         */
+        DEFAULT;
+
+        @Override
+        public Class<? extends Hint> getType() {
+            return NullBehavior.class;
+        }
+    }
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean perform(TherianContext context, Convert<?, ?> convert) {
+        if (convert.getSourcePosition().getValue() == null
+            && context.getTypedContext(NullBehavior.class) == NullBehavior.UNSUPPORTED) {
+            return false;
+        }
         final Convert raw = convert;
         raw.getTargetPosition().setValue(raw.getSourcePosition().getValue());
         return true;
@@ -43,7 +67,8 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
-        return isNoop(convert);
+        return isNoop(convert) && (convert.getSourcePosition().getValue() != null
+            || context.getTypedContext(NullBehavior.class, NullBehavior.DEFAULT) == NullBehavior.DEFAULT);
     }
 
 }
