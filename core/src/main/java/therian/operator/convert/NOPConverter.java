@@ -38,9 +38,14 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
      */
     public enum NullBehavior implements Hint {
         /**
-         * Indicates that a null source value will be considered unsupported.
+         * Indicates that a {@code null} source value will be considered unsupported.
          */
         UNSUPPORTED,
+        
+        /**
+         * Indicates that a {@code null} source value will be considered supported, but do nothing.
+         */
+        NOP,
         
         /**
          * Indicates that a {@code null} source value will yield a {@code null} target value.
