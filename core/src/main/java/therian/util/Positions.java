@@ -17,6 +17,7 @@ package therian.util;
 
 import java.lang.reflect.Type;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -36,10 +37,12 @@ public class Positions {
     private static class RO<T> extends AbstractPosition.Readable<T> {
         private final Type type;
         private final T value;
+        private final boolean isArray;
 
         RO(Type type, T value) {
             this.type = type;
             this.value = value;
+            this.isArray = TypeUtils.isArrayType(type);
         }
 
         @Override
@@ -54,7 +57,8 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Only Position<%s>(%s)", TypeUtils.toString(type), value);
+            return String.format("Read-Only Position<%s>(%s)", Types.toString(type),
+                isArray ? ArrayUtils.toString(value, "null") : value);
         }
 
     }
@@ -77,17 +81,19 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Writable Position<%s>", TypeUtils.toString(type));
+            return String.format("Writable Position<%s>", Types.toString(type));
         }
 
     }
 
     private static class RW<T> implements Position.ReadWrite<T> {
         private final Type type;
+        private final boolean isArray;
         private T value;
 
         RW(Type type) {
             this.type = type;
+            this.isArray = TypeUtils.isArrayType(type);
         }
 
         RW(Type type, T value) {
@@ -122,7 +128,8 @@ public class Positions {
 
         @Override
         public String toString() {
-            return String.format("Read-Write Position<%s>(%s)", TypeUtils.toString(type), value);
+            return String.format("Read-Write Position<%s>(%s)", Types.toString(type),
+                isArray ? ArrayUtils.toString(value, "null") : value);
         }
 
     }
@@ -167,7 +174,7 @@ public class Positions {
     public static <T> Position.Readable<T> readOnly(final Type type, final T value) {
         Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value,
-            TypeUtils.toString(type));
+            Types.toString(type));
         return new RO<T>(type, value);
     }
 
@@ -235,7 +242,7 @@ public class Positions {
     public static <T> Position.ReadWrite<T> readWrite(final Type type, T initialValue) {
         Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(initialValue, type), "%s is not an instance of %s", initialValue,
-            TypeUtils.toString(type));
+            Types.toString(type));
         return new RW<T>(type, initialValue);
     }
 

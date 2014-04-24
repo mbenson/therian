@@ -93,6 +93,18 @@ public class Types {
         return TypeUtils.unrollVariables(variablesMap, var);
     }
 
+    /**
+     * Friendlier string formatting of types that appends brackets for array types.
+     * @param type
+     * @return String
+     */
+    public static String toString(Type type) {
+        if (TypeUtils.isArrayType(type)) {
+            return toString(TypeUtils.getArrayComponentType(type)) + "[]";
+        }
+        return TypeUtils.toString(type);
+    }
+
     private static Type readTyped(Method method, Object target) {
         try {
             final Typed<?> typed = (Typed<?>) method.invoke(target);

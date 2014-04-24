@@ -240,7 +240,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
     @Override
     public String toString() {
         return String.format("CopyingConverter for target type %s",
-            TypeUtils.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
+            Types.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
     }
 
     private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {

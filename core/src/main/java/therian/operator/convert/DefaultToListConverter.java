@@ -43,10 +43,13 @@ public class DefaultToListConverter extends Converter<Object, List> {
 
     @Override
     public boolean perform(TherianContext context, Convert<? extends Object, ? super List> convert) {
+        final Object source = convert.getSourcePosition().getValue();
+        if (source == null) {
+            return false;
+        }
         final List<?> list;
         if (TypeUtils.isArrayType(convert.getSourcePosition().getType())) {
             final Object[] array;
-            final Object source = convert.getSourcePosition().getValue();
             if (source instanceof Object[]) {
                 array = (Object[]) source;
             } else {
