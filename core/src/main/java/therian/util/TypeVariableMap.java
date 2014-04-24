@@ -124,6 +124,6 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
         if (type instanceof TypeVariable<?>) {
             return TypeUtils.toLongString((TypeVariable<?>) type);
         }
-        return TypeUtils.toString(type);
+        return Types.toString(type);
     }
 }

@@ -18,10 +18,10 @@ package therian.operation;
 import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.position.AbstractPosition;
 import therian.position.Position;
+import therian.util.Types;
 
 /**
  * Convert operation.
@@ -86,7 +86,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
             @Override
             public String toString() {
-                return TypeUtils.toString(targetType);
+                return Types.toString(targetType);
             }
         });
     }
