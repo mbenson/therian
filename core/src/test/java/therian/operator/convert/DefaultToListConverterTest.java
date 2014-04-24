@@ -33,6 +33,9 @@ import therian.util.Positions;
 
 public class DefaultToListConverterTest extends OperatorTest {
 
+    private static final TypeLiteral<List<MetasyntacticVariable>> LIST_OF_MV_TYPE =
+        new TypeLiteral<List<MetasyntacticVariable>>() {};
+
     @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new DefaultToListConverter());
@@ -40,18 +43,16 @@ public class DefaultToListConverterTest extends OperatorTest {
 
     @Test
     public void testSingleton() {
-        assertEquals(
-            Collections.singletonList(MetasyntacticVariable.FOO),
-            therianContext.eval(Convert.to(new TypeLiteral<List<MetasyntacticVariable>>() {},
-                Positions.readOnly(MetasyntacticVariable.FOO))));
+        assertEquals(Collections.singletonList(MetasyntacticVariable.FOO),
+            therianContext.eval(Convert.to(LIST_OF_MV_TYPE, Positions.readOnly(MetasyntacticVariable.FOO))));
     }
 
     @Test
     public void testArray() {
-        assertEquals(
-            Arrays.asList(MetasyntacticVariable.values()),
-            therianContext.eval(Convert.to(new TypeLiteral<List<MetasyntacticVariable>>() {},
-                Positions.readOnly(MetasyntacticVariable.values()))));
+        assertEquals(Arrays.asList(MetasyntacticVariable.values()),
+            therianContext.eval(Convert.to(LIST_OF_MV_TYPE, Positions.readOnly(MetasyntacticVariable.values()))));
+        assertEquals(Arrays.asList(),
+            therianContext.eval(Convert.to(LIST_OF_MV_TYPE, Positions.readOnly(new MetasyntacticVariable[0]))));
     }
 
     @Test
