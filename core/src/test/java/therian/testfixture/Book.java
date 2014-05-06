@@ -73,4 +73,13 @@ public class Book {
         result |= ObjectUtils.hashCode(getAuthor());
         return result;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder buf = new StringBuilder(getClass().getSimpleName()).append(' ').append(getTitle());
+        if (getSubtitle() != null) {
+            buf.append(": ").append(getSubtitle());
+        }
+        return buf.toString();
+    }
 }
