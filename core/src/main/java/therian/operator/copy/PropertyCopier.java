@@ -67,7 +67,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
          */
         public @interface Value {
             /**
-             * Property name; implies source {@link Position}.
+             * Property name; blank implies source {@link Position}.
              */
             String from() default "";
 
