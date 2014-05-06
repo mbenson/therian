@@ -39,6 +39,12 @@ import therian.util.Types;
  */
 public class Keyed {
 
+    /**
+     * Keyed value {@link RelativePositionFactory}.
+     *
+     * @param <K>
+     * @param <V>
+     */
     public static class PositionFactory<K, V> extends RelativePositionFactory<Map<K, V>, V> {
         private final K key;
 
@@ -120,7 +126,7 @@ public class Keyed {
         }
 
         /**
-         * Get the key
+         * Get the key.
          *
          * @return K
          */
@@ -129,7 +135,17 @@ public class Keyed {
         }
     }
 
+    /**
+     * Fluent step.
+     *
+     * @param <V>
+     */
     public static class Value<V> {
+        /**
+         * "Keyed value at <em>key</em>".
+         * @param key
+         * @return {@link PositionFactory}
+         */
         public <K> PositionFactory<K, V> at(K key) {
             return new PositionFactory<K, V>(key);
         }
@@ -138,6 +154,10 @@ public class Keyed {
     private Keyed() {
     }
 
+    /**
+     * "Keyed value".
+     * @return {@link Value}
+     */
     public static <V> Value<V> value() {
         return new Value<V>();
     }

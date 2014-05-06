@@ -44,6 +44,9 @@ import therian.el.ELConstants;
 import therian.position.Position;
 import therian.util.Types;
 
+/**
+ * Fluent entry point for "property at" {@link RelativePositionFactory}.
+ */
 public class Property {
     private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
