@@ -23,5 +23,5 @@ import therian.operator.copy.PropertyCopier.Matching;
  */
 @StandardOperator
 @Matching
-public class BeanCopier extends PropertyCopier<Object, Object> {
+public final class BeanCopier extends PropertyCopier<Object, Object> {
 }
