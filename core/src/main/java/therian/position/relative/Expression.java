@@ -49,7 +49,7 @@ public class Expression {
      * 
      * @param <TYPE>
      */
-    public static class PositionFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
+    public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
 
         private static class BaseContext extends ELContextWrapper {
 

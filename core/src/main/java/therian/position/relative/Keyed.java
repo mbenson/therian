@@ -45,7 +45,7 @@ public class Keyed {
      * @param <K>
      * @param <V>
      */
-    public static class PositionFactory<K, V> extends RelativePositionFactory<Map<K, V>, V> {
+    public static class PositionFactory<K, V> extends RelativePositionFactory.ReadWrite<Map<K, V>, V> {
         private final K key;
 
         private PositionFactory(K key) {

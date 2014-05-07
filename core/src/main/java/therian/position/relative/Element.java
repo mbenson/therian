@@ -54,7 +54,7 @@ public class Element {
      * @param <PARENT>
      * @param <TYPE>
      */
-    public static abstract class PositionFactory<PARENT, TYPE> extends RelativePositionFactory<PARENT, TYPE> {
+    public static abstract class PositionFactory<PARENT, TYPE> extends RelativePositionFactory.ReadWrite<PARENT, TYPE> {
 
         private final int index;
 

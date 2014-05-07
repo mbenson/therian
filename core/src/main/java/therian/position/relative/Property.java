@@ -88,7 +88,7 @@ public class Property {
         abstract Type getType(FeatureDescriptor feature);
     }
 
-    public static class PositionFactory<TYPE> extends RelativePositionFactory<Object, TYPE> {
+    public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
 
         private final String propertyName;
         private final boolean optional;

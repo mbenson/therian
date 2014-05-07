@@ -5,6 +5,7 @@ import org.apache.commons.lang3.Validate;
 
 import therian.TherianContext;
 import therian.position.Position;
+import therian.position.Position.Readable;
 
 /**
  * Describes an entity capable of producing {@link RelativePosition}s.
@@ -13,6 +14,18 @@ import therian.position.Position;
  * @param <TYPE>
  */
 public abstract class RelativePositionFactory<PARENT, TYPE> {
+
+    /**
+     * Specialized subclass that advertises its products as RW.
+     *
+     * @param <PARENT>
+     * @param <TYPE>
+     */
+    public static abstract class ReadWrite<PARENT, TYPE> extends RelativePositionFactory<PARENT, TYPE> {
+        @Override
+        public abstract <P extends PARENT> RelativePosition.ReadWrite<P, TYPE> of(Readable<P> parentPosition);
+    }
+
     protected abstract class RelativePositionImpl<P extends PARENT, E> implements RelativePosition<P, TYPE> {
         protected final Position.Readable<P> parentPosition;
         private final E name;
