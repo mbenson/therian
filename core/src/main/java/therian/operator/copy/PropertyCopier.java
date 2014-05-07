@@ -32,22 +32,25 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 
 import therian.OperationException;
+import therian.Operator.DependsOn;
 import therian.OperatorDefinitionException;
 import therian.TherianContext;
-import therian.Operator.DependsOn;
 import therian.TherianContext.Hint;
 import therian.operation.Copy;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.convert.NOPConverter;
 import therian.position.Position;
+import therian.position.relative.Expression;
 import therian.position.relative.Property;
+import therian.position.relative.RelativePositionFactory;
 import therian.util.BeanProperties;
 import therian.util.BeanProperties.ReturnProperties;
+import uelbox.UEL;
 
 /**
- * Copies based on annotated property mapping. Concrete subclasses must specify one or both of {@link Mapping} and
- * {@link Matching}.
+ * Copies based on annotations. Concrete subclasses must specify one or both of {@link Mapping} and
+ * {@link Matching} to designate property/expression (using {@code #{}} embedding syntax).
  * 
  * @param <SOURCE>
  * @param <TARGET>
@@ -67,12 +70,12 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
          */
         public @interface Value {
             /**
-             * Property name; blank implies source {@link Position}.
+             * Property name or delimited expression; blank implies source {@link Position}.
              */
             String from() default "";
 
             /**
-             * Property name; blank implies target {@link Position}.
+             * Property name or delimited expression; blank implies target {@link Position}.
              */
             String to() default "";
         }
@@ -129,12 +132,22 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
     }
 
-    private final List<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>> mappings;
+    private static RelativePositionFactory.ReadWrite<Object, ?> toFactory(String s, boolean optional) {
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        if (UEL.isDelimited(s)) {
+            return optional ? Expression.optional(s) : Expression.at(s);
+        }
+        return optional ? Property.optional(s) : Property.at(s);
+    }
+
+    private final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings;
     private final Matching matching;
 
     {
-        final List<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>> m =
-            new ArrayList<Pair<Property.PositionFactory<?>, Property.PositionFactory<?>>>();
+        final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> m =
+            new ArrayList<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>>();
 
         try {
             @SuppressWarnings("rawtypes")
@@ -147,6 +160,8 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             } else {
                 Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
 
+                final boolean optional = true;
+
                 for (Mapping.Value v : mapping.value()) {
                     final String from = StringUtils.trimToNull(v.from());
                     final String to = StringUtils.trimToNull(v.to());
@@ -154,10 +169,12 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                     Validate.validState(from != null || to != null,
                         "both from and to cannot be blank/empty for a single @Mapping.Value");
 
-                    final Property.PositionFactory<?> target = to == null ? null : Property.at(to);
-                    final Property.PositionFactory<?> source = from == null ? null : Property.optional(from);
+                    final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, !optional);
+                    final RelativePositionFactory.ReadWrite<Object, ?> source = toFactory(from, optional);
 
-                    m.add(Pair.<Property.PositionFactory<?>, Property.PositionFactory<?>> of(source, target));
+                    m.add(Pair
+                        .<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> of(
+                            source, target));
                 }
                 mappings = Collections.unmodifiableList(m);
             }
@@ -236,7 +253,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         return NullBehavior.NOOP;
     }
 
-    private Position.Readable<?> dereference(Property.PositionFactory<?> positionFactory,
+    private Position.Readable<?> dereference(RelativePositionFactory.ReadWrite<Object, ?> positionFactory,
         Position.Readable<?> parentPosition) {
         return positionFactory == null ? parentPosition : positionFactory.of(parentPosition);
     }
@@ -247,7 +264,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
         final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
 
-        for (Pair<Property.PositionFactory<?>, Property.PositionFactory<?>> mapping : mappings) {
+        for (Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> mapping : mappings) {
             final Position.Readable<?> propertySource = dereference(mapping.getLeft(), copy.getSourcePosition());
             final Position.Readable<?> propertyTarget = dereference(mapping.getRight(), copy.getTargetPosition());
             result.add(Copy.to(propertyTarget, propertySource));
@@ -273,8 +290,12 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
         final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
         for (String property : properties) {
-            final Position.ReadWrite<?> target = Property.at(property).of(copy.getTargetPosition());
-            final Position.ReadWrite<?> source = Property.optional(property).of(copy.getSourcePosition());
+            if (StringUtils.isBlank(property)) {
+                continue;
+            }
+            final RelativePositionFactory.ReadWrite<Object, ?> factory = Property.optional(property);
+            final Position.Readable<?> target = dereference(factory, copy.getTargetPosition());
+            final Position.Readable<?> source = dereference(factory, copy.getSourcePosition());
 
             if (lenient) {
                 final Copy<?, ?> propertyCopy = Copy.Safely.to(target, source);
@@ -287,4 +308,5 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
         return result;
     }
+
 }

@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import therian.OperatorDefinitionException;
 import therian.TherianModule;
+import therian.operation.Convert;
 import therian.operation.Copy;
 import therian.operator.OperatorTest;
 import therian.operator.convert.DefaultCopyingConverter;
@@ -30,6 +31,7 @@ import therian.position.Position;
 import therian.testfixture.Author;
 import therian.testfixture.Book;
 import therian.testfixture.Employee;
+import therian.testfixture.IllustratedBook;
 import therian.testfixture.Person;
 import therian.util.Positions;
 
@@ -49,10 +51,15 @@ public class PropertyCopierTest extends OperatorTest {
     public static class BookToPerson extends PropertyCopier<Book, Person> {
     }
 
+    @PropertyCopier.Mapping({ @Value(from = "#{illustrator.firstName}", to = "firstName"),
+        @Value(from = "#{illustrator.lastName}", to = "lastName") })
+    public static class IllustratedBookToEmployee extends PropertyCopier<IllustratedBook, Employee> {
+    }
+
     @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new NOPConverter(), new ConvertingCopier(),
-            new DefaultCopyingConverter(), new InvertNames(), new PersonToBook(), new BookToPerson());
+            new DefaultCopyingConverter(), new InvertNames(), new PersonToBook(), new BookToPerson(), new IllustratedBookToEmployee());
     }
 
     @Test
@@ -124,5 +131,31 @@ public class PropertyCopierTest extends OperatorTest {
 
         }
         new PropertyCopierWithInvalidAnnotation();
+    }
+    
+    @Test
+    public void testExpressionMapping() {
+        final IllustratedBook book = new IllustratedBook();
+        final Person illustrator = new Person() {
+
+            @Override
+            public String getFirstName() {
+                return "Shel";
+            }
+
+            @Override
+            public String getMiddleName() {
+                return null;
+            }
+
+            @Override
+            public String getLastName() {
+                return "Silverstein";
+            }
+        };
+        book.setIllustrator(illustrator);
+        final Employee employee = therianContext.eval(Convert.to(Employee.class, Positions.readOnly(book)));
+        assertEquals(illustrator.getFirstName(), employee.getFirstName());
+        assertEquals(illustrator.getLastName(), employee.getLastName());
     }
 }
