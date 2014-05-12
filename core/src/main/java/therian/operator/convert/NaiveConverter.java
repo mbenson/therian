@@ -15,6 +15,8 @@
  */
 package therian.operator.convert;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import therian.TherianContext;
 import therian.operation.Convert;
 
@@ -28,7 +30,19 @@ public abstract class NaiveConverter<SOURCE, TARGET> extends Converter<SOURCE, T
 
     @Override
     public final boolean perform(TherianContext context, Convert<? extends SOURCE, ? super TARGET> convert) {
-        convert.getTargetPosition().setValue(convert(convert.getSourcePosition().getValue()));
+        final SOURCE sourceValue = convert.getSourcePosition().getValue();
+        final TARGET targetValue;
+
+        if (sourceValue == null) {
+            if (TypeUtils.isAssignable(null, convert.getTargetPosition().getType())) {
+                targetValue = null;
+            } else {
+                return false;
+            }
+        } else {
+            targetValue = convert(sourceValue);
+        }
+        convert.getTargetPosition().setValue(targetValue);
         return true;
     }
 
