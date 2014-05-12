@@ -51,10 +51,16 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
         }
     }
 
-    protected Copy(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
+    private Copy(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
     }
 
+    /**
+     * Fluent factory method.
+     * @param targetPosition
+     * @param sourcePosition
+     * @return Copy
+     */
     public static <S, T> Copy<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
         return new Copy<S, T>(sourcePosition, targetPosition);
     }
