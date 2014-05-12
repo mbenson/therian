@@ -19,8 +19,8 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.TherianContext;
 import therian.TherianContext.Callback;
@@ -192,12 +192,12 @@ public class Positions {
     /**
      * Get a read-only position of type {@code type#value} and value {@code value}.
      * 
-     * @param type not {@code null}
+     * @param typed not {@code null}
      * @param value
      * @return Position.Readable
      */
-    public static <T> Position.Readable<T> readOnly(final TypeLiteral<T> type, final T value) {
-        return readOnly(Validate.notNull(type, "type").value, value);
+    public static <T> Position.Readable<T> readOnly(final Typed<T> typed, final T value) {
+        return readOnly(Validate.notNull(typed, "type").getType(), value);
     }
 
     /**
@@ -225,11 +225,11 @@ public class Positions {
     /**
      * Get a read-write position of type {@code type#value}.
      * 
-     * @param type not {@code null}
+     * @param typed not {@code null}
      * @return Position.ReadWrite
      */
-    public static <T> Position.ReadWrite<T> readWrite(final TypeLiteral<T> type) {
-        return readWrite(Validate.notNull(type, "type").value);
+    public static <T> Position.ReadWrite<T> readWrite(final Typed<T> typed) {
+        return readWrite(Validate.notNull(typed.getType(), "type"));
     }
 
     /**
@@ -260,12 +260,12 @@ public class Positions {
     /**
      * Get a read-write position of type {@code type#value} and with initial value {@code initialValue}.
      * 
-     * @param type not {@code null}
+     * @param typed not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
      */
-    public static <T> Position.ReadWrite<T> readWrite(final TypeLiteral<T> type, T initialValue) {
-        return readWrite(Validate.notNull(type, "type").value, initialValue);
+    public static <T> Position.ReadWrite<T> readWrite(final Typed<T> typed, T initialValue) {
+        return readWrite(Validate.notNull(typed, "type").getType(), initialValue);
     }
 
     /**
@@ -283,11 +283,11 @@ public class Positions {
     /**
      * Get a writable position of type {@code type#value}.
      * 
-     * @param type not {@code null}
+     * @param typed not {@code null}
      * @return Position.Writable
      */
-    public static <T> Position.Writable<T> writable(final TypeLiteral<T> type) {
-        return writable(Validate.notNull(type, "type").value);
+    public static <T> Position.Writable<T> writable(final Typed<T> typed) {
+        return writable(Validate.notNull(typed, "type").getType());
     }
 
     /**
