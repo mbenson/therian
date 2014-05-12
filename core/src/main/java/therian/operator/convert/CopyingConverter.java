@@ -63,7 +63,6 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
         @BindTypeVariable
         public abstract Typed<TARGET> getTargetType();
-
     }
 
     /**
