@@ -216,16 +216,13 @@ class OperatorManager {
             final Class<?> opType = operator.getClass();
             operatorsPresent.add(opType);
 
-            Class<?> c = opType;
-            while (c != null) {
+            for (Class<?> c : ClassUtils.hierarchy(opType)) {
                 final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
                 if (dependsOn != null) {
                     Collections.addAll(operatorsNeeded, dependsOn.value());
                 }
-                c = c.getSuperclass();
             }
         }
-
         operatorsNeeded.removeAll(operatorsPresent);
         Validate.isTrue(operatorsNeeded.isEmpty(), "Missing required operators: %s", operatorsNeeded);
     }
