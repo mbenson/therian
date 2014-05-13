@@ -1,8 +1,11 @@
 package therian.util;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -26,6 +29,9 @@ public class Types {
 
     private static final Map<Class<?>, Map<TypeVariable<?>, Method>> TYPED_GETTERS =
         new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
+
+    // borrowed from Commons Lang MemberUtils
+    private static final int ACCESS_TEST = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
 
     /**
      * "Refine" a declared type:
@@ -126,12 +132,51 @@ public class Types {
 
     private static Type readTyped(Method method, Object target) {
         try {
+            setAccessibleWorkaround(method);
             final Typed<?> typed = (Typed<?>) method.invoke(target);
             Validate.validState(typed != null, "%s returned null", method);
             return typed.getType();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    /**
+     * XXX Default access superclass workaround
+     *
+     * When a {@code public} class has a default access superclass with {@code public} members,
+     * these members are accessible. Calling them from compiled code works fine.
+     * Unfortunately, on some JVMs, using reflection to invoke these members
+     * seems to (wrongly) prevent access even when the modifier is {@code public}.
+     * Calling {@code setAccessible(true)} solves the problem but will only work from
+     * sufficiently privileged code. Better workarounds would be gratefully
+     * accepted.
+     * @param o the AccessibleObject to set as accessible
+     */
+    // borrowed from Commons Lang MemberUtils
+    static void setAccessibleWorkaround(final AccessibleObject o) {
+        if (o == null || o.isAccessible()) {
+            return;
+        }
+        final Member m = (Member) o;
+        if (Modifier.isPublic(m.getModifiers())
+                && isPackageAccess(m.getDeclaringClass().getModifiers())) {
+            try {
+                o.setAccessible(true);
+            } catch (final SecurityException e) { // NOPMD
+                // ignore in favor of subsequent IllegalAccessException
+            }
+        }
+    }
+
+    /**
+     * Returns whether a given set of modifiers implies package access.
+     * @param modifiers to test
+     * @return {@code true} unless {@code package}/{@code protected}/{@code private} modifier detected
+     */
+    // borrowed from Commons Lang MemberUtils
+    static boolean isPackageAccess(final int modifiers) {
+        return (modifiers & ACCESS_TEST) == 0;
     }
 
     private static Iterable<Class<?>> init(Class<?> c) {
