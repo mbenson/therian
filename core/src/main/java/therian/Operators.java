@@ -44,7 +44,7 @@ public class Operators {
         }
 
         private int compareTypes(Type t1, Type t2) {
-            if (ObjectUtils.equals(t1, t2)) {
+            if (TypeUtils.equals(t1, t2)) {
                 return 0;
             }
             if (TypeUtils.isAssignable(t1, t2)) {
@@ -71,7 +71,7 @@ public class Operators {
                 }
                 return 0;
             }
-            return t1.toString().compareTo(t2.toString());
+            return Types.toString(t1).compareTo(Types.toString(t2));
         }
 
         private Class<?> raw(Type type) {
