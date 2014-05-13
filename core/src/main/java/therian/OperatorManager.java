@@ -217,7 +217,7 @@ class OperatorManager {
             operatorsPresent.add(opType);
 
             for (Class<?> c : ClassUtils.hierarchy(opType)) {
-                final DependsOn dependsOn = opType.getAnnotation(DependsOn.class);
+                final DependsOn dependsOn = c.getAnnotation(DependsOn.class);
                 if (dependsOn != null) {
                     Collections.addAll(operatorsNeeded, dependsOn.value());
                 }
@@ -230,11 +230,8 @@ class OperatorManager {
     private static List<OperatorInfo> buildOperatorInfos(Set<Operator<?>> operators) {
         final List<OperatorInfo> result = new ArrayList<OperatorInfo>();
         for (Operator<?> operator : operators) {
-            OperatorInfo info = new OperatorInfo(operator);
-            boolean changed = result.add(info);
-            if (changed) {
-                changed = false;
-            }
+            final OperatorInfo info = new OperatorInfo(operator);
+            result.add(info);
         }
         Collections.sort(result);
         return result;
