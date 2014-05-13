@@ -20,9 +20,11 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Comparator;
 import java.util.Map;
-import org.apache.commons.lang3.ObjectUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
+
 import therian.util.Types;
 
 /**
@@ -44,7 +46,7 @@ public class Operators {
         }
 
         private int compareTypes(Type t1, Type t2) {
-            if (TypeUtils.equals(t1, t2)) {
+            if (t1 == t2 || TypeUtils.equals(t1, t2)) {
                 return 0;
             }
             if (TypeUtils.isAssignable(t1, t2)) {
@@ -54,9 +56,11 @@ public class Operators {
                 return 1;
             }
             final Class<?> raw1 = raw(t1);
+            Validate.validState(raw1 != null, "Cannot get raw type for %s", t1);
             final Class<?> raw2 = raw(t2);
+            Validate.validState(raw2 != null, "Cannot get raw type for %s", t2);
 
-            if (ObjectUtils.equals(raw1, raw2)) {
+            if (raw1.equals(raw2)) {
                 if (raw1.getTypeParameters().length == 0) {
                     return 0;
                 }
@@ -64,14 +68,21 @@ public class Operators {
                 final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
                 for (TypeVariable<?> var : raw1.getTypeParameters()) {
                     final int recurse =
-                        compareTypes(TypeUtils.unrollVariables(typeArgs1, var), TypeUtils.unrollVariables(typeArgs2, var));
+                        compareTypes(TypeUtils.unrollVariables(typeArgs1, var),
+                            TypeUtils.unrollVariables(typeArgs2, var));
                     if (recurse != 0) {
                         return recurse;
                     }
                 }
                 return 0;
             }
-            return Types.toString(t1).compareTo(Types.toString(t2));
+            final int steps =
+                Integer.compare(StringUtils.countMatches(raw1.getName(), "."),
+                    StringUtils.countMatches(raw2.getName(), "."));
+            if (steps == 0) {
+                return raw1.getName().compareTo(raw2.getName());
+            }
+            return steps;
         }
 
         private Class<?> raw(Type type) {
