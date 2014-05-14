@@ -16,6 +16,7 @@
 package therian.operator.convert;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -29,6 +30,8 @@ import therian.testfixture.MetasyntacticVariable;
 import therian.util.Positions;
 
 public class NOPConverterTest extends OperatorTest {
+    private static final TypeLiteral<CharSequence> charSequenceType = new TypeLiteral<CharSequence>() {};
+
     @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new NOPConverter());
@@ -43,7 +46,6 @@ public class NOPConverterTest extends OperatorTest {
             therianContext.eval(Convert.to(Long.class, Positions.readOnly(Long.valueOf(100L)))));
         assertEquals(Boolean.TRUE, therianContext.eval(Convert.to(Boolean.class, Positions.readOnly(Boolean.TRUE))));
 
-        final TypeLiteral<CharSequence> charSequenceType = new TypeLiteral<CharSequence>() {};
         assertNull(therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(String.class, null))));
         assertEquals("", therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(""))));
         assertEquals("", therianContext.eval(Convert.to(String.class, Positions.readOnly(""))));
@@ -55,6 +57,11 @@ public class NOPConverterTest extends OperatorTest {
             therianContext.eval(Convert.to(Integer.class, Positions.readOnly(Integer.valueOf(666)))));
         assertEquals(Integer.valueOf(666),
             therianContext.eval(Convert.to(Number.class, Positions.readOnly(Integer.valueOf(666)))));
+    }
 
+    @Test
+    public void testNullValueUnsupportedHint() {
+        assertFalse(therianContext.supports(Convert.to(charSequenceType, Positions.readOnly(String.class, null)),
+            NOPConverter.NullBehavior.UNSUPPORTED));
     }
 }
