@@ -55,11 +55,9 @@ class OperatorManager {
         final Type targetType;
         final Class<?> rawTargetType;
 
-        OperatorInfo(Operator operator) {
+        OperatorInfo(Operator operator, Type targetType) {
             this.operator = operator;
-            targetType =
-                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
-                    Operator.class.getTypeParameters()[0]);
+            this.targetType = targetType;
             rawTargetType = getRawType(targetType);
         }
 
@@ -109,23 +107,28 @@ class OperatorManager {
                     return false;
                 }
 
-                for (Class<?> c : ClassUtils.hierarchy(operatorInfo.rawTargetType)) {
-                    if (c.equals(Operation.class)) {
-                        break;
-                    }
-                    final Map<TypeVariable<?>, Type> typeArguments =
-                        TypeUtils.getTypeArguments(operatorInfo.targetType, c);
+                final Map<TypeVariable<?>, Type> operationArgs =
+                    TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
 
-                    if (typeArguments != null) {
+                final Map<TypeVariable<?>, Type> operatorArgs =
+                    TypeUtils.getTypeArguments(operatorInfo.targetType, Operation.class);
+
+                if (operatorArgs != null) {
+                    for (Class<?> c : ClassUtils.hierarchy(operatorInfo.rawTargetType)) {
+                        if (c.equals(Operation.class)) {
+                            break;
+                        }
+
                         for (TypeVariable<?> var : c.getTypeParameters()) {
-                            Type type = Types.resolveAt(operation, var);
-                            if (type == null) {
+                            Type operationVariableType = Types.resolveAt(operation, var, operationArgs);
+                            if (operationVariableType == null) {
                                 continue;
                             }
-                            if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
-                                type = ClassUtils.primitiveToWrapper((Class<?>) type);
+                            if (operationVariableType instanceof Class<?> && ((Class<?>) operationVariableType).isPrimitive()) {
+                                operationVariableType = ClassUtils.primitiveToWrapper((Class<?>) operationVariableType);
                             }
-                            if (!TypeUtils.isAssignable(type, TypeUtils.unrollVariables(typeArguments, var))) {
+                            final Type operatorVariableType = TypeUtils.unrollVariables(operatorArgs, var);
+                            if (!TypeUtils.isAssignable(operationVariableType, operatorVariableType)) {
                                 return false;
                             }
                         }
@@ -218,9 +221,8 @@ class OperatorManager {
 
     private static List<OperatorInfo> buildOperatorInfos(Set<Operator<?>> operators) {
         final List<OperatorInfo> result = new ArrayList<OperatorInfo>(operators.size());
-        for (Operator<?> operator : new Operators(operators)) {
-            final OperatorInfo info = new OperatorInfo(operator);
-            result.add(info);
+        for (Map.Entry<Operator<?>, Type> entry : new Operators(operators).entrySet()) {
+            result.add(new OperatorInfo(entry.getKey(), entry.getValue()));
         }
         return result;
     }

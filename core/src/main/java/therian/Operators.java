@@ -15,17 +15,17 @@
  */
 package therian;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
+import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -35,7 +35,7 @@ import therian.util.Types;
 /**
  * Provides {@link Operator}-related utility methods and serves as a sorting instance {@link Collection}.
  */
-public class Operators extends AbstractCollection<Operator<?>> {
+public class Operators extends AbstractMap<Operator<?>, Type> {
 
     private static final TypeVariable<?> OPERATION_VARIABLE = Operator.class.getTypeParameters()[0];
 
@@ -67,55 +67,45 @@ public class Operators extends AbstractCollection<Operator<?>> {
         return operator;
     }
 
-    private final List<Operator<?>> content = new ArrayList<Operator<?>>();
-
-    public Operators() {
-        super();
-    }
+    private ListOrderedMap<Operator<?>, Type> contents = ListOrderedMap
+        .listOrderedMap(new IdentityHashMap<Operator<?>, Type>());
 
     public Operators(Collection<? extends Operator<?>> c) {
-        this();
+        super();
         addAll(c);
     }
 
-    @Override
-    public Iterator<Operator<?>> iterator() {
-        return Collections.unmodifiableList(content).iterator();
+    public boolean addAll(Collection<? extends Operator<?>> c) {
+        Validate.notNull(c);
+        boolean result = false;
+        for (Operator<?> operator : c ) {
+            result = add(operator) || result;
+        }
+        return result;
     }
 
-    @Override
-    public boolean add(Operator<?> e) {
-        content.add(findInsertPos(e), e);
-        return true;
-    }
-
-    @Override
-    public int size() {
-        return content.size();
-    }
-
-    private int findInsertPos(Operator<?> operator) {
+    public boolean add(Operator<?> operator) {
+        Validate.notNull(operator);
         int pos = 0;
-        for (Operator<?> existing : content) {
-            if (compare(operator, existing) <= 0) {
+
+        final Type operationType = Types.resolveAt(operator, OPERATION_VARIABLE);
+        for (Map.Entry<Operator<?>, Type> entry : contents.entrySet()) {
+            if (compare(operationType, entry.getValue()) >= 0) {
                 pos++;
                 continue;
             }
             break;
         }
-        return pos;
+        contents.put(pos, operator, operationType);
+        return true;
     }
 
-    private int compare(Operator<?> o1, Operator<?> o2) {
-        final Type opType1 =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), OPERATION_VARIABLE);
-        final Type opType2 =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), OPERATION_VARIABLE);
-
-        return compareTypes(opType1, opType2) * -1;
+    @Override
+    public int size() {
+        return contents.size();
     }
 
-    private int compareTypes(Type t1, Type t2) {
+    private int compare(Type t1, Type t2) {
         if (t1 == t2 || TypeUtils.equals(t1, t2)) {
             return 0;
         }
@@ -134,14 +124,21 @@ public class Operators extends AbstractCollection<Operator<?>> {
             if (raw1.getTypeParameters().length == 0) {
                 return 0;
             }
-            final Map<TypeVariable<?>, Type> typeArgs1 = TypeUtils.getTypeArguments(t1, raw1);
-            final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
-            for (TypeVariable<?> var : raw1.getTypeParameters()) {
-                final int recurse =
-                    compareTypes(TypeUtils.unrollVariables(typeArgs1, var), TypeUtils.unrollVariables(typeArgs2, var));
-                if (recurse != 0) {
-                    return recurse;
+            if (t1 instanceof ParameterizedType) {
+                if (t2 instanceof ParameterizedType) {
+                    Type[] args1 = ((ParameterizedType) t1).getActualTypeArguments();
+                    Type[] args2 = ((ParameterizedType) t2).getActualTypeArguments();
+                    for (int i = 0; i < args1.length; i++) {
+                        final int recurse = compare(args1[i], args2[i]);
+                        if (recurse != 0) {
+                            return recurse;
+                        }
+                    }
+                } else {
+                    return -1;
                 }
+            } else if (t2 instanceof ParameterizedType) {
+                return 1;
             }
             return 0;
         }
@@ -160,5 +157,10 @@ public class Operators extends AbstractCollection<Operator<?>> {
             return upper instanceof Class<?> ? (Class<?>) upper : raw(upper);
         }
         return TypeUtils.getRawType(type, null);
+    }
+
+    @Override
+    public Set<java.util.Map.Entry<Operator<?>, Type>> entrySet() {
+        return contents.entrySet();
     }
 }

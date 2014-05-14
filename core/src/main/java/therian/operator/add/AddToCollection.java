@@ -32,11 +32,11 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
  */
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> {
+public class AddToCollection implements therian.Operator<Add<?, ? extends Collection<?>>> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public boolean perform(TherianContext context, Add<?, Collection<?>> add) {
+    public boolean perform(TherianContext context, Add<?, ? extends Collection<?>> add) {
         final boolean result =
             ((Collection) add.getTargetPosition().getValue()).add(add.getSourcePosition().getValue());
         add.setResult(result);
@@ -44,7 +44,7 @@ public class AddToCollection implements therian.Operator<Add<?, Collection<?>>> 
     }
 
     @Override
-    public boolean supports(TherianContext context, Add<?, Collection<?>> add) {
+    public boolean supports(TherianContext context, Add<?, ? extends Collection<?>> add) {
         // cannot add to immutable types
         if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
             return false;

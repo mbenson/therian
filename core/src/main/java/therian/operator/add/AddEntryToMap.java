@@ -35,11 +35,11 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
 @SuppressWarnings("rawtypes")
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddEntryToMap implements Operator<Add<Map.Entry, Map>> {
+public class AddEntryToMap implements Operator<Add<? extends Map.Entry, ? extends Map>> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean perform(TherianContext context, Add<Map.Entry, Map> add) {
+    public boolean perform(TherianContext context, Add<? extends Map.Entry, ? extends Map> add) {
         add.getTargetPosition().getValue()
             .put(add.getSourcePosition().getValue().getKey(), add.getSourcePosition().getValue().getValue());
         add.setResult(true);
@@ -47,7 +47,7 @@ public class AddEntryToMap implements Operator<Add<Map.Entry, Map>> {
     }
 
     @Override
-    public boolean supports(TherianContext context, Add<Map.Entry, Map> add) {
+    public boolean supports(TherianContext context, Add<? extends Map.Entry, ? extends Map> add) {
         // cannot add to immutable types
         if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
             return false;

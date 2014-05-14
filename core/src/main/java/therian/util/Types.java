@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -77,8 +78,7 @@ public class Types {
      * 
      * @param o
      * @param var
-     * @param variablesMap
-     *            prepopulated map for efficiency
+     * @param variablesMap prepopulated map for efficiency
      * @return Type resolved or {@code null}
      */
     public static Type resolveAt(Object o, TypeVariable<?> var, Map<TypeVariable<?>, Type> variablesMap) {
@@ -92,17 +92,68 @@ public class Types {
         if (!declaring.isInstance(o)) {
             throw new IllegalArgumentException(TypeUtils.toLongString(var) + " does not belong to " + rt);
         }
-        for (Class<?> c : init(rt)) {
-            final Map<TypeVariable<?>, Method> gettersForType = TYPED_GETTERS.get(c);
-            if (gettersForType != null && gettersForType.containsKey(var)) {
-                return readTyped(gettersForType.get(var), o);
+        return unrollVariables(variablesMap, var, o);
+    }
+
+    private static Type unrollVariables(Map<TypeVariable<?>, Type> typeArguments, final Type type, final Object o) {
+        if (typeArguments == null) {
+            typeArguments = Collections.<TypeVariable<?>, Type> emptyMap();
+        }
+        if (TypeUtils.containsTypeVariables(type)) {
+            if (type instanceof TypeVariable<?>) {
+                for (Class<?> c : init(o.getClass())) {
+                    final Map<TypeVariable<?>, Method> gettersForType = TYPED_GETTERS.get(c);
+                    if (gettersForType != null && gettersForType.containsKey(type)) {
+                        return readTyped(gettersForType.get(type), o);
+                    }
+                }
+                return unrollVariables(typeArguments, typeArguments.get(type), o);
+            }
+            if (type instanceof ParameterizedType) {
+                final ParameterizedType p = (ParameterizedType) type;
+                final Map<TypeVariable<?>, Type> parameterizedTypeArguments;
+                if (p.getOwnerType() == null) {
+                    parameterizedTypeArguments = typeArguments;
+                } else {
+                    parameterizedTypeArguments = new HashMap<TypeVariable<?>, Type>(typeArguments);
+                    parameterizedTypeArguments.putAll(TypeUtils.getTypeArguments(p));
+                }
+                final Type[] args = p.getActualTypeArguments();
+                for (int i = 0; i < args.length; i++) {
+                    final Type unrolled = unrollVariables(parameterizedTypeArguments, args[i], o);
+                    if (unrolled != null) {
+                        args[i] = unrolled;
+                    }
+                }
+                return TypeUtils.parameterizeWithOwner(p.getOwnerType(), (Class<?>) p.getRawType(), args);
+            }
+            if (type instanceof WildcardType) {
+                final WildcardType wild = (WildcardType) type;
+                return TypeUtils.wildcardType().withUpperBounds(unrollBounds(typeArguments, wild.getUpperBounds(), o))
+                    .withLowerBounds(unrollBounds(typeArguments, wild.getLowerBounds(), o)).build();
             }
         }
-        return TypeUtils.unrollVariables(variablesMap, var);
+        return type;
+    }
+
+    private static Type[] unrollBounds(final Map<TypeVariable<?>, Type> typeArguments, final Type[] bounds,
+        final Object o) {
+        Type[] result = bounds;
+        int i = 0;
+        for (; i < result.length; i++) {
+            final Type unrolled = unrollVariables(typeArguments, result[i], o);
+            if (unrolled == null) {
+                result = ArrayUtils.remove(result, i--);
+            } else {
+                result[i] = unrolled;
+            }
+        }
+        return result;
     }
 
     /**
      * Friendlier string formatting of types that appends brackets for array types.
+     * 
      * @param type
      * @return String
      */
@@ -140,17 +191,16 @@ public class Types {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * XXX Default access superclass workaround
-     *
-     * When a {@code public} class has a default access superclass with {@code public} members,
-     * these members are accessible. Calling them from compiled code works fine.
-     * Unfortunately, on some JVMs, using reflection to invoke these members
-     * seems to (wrongly) prevent access even when the modifier is {@code public}.
-     * Calling {@code setAccessible(true)} solves the problem but will only work from
-     * sufficiently privileged code. Better workarounds would be gratefully
-     * accepted.
+     * 
+     * When a {@code public} class has a default access superclass with {@code public} members, these members are
+     * accessible. Calling them from compiled code works fine. Unfortunately, on some JVMs, using reflection to invoke
+     * these members seems to (wrongly) prevent access even when the modifier is {@code public}. Calling
+     * {@code setAccessible(true)} solves the problem but will only work from sufficiently privileged code. Better
+     * workarounds would be gratefully accepted.
+     * 
      * @param o the AccessibleObject to set as accessible
      */
     // borrowed from Commons Lang MemberUtils
@@ -159,8 +209,7 @@ public class Types {
             return;
         }
         final Member m = (Member) o;
-        if (Modifier.isPublic(m.getModifiers())
-                && isPackageAccess(m.getDeclaringClass().getModifiers())) {
+        if (Modifier.isPublic(m.getModifiers()) && isPackageAccess(m.getDeclaringClass().getModifiers())) {
             try {
                 o.setAccessible(true);
             } catch (final SecurityException e) { // NOPMD
@@ -171,6 +220,7 @@ public class Types {
 
     /**
      * Returns whether a given set of modifiers implies package access.
+     * 
      * @param modifiers to test
      * @return {@code true} unless {@code package}/{@code protected}/{@code private} modifier detected
      */
@@ -313,6 +363,7 @@ public class Types {
 
     /**
      * Format a {@link Class} as a {@link String}.
+     * 
      * @param c {@code Class} to format
      * @return String
      * @since 3.2
@@ -335,6 +386,7 @@ public class Types {
 
     /**
      * Format a {@link TypeVariable} as a {@link String}.
+     * 
      * @param v {@code TypeVariable} to format
      * @return String
      * @since 3.2
@@ -351,6 +403,7 @@ public class Types {
 
     /**
      * Format a {@link ParameterizedType} as a {@link String}.
+     * 
      * @param p {@code ParameterizedType} to format
      * @return String
      * @since 3.2
@@ -378,6 +431,7 @@ public class Types {
 
     /**
      * Format a {@link WildcardType} as a {@link String}.
+     * 
      * @param w {@code WildcardType} to format
      * @return String
      * @since 3.2
@@ -396,6 +450,7 @@ public class Types {
 
     /**
      * Format a {@link GenericArrayType} as a {@link String}.
+     * 
      * @param g {@code GenericArrayType} to format
      * @return String
      * @since 3.2
@@ -406,6 +461,7 @@ public class Types {
 
     /**
      * Append {@code types} to @{code buf} with separator {@code sep}.
+     * 
      * @param buf destination
      * @param sep separator
      * @param types to append

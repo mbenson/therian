@@ -33,11 +33,11 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
  */
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
+public class AddToListIterator implements Operator<Add<?, ? extends ListIterator<?>>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean perform(TherianContext context, Add<?, ListIterator<?>> add) {
+    public boolean perform(TherianContext context, Add<?, ? extends ListIterator<?>> add) {
         @SuppressWarnings("rawtypes")
         final ListIterator listIterator = add.getTargetPosition().getValue();
 
@@ -60,7 +60,7 @@ public class AddToListIterator implements Operator<Add<?, ListIterator<?>>> {
     }
 
     @Override
-    public boolean supports(TherianContext context, Add<?, ListIterator<?>> add) {
+    public boolean supports(TherianContext context, Add<?, ? extends ListIterator<?>> add) {
         // cannot add to immutable types
         if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
             return false;

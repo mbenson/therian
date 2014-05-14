@@ -27,6 +27,7 @@ import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Assert;
 import org.junit.Test;
 
+import therian.operator.convert.CopyingConverter;
 import therian.operator.convert.ELCoercionConverter;
 import therian.operator.convert.EnumToNumberConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
@@ -98,14 +99,18 @@ public class OperatorsTest {
     public void testSimpleSort() {
         final Operator<?> cnv1 = new EnumToNumberConverter();
         final Operator<?> cnv2 = new ELCoercionConverter();
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv1, cnv2)), IsIterableContainingInOrder.contains(cnv1, cnv2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv2, cnv1)), IsIterableContainingInOrder.contains(cnv1, cnv2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv1, cnv2)).keySet(),
+            IsIterableContainingInOrder.contains(cnv1, cnv2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv2, cnv1)).keySet(),
+            IsIterableContainingInOrder.contains(cnv1, cnv2));
 
         final Operator<?> chk1 = new DefaultImmutableChecker();
         final Operator<?> chk2 = new DefaultImmutableChecker();
 
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk1, chk2)), IsIterableContainingInOrder.contains(chk1, chk2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk2, chk1)), IsIterableContainingInOrder.contains(chk2, chk1));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk1, chk2)).keySet(),
+            IsIterableContainingInOrder.contains(chk1, chk2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk2, chk1)).keySet(),
+            IsIterableContainingInOrder.contains(chk2, chk1));
     }
 
     @Test
@@ -121,8 +126,20 @@ public class OperatorsTest {
         final ArrayList<Operator<?>> input = new ArrayList<Operator<?>>(expected);
         Collections.shuffle(input);
 
-        assertThat(new Operators(input),
-            IsIterableContainingInOrder.contains(expected.<Operator<?>> toArray(new Operator[expected.size()])));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(input).keySet(),
+            IsIterableContainingInOrder.contains(expected.toArray(new Operator[expected.size()])));
+    }
+
+    @Test
+    public void testBoundTypeVariables() {
+        final Operator<?> cnv1 = new ELCoercionConverter();
+        final Operator<?> cnv2 = CopyingConverter.IMPLEMENTING_COLLECTION;
+
+        @SuppressWarnings("unchecked")
+        final Operators operators = new Operators(Arrays.asList(cnv1, cnv2));
+
+        assertThat((Iterable<? extends Operator<?>>) operators.keySet(),
+            IsIterableContainingInOrder.contains(cnv2, cnv1));
     }
 
     @Test
