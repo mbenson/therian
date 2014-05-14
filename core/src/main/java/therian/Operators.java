@@ -18,7 +18,12 @@ package therian;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Comparator;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,72 +33,11 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.util.Types;
 
 /**
- * Utility methods for Operators.
+ * Provides {@link Operator}-related utility methods and serves as a sorting instance {@link Collection}.
  */
-public class Operators {
+public class Operators extends AbstractCollection<Operator<?>> {
 
-    private static final Comparator<Operator<?>> COMPARATOR = new Comparator<Operator<?>>() {
-        private final TypeVariable<?> opVar = Operator.class.getTypeParameters()[0];
-
-        @Override
-        public int compare(Operator<?> o1, Operator<?> o2) {
-            final Type opType1 =
-                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), opVar);
-            final Type opType2 =
-                TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), opVar);
-
-            return compareTypes(opType1, opType2);
-        }
-
-        private int compareTypes(Type t1, Type t2) {
-            if (t1 == t2 || TypeUtils.equals(t1, t2)) {
-                return 0;
-            }
-            if (TypeUtils.isAssignable(t1, t2)) {
-                return -1;
-            }
-            if (TypeUtils.isAssignable(t2, t1)) {
-                return 1;
-            }
-            final Class<?> raw1 = raw(t1);
-            Validate.validState(raw1 != null, "Cannot get raw type for %s", t1);
-            final Class<?> raw2 = raw(t2);
-            Validate.validState(raw2 != null, "Cannot get raw type for %s", t2);
-
-            if (raw1.equals(raw2)) {
-                if (raw1.getTypeParameters().length == 0) {
-                    return 0;
-                }
-                final Map<TypeVariable<?>, Type> typeArgs1 = TypeUtils.getTypeArguments(t1, raw1);
-                final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
-                for (TypeVariable<?> var : raw1.getTypeParameters()) {
-                    final int recurse =
-                        compareTypes(TypeUtils.unrollVariables(typeArgs1, var),
-                            TypeUtils.unrollVariables(typeArgs2, var));
-                    if (recurse != 0) {
-                        return recurse;
-                    }
-                }
-                return 0;
-            }
-            final int steps =
-                Integer.compare(StringUtils.countMatches(raw1.getName(), "."),
-                    StringUtils.countMatches(raw2.getName(), "."));
-            if (steps == 0) {
-                return raw1.getName().compareTo(raw2.getName());
-            }
-            return steps;
-        }
-
-        private Class<?> raw(Type type) {
-            if (type instanceof WildcardType) {
-                final Type upper = TypeUtils.getImplicitUpperBounds((WildcardType) type)[0];
-                return upper instanceof Class<?> ? (Class<?>) upper : raw(upper);
-            }
-            return TypeUtils.getRawType(type, null);
-        }
-
-    };
+    private static final TypeVariable<?> OPERATION_VARIABLE = Operator.class.getTypeParameters()[0];
 
     /**
      * Get standard operators.
@@ -123,12 +67,98 @@ public class Operators {
         return operator;
     }
 
-    /**
-     * Get a comparator that compares {@link Operator}s by {@link Operation} type/type parameter assignability.
-     * 
-     * @return a Comparator that does not handle {@code null} values
-     */
-    public static Comparator<Operator<?>> comparator() {
-        return COMPARATOR;
+    private final List<Operator<?>> content = new ArrayList<Operator<?>>();
+
+    public Operators() {
+        super();
+    }
+
+    public Operators(Collection<? extends Operator<?>> c) {
+        this();
+        addAll(c);
+    }
+
+    @Override
+    public Iterator<Operator<?>> iterator() {
+        return Collections.unmodifiableList(content).iterator();
+    }
+
+    @Override
+    public boolean add(Operator<?> e) {
+        content.add(findInsertPos(e), e);
+        return true;
+    }
+
+    @Override
+    public int size() {
+        return content.size();
+    }
+
+    private int findInsertPos(Operator<?> operator) {
+        int pos = 0;
+        for (Operator<?> existing : content) {
+            if (compare(operator, existing) <= 0) {
+                pos++;
+                continue;
+            }
+            break;
+        }
+        return pos;
+    }
+
+    private int compare(Operator<?> o1, Operator<?> o2) {
+        final Type opType1 =
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o1.getClass(), Operator.class), OPERATION_VARIABLE);
+        final Type opType2 =
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(o2.getClass(), Operator.class), OPERATION_VARIABLE);
+
+        return compareTypes(opType1, opType2) * -1;
+    }
+
+    private int compareTypes(Type t1, Type t2) {
+        if (t1 == t2 || TypeUtils.equals(t1, t2)) {
+            return 0;
+        }
+        if (TypeUtils.isAssignable(t1, t2)) {
+            return -1;
+        }
+        if (TypeUtils.isAssignable(t2, t1)) {
+            return 1;
+        }
+        final Class<?> raw1 = raw(t1);
+        Validate.validState(raw1 != null, "Cannot get raw type for %s", t1);
+        final Class<?> raw2 = raw(t2);
+        Validate.validState(raw2 != null, "Cannot get raw type for %s", t2);
+
+        if (raw1.equals(raw2)) {
+            if (raw1.getTypeParameters().length == 0) {
+                return 0;
+            }
+            final Map<TypeVariable<?>, Type> typeArgs1 = TypeUtils.getTypeArguments(t1, raw1);
+            final Map<TypeVariable<?>, Type> typeArgs2 = TypeUtils.getTypeArguments(t2, raw2);
+            for (TypeVariable<?> var : raw1.getTypeParameters()) {
+                final int recurse =
+                    compareTypes(TypeUtils.unrollVariables(typeArgs1, var), TypeUtils.unrollVariables(typeArgs2, var));
+                if (recurse != 0) {
+                    return recurse;
+                }
+            }
+            return 0;
+        }
+        final int steps =
+            Integer.compare(StringUtils.countMatches(raw1.getName(), "."),
+                StringUtils.countMatches(raw2.getName(), "."));
+        if (steps == 0) {
+            return raw1.getName().compareTo(raw2.getName());
+        }
+        return steps;
+    }
+
+    private Class<?> raw(Type type) {
+        if (type instanceof WildcardType) {
+            final Type upper = TypeUtils.getImplicitUpperBounds((WildcardType) type)[0];
+            return upper instanceof Class<?> ? (Class<?>) upper : raw(upper);
+        }
+        return TypeUtils.getRawType(type, null);
     }
 }

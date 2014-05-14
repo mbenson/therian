@@ -22,7 +22,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,15 +43,13 @@ import therian.util.Types;
  * Manages {@link Operator}s for a given {@link Therian} instance in an attempt to improve efficiency.
  * 
  * <ul>
- * <li>Sorts operators using {@link Operators#comparator()}</li>
  * <li>Caches expected operation type per {@link Operator} instance</li>
  * <li>breaks operators into subgroups by raw operation type</li>
  * </ul>
  */
 class OperatorManager {
     @SuppressWarnings("rawtypes")
-    private static class OperatorInfo implements Comparable<OperatorInfo> {
-        private static final Comparator<Operator<?>> OPERATOR_COMPARATOR = Operators.comparator();
+    private static class OperatorInfo {
 
         final Operator operator;
         final Type targetType;
@@ -77,14 +74,6 @@ class OperatorManager {
                 return getRawType(TypeUtils.getImplicitUpperBounds((WildcardType) targetType)[0]);
             }
             throw new IllegalArgumentException();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public int compareTo(OperatorInfo o) {
-            return OPERATOR_COMPARATOR.compare(this.operator, o.operator);
         }
 
         /**
@@ -228,12 +217,11 @@ class OperatorManager {
     }
 
     private static List<OperatorInfo> buildOperatorInfos(Set<Operator<?>> operators) {
-        final List<OperatorInfo> result = new ArrayList<OperatorInfo>();
-        for (Operator<?> operator : operators) {
+        final List<OperatorInfo> result = new ArrayList<OperatorInfo>(operators.size());
+        for (Operator<?> operator : new Operators(operators)) {
             final OperatorInfo info = new OperatorInfo(operator);
             result.add(info);
         }
-        Collections.sort(result);
         return result;
     }
 

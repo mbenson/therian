@@ -16,11 +16,15 @@
 package therian;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
+import java.util.Arrays;
+import java.util.Collections;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.collection.IsIterableContainingInOrder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import therian.operator.convert.ELCoercionConverter;
@@ -78,7 +82,6 @@ public class OperatorsTest {
         public boolean supports(TherianContext context, Operation<Success> operation) {
             return true;
         }
-
     }
 
     @Test
@@ -92,13 +95,17 @@ public class OperatorsTest {
     }
 
     @Test
-    public void testComparatorSimple() {
-        assertTrue(Operators.comparator().compare(new EnumToNumberConverter(), new ELCoercionConverter()) < 0);
-    }
+    public void testSimpleSort() {
+        final Operator<?> cnv1 = new EnumToNumberConverter();
+        final Operator<?> cnv2 = new ELCoercionConverter();
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv1, cnv2)), IsIterableContainingInOrder.contains(cnv1, cnv2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv2, cnv1)), IsIterableContainingInOrder.contains(cnv1, cnv2));
 
-    @Test
-    public void testComparatorEquality() {
-        assertEquals(0, Operators.comparator().compare(new DefaultImmutableChecker(), new DefaultImmutableChecker()));
+        final Operator<?> chk1 = new DefaultImmutableChecker();
+        final Operator<?> chk2 = new DefaultImmutableChecker();
+
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk1, chk2)), IsIterableContainingInOrder.contains(chk1, chk2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk2, chk1)), IsIterableContainingInOrder.contains(chk2, chk1));
     }
 
     @Test
@@ -111,10 +118,11 @@ public class OperatorsTest {
         expected.add(new ELCoercionConverter());
         expected.add(new DefaultImmutableChecker());
 
-        final TreeSet<Operator<?>> actual = new TreeSet<Operator<?>>(Operators.comparator());
-        actual.addAll(expected);
+        final ArrayList<Operator<?>> input = new ArrayList<Operator<?>>(expected);
+        Collections.shuffle(input);
 
-        assertEquals(expected, new ArrayList<Operator<?>>(actual));
+        assertThat(new Operators(input),
+            IsIterableContainingInOrder.contains(expected.<Operator<?>> toArray(new Operator[expected.size()])));
     }
 
     @Test
