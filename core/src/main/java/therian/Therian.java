@@ -17,7 +17,7 @@ package therian;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -53,7 +53,7 @@ public class Therian {
     private Therian(TherianModule... modules) {
         this.modules = Validate.noNullElements(modules, "modules");
 
-        final Set<Operator<?>> operators = new HashSet<Operator<?>>();
+        final Set<Operator<?>> operators = new LinkedHashSet<Operator<?>>();
         int moduleNumber = 0;
         for (TherianModule module : this.modules) {
             Validate.noNullElements(module.getOperators(), "null operator at index %2$s of module %1$s", moduleNumber);
