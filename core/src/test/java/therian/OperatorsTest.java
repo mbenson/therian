@@ -15,16 +15,13 @@
  */
 package therian;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.collection.IsIterableContainingInOrder;
-import org.junit.Assert;
 import org.junit.Test;
 
 import therian.operator.convert.CopyingConverter;
@@ -99,18 +96,18 @@ public class OperatorsTest {
     public void testSimpleSort() {
         final Operator<?> cnv1 = new EnumToNumberConverter();
         final Operator<?> cnv2 = new ELCoercionConverter();
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv1, cnv2)).keySet(),
-            IsIterableContainingInOrder.contains(cnv1, cnv2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(cnv2, cnv1)).keySet(),
-            IsIterableContainingInOrder.contains(cnv1, cnv2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(cnv1, cnv2)).keySet(),
+            IsIterableContainingInOrder.<Operator<?>> contains(cnv1, cnv2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(cnv2, cnv1)).keySet(),
+            IsIterableContainingInOrder.<Operator<?>> contains(cnv1, cnv2));
 
         final Operator<?> chk1 = new DefaultImmutableChecker();
         final Operator<?> chk2 = new DefaultImmutableChecker();
 
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk1, chk2)).keySet(),
-            IsIterableContainingInOrder.contains(chk1, chk2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.asList(chk2, chk1)).keySet(),
-            IsIterableContainingInOrder.contains(chk2, chk1));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(chk1, chk2)).keySet(),
+            IsIterableContainingInOrder.<Operator<?>> contains(chk1, chk2));
+        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(chk2, chk1)).keySet(),
+            IsIterableContainingInOrder.<Operator<?>> contains(chk2, chk1));
     }
 
     @Test
@@ -135,11 +132,10 @@ public class OperatorsTest {
         final Operator<?> cnv1 = new ELCoercionConverter();
         final Operator<?> cnv2 = CopyingConverter.IMPLEMENTING_COLLECTION;
 
-        @SuppressWarnings("unchecked")
-        final Operators operators = new Operators(Arrays.asList(cnv1, cnv2));
+        final Operators operators = new Operators(Arrays.<Operator<?>> asList(cnv1, cnv2));
 
         assertThat((Iterable<? extends Operator<?>>) operators.keySet(),
-            IsIterableContainingInOrder.contains(cnv2, cnv1));
+            IsIterableContainingInOrder.<Operator<?>> contains(cnv2, cnv1));
     }
 
     @Test

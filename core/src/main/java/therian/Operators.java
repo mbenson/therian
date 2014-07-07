@@ -33,7 +33,8 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import therian.util.Types;
 
 /**
- * Provides {@link Operator}-related utility methods and serves as a sorting instance {@link Collection}.
+ * Provides {@link Operator}-related utility methods and implements a sorted {@link Map} of {@link Operator} instance to
+ * implemented {@link Operation} type.
  */
 public class Operators extends AbstractMap<Operator<?>, Type> {
 
