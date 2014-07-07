@@ -79,7 +79,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
     public boolean addAll(Collection<? extends Operator<?>> c) {
         Validate.notNull(c);
         boolean result = false;
-        for (Operator<?> operator : c ) {
+        for (Operator<?> operator : c) {
             result = add(operator) || result;
         }
         return result;
