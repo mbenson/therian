@@ -66,7 +66,7 @@ public class TherianContextELResolver extends ELResolver {
 
     @Override
     public boolean isReadOnly(ELContext context, Object base, Object property) {
-        return delegate.isReadOnly(context, base, property);
+        return "class".equals(property) || delegate.isReadOnly(context, base, property);
     }
 
     @Override
