@@ -34,9 +34,6 @@ import therian.position.Position;
  * Bean property utility methods.
  */
 public class BeanProperties {
-    private BeanProperties() {
-    }
-
     public enum ReturnProperties {
         ALL, WRITABLE;
     }
@@ -91,6 +88,9 @@ public class BeanProperties {
             result.add(name);
         }
         return result;
+    }
+
+    private BeanProperties() {
     }
 
 }

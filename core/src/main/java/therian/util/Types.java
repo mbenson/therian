@@ -479,4 +479,7 @@ public class Types {
         return buf;
     }
 
+    private Types() {
+    }
+
 }

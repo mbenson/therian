@@ -23,6 +23,11 @@ import org.apache.commons.lang3.reflect.Typed;
 import therian.BindTypeVariable;
 import therian.Operation;
 
+/**
+ * Operation to get the element type of some "container" type.
+ *
+ * @param <T>
+ */
 public class GetElementType<T> extends Operation<Type> {
     private final Typed<T> typedItem;
 

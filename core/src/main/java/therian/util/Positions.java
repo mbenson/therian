@@ -316,4 +316,8 @@ public class Positions {
             }
         };
     }
+
+    private Positions() {
+    }
+
 }

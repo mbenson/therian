@@ -31,53 +31,6 @@ import therian.Operator.DependsOn;
  * Therian module.
  */
 public class TherianModule {
-    private ELResolver[] elResolvers;
-    private ELContextListener[] elContextListeners;
-    private Operator<?>[] operators;
-
-    protected TherianModule() {
-    }
-
-    public synchronized ELResolver[] getElResolvers() {
-        if (elResolvers == null) {
-            elResolvers = new ELResolver[0];
-        }
-        return elResolvers;
-    }
-
-    public ELContextListener[] getElContextListeners() {
-        if (elContextListeners == null) {
-            elContextListeners = new ELContextListener[0];
-        }
-        return elContextListeners;
-    }
-
-    public Operator<?>[] getOperators() {
-        if (operators == null) {
-            operators = new Operator[0];
-        }
-        return operators;
-    }
-
-    public TherianModule withELResolvers(ELResolver... elResolvers) {
-        this.elResolvers = elResolvers;
-        return this;
-    }
-
-    public TherianModule withELContextListeners(ELContextListener... elContextListeners) {
-        this.elContextListeners = elContextListeners;
-        return this;
-    }
-
-    public TherianModule withOperators(Operator<?>... operators) {
-        this.operators = operators;
-        return this;
-    }
-
-    public static TherianModule create() {
-        return new TherianModule();
-    }
-
     protected static Operator<?>[] withDependencies(Operator<?>... operators) {
         if (operators == null) {
             return new Operator[0];
@@ -143,6 +96,10 @@ public class TherianModule {
         return ArrayUtils.addAll(operators, deps);
     }
 
+    public static TherianModule create() {
+        return new TherianModule();
+    }
+
     public static TherianModule expandingDependencies(final TherianModule module) {
         Validate.notNull(module, "module");
 
@@ -153,4 +110,48 @@ public class TherianModule {
         return TherianModule.create().withELContextListeners(module.getElContextListeners())
             .withELResolvers(module.getElResolvers()).withOperators(expandedOperators);
     }
+
+    private ELResolver[] elResolvers;
+    private ELContextListener[] elContextListeners;
+    private Operator<?>[] operators;
+
+    protected TherianModule() {
+    }
+
+    public synchronized ELResolver[] getElResolvers() {
+        if (elResolvers == null) {
+            elResolvers = new ELResolver[0];
+        }
+        return elResolvers;
+    }
+
+    public ELContextListener[] getElContextListeners() {
+        if (elContextListeners == null) {
+            elContextListeners = new ELContextListener[0];
+        }
+        return elContextListeners;
+    }
+
+    public Operator<?>[] getOperators() {
+        if (operators == null) {
+            operators = new Operator[0];
+        }
+        return operators;
+    }
+
+    public TherianModule withELResolvers(ELResolver... elResolvers) {
+        this.elResolvers = elResolvers;
+        return this;
+    }
+
+    public TherianModule withELContextListeners(ELContextListener... elContextListeners) {
+        this.elContextListeners = elContextListeners;
+        return this;
+    }
+
+    public TherianModule withOperators(Operator<?>... operators) {
+        this.operators = operators;
+        return this;
+    }
+
 }

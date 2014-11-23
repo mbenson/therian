@@ -31,9 +31,8 @@ import java.lang.annotation.Target;
 public interface Operator<OPERATION extends Operation<?>> {
 
 	/**
-	 * Allows an Operator to define that it depends on other Operators, which is
-	 * not to say that such should be taken as an all-inclusive list, but may
-	 * still be instructive.
+	 * Allows an Operator to specify that it depends on other Operators.
+	 * Such should be taken as an all-inclusive list, but may still be instructive.
 	 */
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
