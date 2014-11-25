@@ -26,7 +26,6 @@ import therian.position.Position;
  */
 public class Size<T> extends Operation<Integer> {
     private final Position.Readable<T> position;
-    private int result = -1;
 
     private Size(Position.Readable<T> position) {
         super();

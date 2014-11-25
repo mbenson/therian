@@ -29,7 +29,6 @@ import therian.position.Position;
  * @param <TARGET>
  */
 public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
-    private boolean result;
 
     protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
