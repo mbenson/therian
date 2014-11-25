@@ -73,7 +73,9 @@ public class ElementTest {
 
     @Test
     public void testGetArrayElementValue() {
-        assertEquals("foo", Element.atArrayIndex(0).of(Positions.readOnly(ArrayUtils.toArray("foo"))).getValue());
+        Position.Readable<String[]> array = Positions.readOnly(ArrayUtils.toArray("foo"));
+        RelativePosition.ReadWrite<String[], String> foo = Element.<String> atArrayIndex(0).of(array);
+        assertEquals("foo", foo.getValue());
     }
 
     @Test
