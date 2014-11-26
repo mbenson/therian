@@ -1,0 +1,13 @@
+therian
+therian.module
+therian.operator
+therian.operator.add
+therian.operator.addall
+therian.operator.convert
+therian.operator.copy
+therian.operator.getelementtype
+therian.operator.immutablecheck
+therian.operator.size
+therian.position.relative
+therian.testfixture
+therian.util
