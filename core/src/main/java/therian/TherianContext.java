@@ -284,7 +284,7 @@ public class TherianContext extends ELContextWrapper {
             if (isRoot()) {
                 lead = "";
             } else {
-                OperationRequest<RESULT> duplicateKey = parent.find(result);
+                final OperationRequest<RESULT> duplicateKey = parent.find(result);
                 if (duplicateKey != null) {
                     throw new Frame.RecursionException(duplicateKey);
                 }
@@ -522,8 +522,8 @@ public class TherianContext extends ELContextWrapper {
     private synchronized <RESULT> boolean handle(Frame<RESULT> frame) throws Frame.RecursionException {
         final OperationRequest<?> request = push(frame);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("{} requested", frame.logString());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{} requested", frame.logString());
         }
 
         final TherianContext originalContext = getCurrentInstance();
