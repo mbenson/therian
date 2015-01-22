@@ -15,14 +15,9 @@
  */
 package therian.util;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.ClassUtils.Interfaces;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.reflect.Typed;
@@ -319,54 +314,6 @@ public class Positions {
                 pos.setValue(value);
             }
         };
-    }
-
-    /**
-     * Get the narrowest parameterized type from the specified readable Position.
-     * 
-     * @param pos
-     * @return Type
-     */
-    public static Type narrowestParameterizedType(Position.Readable<?> pos) {
-        Type result = pos.getType();
-
-        if (result instanceof ParameterizedType && pos.getValue() != null) {
-            final Class<?> rawType = TypeUtils.getRawType(result, null);
-            final Class<?> rt = pos.getValue().getClass();
-
-            hierarchy: for (Class<?> t : ClassUtils.hierarchy(rt, Interfaces.INCLUDE)) {
-                if (t.equals(rawType)) {
-                    break;
-                }
-                if (!rawType.isAssignableFrom(t)) {
-                    continue;
-                }
-                if (t.getTypeParameters().length > 0) {
-                    // try to parameterize raw runtime type:
-                    try {
-                        final Map<TypeVariable<?>, Type> typeArgMappings =
-                            TypeUtils.determineTypeArguments(t, (ParameterizedType) result);
-                        result = TypeUtils.parameterize(t, typeArgMappings);
-                    } catch (Exception e) {
-                        // use basic parameterized source type
-                    }
-                    break;
-                } else {
-                    final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(rt, rawType);
-                    for (TypeVariable<?> v : rawType.getTypeParameters()) {
-                        final Type arg = typeArguments.get(v);
-                        if (arg == null || arg instanceof TypeVariable<?>) {
-                            continue hierarchy;
-                        }
-                    }
-                    // if we are here, we have determined that rt explicitly binds all type params of the declared type
-                    // of pos:
-                    result = t;
-                    break;
-                }
-            }
-        }
-        return result;
     }
 
     private Positions() {

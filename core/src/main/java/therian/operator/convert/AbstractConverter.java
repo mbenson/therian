@@ -15,12 +15,17 @@
  */
 package therian.operator.convert;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.Map;
+
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.operation.Convert;
 import therian.operator.FromSourceToTarget;
-import therian.util.Positions;
+import therian.util.Types;
 
 /**
  * Abstract {@link Convert} {@link Operator} superclass.
@@ -34,8 +39,30 @@ public abstract class AbstractConverter extends FromSourceToTarget {
      * @return boolean
      */
     protected final boolean isNoop(Convert<?, ?> convert) {
-        return TypeUtils.isAssignable(Positions.narrowestParameterizedType(convert.getSourcePosition()), convert
-            .getTargetPosition().getType());
+        Type sourceType = convert.getSourcePosition().getType();
+        if (ParameterizedType.class.isInstance(sourceType) && convert.getSourcePosition().getValue() != null) {
+            sourceType =
+                Types.narrowestParameterizedType(convert.getSourcePosition().getValue().getClass(),
+                    (ParameterizedType) sourceType);
+        }
+        if (TypeUtils.isAssignable(sourceType, convert.getTargetPosition().getType())) {
+            if (ParameterizedType.class.isInstance(convert.getTargetPosition().getType())) {
+                // make sure all type params of target position are accounted for by source before declaring it a noop:
+                final Class<?> rawTargetType = TypeUtils.getRawType(convert.getTargetPosition().getType(), null);
+                final Map<TypeVariable<?>, Type> typeMappings = TypeUtils.getTypeArguments(sourceType, rawTargetType);
+
+                for (TypeVariable<?> v : rawTargetType.getTypeParameters()) {
+                    if (typeMappings.get(v) == null) {
+                        return false;
+                    }
+                    if (typeMappings.get(v) instanceof TypeVariable<?>) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.ClassUtils.Interfaces;
 import org.apache.commons.lang3.reflect.Typed;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -93,6 +94,55 @@ public class Types {
             throw new IllegalArgumentException(TypeUtils.toLongString(var) + " does not belong to " + rt);
         }
         return unrollVariables(variablesMap, var, o);
+    }
+
+    /**
+     * Get the narrowest {@link Type} assignable to {@code subClass} that binds all type parameters of the specified
+     * {@link ParameterizedType}.
+     * 
+     * @param subClass
+     * @param parameterizedType
+     * @return Type
+     */
+    public static Type narrowestParameterizedType(Class<?> subClass, ParameterizedType parameterizedType) {
+        Validate.notNull(parameterizedType, "ParameterizedType must not be null");
+        if (subClass == null) {
+            return parameterizedType;
+        }
+        final Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+        Validate.isAssignableFrom(rawType, subClass);
+
+        final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(subClass, rawType);
+
+        hierarchy: for (Class<?> t : ClassUtils.hierarchy(subClass, Interfaces.INCLUDE)) {
+            if (t.equals(rawType)) {
+                break;
+            }
+            if (!rawType.isAssignableFrom(t)) {
+                continue;
+            }
+            if (t.getTypeParameters().length > 0) {
+                // try to parameterize raw runtime type:
+                try {
+                    final Map<TypeVariable<?>, Type> typeArgMappings =
+                        TypeUtils.determineTypeArguments(t, parameterizedType);
+                    return TypeUtils.parameterize(t, typeArgMappings);
+                } catch (Exception e) {
+                    // use basic parameterized source type
+                }
+            } else {
+                for (TypeVariable<?> v : rawType.getTypeParameters()) {
+                    final Type arg = typeArguments.get(v);
+                    if (arg == null || arg instanceof TypeVariable<?>) {
+                        continue hierarchy;
+                    }
+                }
+                // if we are here, we have determined that rt explicitly binds all type params of the declared type
+                // of pos:
+                return t;
+            }
+        }
+        return parameterizedType;
     }
 
     private static Type unrollVariables(Map<TypeVariable<?>, Type> typeArguments, final Type type, final Object o) {

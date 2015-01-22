@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,7 +62,8 @@ public class TypesTest {
         final IterableToIterator iterableToIterator = new IterableToIterator();
         Type[] typeArguments = { TypeUtils.WILDCARD_ALL };
 
-        assertTrue(TypeUtils.equals(TypeUtils.parameterize(Iterable.class, typeArguments), Types.resolveAt(iterableToIterator, FromSource.class.getTypeParameters()[0])));
+        assertTrue(TypeUtils.equals(TypeUtils.parameterize(Iterable.class, typeArguments),
+            Types.resolveAt(iterableToIterator, FromSource.class.getTypeParameters()[0])));
         assertEquals(Iterator.class, Types.resolveAt(iterableToIterator, ToTarget.class.getTypeParameters()[0]));
 
         final CopyingConverter<Object, Book> forBook = CopyingConverter.forTargetType(Book.class);
@@ -98,6 +101,27 @@ public class TypesTest {
         assertTrue(size.matches(new SizeOfCollection()));
         assertTrue(size.matches(new SizeOfIterable()));
         assertFalse(size.matches(new SizeOfIterator()));
+    }
+
+    @Test
+    public void testNarrowestParameterizedType() {
+        final ParameterizedType listOfStringType = TypeUtils.parameterize(List.class, String.class);
+
+        assertEquals(listOfStringType, Types.narrowestParameterizedType(null, listOfStringType));
+
+        final List<String> arrayAsList = Arrays.asList("foo", "bar", "baz");
+        @SuppressWarnings("rawtypes")
+        final Class<? extends List> arrayAsListType = arrayAsList.getClass();
+        assertEquals(TypeUtils.parameterize(arrayAsListType, String.class),
+            Types.narrowestParameterizedType(arrayAsListType, listOfStringType));
+
+        assertEquals(TypeUtils.parameterize(ArrayList.class, String.class),
+            Types.narrowestParameterizedType(ArrayList.class, listOfStringType));
+
+        @SuppressWarnings("rawtypes")
+        final Class<? extends List> arrayListSubListType = new ArrayList<String>(arrayAsList).subList(0, 1).getClass();
+        assertEquals(TypeUtils.parameterize(AbstractList.class, String.class),
+            Types.narrowestParameterizedType(arrayListSubListType, listOfStringType));
     }
 
     @SuppressWarnings("unused")
