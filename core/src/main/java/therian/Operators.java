@@ -143,9 +143,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
             }
             return 0;
         }
-        final int steps =
-            Integer.compare(StringUtils.countMatches(raw1.getName(), "."),
-                StringUtils.countMatches(raw2.getName(), "."));
+        final int steps = StringUtils.countMatches(raw1.getName(), ".") - StringUtils.countMatches(raw2.getName(), ".");
         if (steps == 0) {
             return raw1.getName().compareTo(raw2.getName());
         }
