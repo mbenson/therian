@@ -15,16 +15,12 @@
  */
 package therian.operator.convert;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Map;
-
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.Operator;
 import therian.operation.Convert;
 import therian.operator.FromSourceToTarget;
+import therian.util.Positions;
 
 /**
  * Abstract {@link Convert} {@link Operator} superclass.
@@ -38,22 +34,8 @@ public abstract class AbstractConverter extends FromSourceToTarget {
      * @return boolean
      */
     protected final boolean isNoop(Convert<?, ?> convert) {
-        Type toCompare = convert.getSourcePosition().getType();
-        if (convert.getSourcePosition().getValue() != null) {
-            final Class<?> rt = convert.getSourcePosition().getValue().getClass();
-            if (rt.getTypeParameters().length > 0 && toCompare instanceof ParameterizedType) {
-                try {
-                    final Map<TypeVariable<?>, Type> typeArgMappings =
-                        TypeUtils.determineTypeArguments(rt, (ParameterizedType) toCompare);
-                    toCompare = TypeUtils.parameterize(rt, typeArgMappings);
-                } catch (Exception e) {
-                    // use basic parameterized source type
-                }
-            } else {
-                toCompare = rt;
-            }
-        }
-        return TypeUtils.isAssignable(toCompare, convert.getTargetPosition().getType());
+        return TypeUtils.isAssignable(Positions.narrowestParameterizedType(convert.getSourcePosition()), convert
+            .getTargetPosition().getType());
     }
 
     /**
