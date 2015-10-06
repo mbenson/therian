@@ -17,6 +17,7 @@ package therian.position.relative;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -46,7 +47,7 @@ public class Expression {
 
     /**
      * Expression {@link RelativePositionFactory}.
-     * 
+     *
      * @param <TYPE>
      */
     public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
@@ -220,8 +221,9 @@ public class Expression {
                                 valueExpression.setValue(bruteForceContext, null);
                             } catch (Exception e) {
                             }
-                            if (bruteForceContext.isPropertyResolved())
+                            if (bruteForceContext.isPropertyResolved()) {
                                 result = workingStorage.current.getType();
+                            }
                         }
                     }
                     return handle(context, result);
@@ -229,7 +231,7 @@ public class Expression {
 
                 /**
                  * Handle result.
-                 * 
+                 *
                  * @param context
                  * @param result
                  * @return result
@@ -239,9 +241,7 @@ public class Expression {
                     synchronized (this) {
                         cachedType = ImmutablePair.of(context, result);
                     }
-                    if (result == null) {
-                        throw new IllegalStateException("Cannot get type for expression " + expr);
-                    }
+                    Validate.validState(result != null, "Cannot get type for expression " + expr);
                     return result;
                 }
 
@@ -281,7 +281,7 @@ public class Expression {
 
         @Override
         public int hashCode() {
-            return (73 << 4) | expr.hashCode();
+            return Objects.hash(expr);
         }
 
         @Override
@@ -292,7 +292,7 @@ public class Expression {
 
     /**
      * Create a {@link Expression.PositionFactory} for the specified expression.
-     * 
+     *
      * @param expr
      * @return {@link PositionFactory}
      */
@@ -303,7 +303,7 @@ public class Expression {
     /**
      * Create a {@link Expression.PositionFactory} for an optional expression. A position created from such a factory
      * will silently swallow a {@link PropertyNotFoundException} and return {@code null} as its value.
-     * 
+     *
      * @param expr
      * @return {@link PositionFactory}
      */
