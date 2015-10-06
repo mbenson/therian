@@ -30,7 +30,9 @@ public class GetEnumerationElementType implements Operator<GetElementType<Enumer
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Enumeration> op) {
-        op.setResult(TypeUtils.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Enumeration.class), Enumeration.class.getTypeParameters()[0]));
+        op.setResult(TypeUtils.unrollVariables(
+            TypeUtils.getTypeArguments(op.getTypedItem().getType(), Enumeration.class),
+            Enumeration.class.getTypeParameters()[0]));
         return true;
     }
 

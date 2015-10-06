@@ -23,7 +23,6 @@ import javax.el.ELResolver;
 
 import therian.Operator;
 
-
 /**
  * Special ELResolver that:
  * <ul>
@@ -74,12 +73,11 @@ public class TherianContextELResolver extends ELResolver {
         // coerce value; record stuff?
         delegate.setValue(context, base, property, value);
     }
-    
+
     @Override
     public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
         // TODO coerce parameters
         return super.invoke(context, base, method, paramTypes, params);
     }
-
 
 }

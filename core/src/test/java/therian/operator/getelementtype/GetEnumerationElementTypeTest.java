@@ -39,8 +39,10 @@ public class GetEnumerationElementTypeTest extends OperatorTest {
     @Test
     public void test() {
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String>>() {})));
-        assertTrue(TypeUtils.equals(new TypeLiteral<List<String>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<List<String>>>() {}))));
-        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String[]>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<List<String>>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<List<String>>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<Enumeration<String[]>>() {}))));
     }
 
 }

@@ -23,65 +23,66 @@ import java.util.Objects;
 
 public class Author implements Person {
 
-	private String firstName;
-	private String lastName;
-	private String company;
-	private List<Address> addresses;
+    private String firstName;
+    private String lastName;
+    private String company;
+    private List<Address> addresses;
 
-	public List<Address> getAddresses() {
-		return addresses;
-	}
+    public List<Address> getAddresses() {
+        return addresses;
+    }
 
-	public void setAddresses(List<Address> addresses) {
-		this.addresses = addresses;
-	}
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
 
-	@Override
-	public String getFirstName() {
-		return firstName;
-	}
+    @Override
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	@Override
-	public String getLastName() {
-		return lastName;
-	}
+    @Override
+    public String getLastName() {
+        return lastName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public String getCompany() {
-		return company;
-	}
+    public String getCompany() {
+        return company;
+    }
 
-	public void setCompany(String company) {
-		this.company = company;
-	}
+    public void setCompany(String company) {
+        this.company = company;
+    }
 
-	@Override
-	public String getMiddleName() {
-		return null;
-	}
+    @Override
+    public String getMiddleName() {
+        return null;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if ((obj instanceof Author) == false) {
-			return false;
-		}
-		final Author other = (Author) obj;
-		return Objects.equals(other.getFirstName(), getFirstName()) && Objects.equals(other.getLastName(), getLastName())
-				&& Objects.equals(other.getCompany(), getCompany()) && Objects.equals(other.getAddresses(), getAddresses());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if ((obj instanceof Author) == false) {
+            return false;
+        }
+        final Author other = (Author) obj;
+        return Objects.equals(other.getFirstName(), getFirstName())
+            && Objects.equals(other.getLastName(), getLastName()) && Objects.equals(other.getCompany(), getCompany())
+            && Objects.equals(other.getAddresses(), getAddresses());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getFirstName(), getLastName(), getCompany(), getAddresses());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFirstName(), getLastName(), getCompany(), getAddresses());
+    }
 }

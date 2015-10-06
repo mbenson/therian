@@ -99,6 +99,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     /**
      * Fluent factory method.
+     * 
      * @param targetType
      * @param sourcePosition
      * @return Convert
@@ -109,6 +110,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     /**
      * Fluent factory method.
+     * 
      * @param targetType
      * @param sourcePosition
      * @return Convert
@@ -119,6 +121,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     /**
      * Fluent factory method.
+     * 
      * @param targetPosition
      * @param sourcePosition
      * @return Convert

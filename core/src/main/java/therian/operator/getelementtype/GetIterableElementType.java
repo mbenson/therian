@@ -32,7 +32,9 @@ public class GetIterableElementType implements Operator<GetElementType<Iterable>
     @Override
     public boolean perform(TherianContext context, GetElementType<Iterable> op) {
         final Type result =
-            ObjectUtils.defaultIfNull(TypeUtils.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class), Iterable.class.getTypeParameters()[0]), Object.class);
+            ObjectUtils.defaultIfNull(TypeUtils.unrollVariables(
+                TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class),
+                Iterable.class.getTypeParameters()[0]), Object.class);
         op.setResult(result);
         return true;
     }

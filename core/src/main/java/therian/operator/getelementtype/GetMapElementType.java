@@ -30,7 +30,8 @@ public class GetMapElementType implements Operator<GetElementType<Map>> {
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Map> op) {
-        op.setResult(TypeUtils.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Map.class), Map.class.getTypeParameters()[1]));
+        op.setResult(TypeUtils.unrollVariables(TypeUtils.getTypeArguments(op.getTypedItem().getType(), Map.class),
+            Map.class.getTypeParameters()[1]));
         return true;
     }
 

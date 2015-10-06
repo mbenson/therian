@@ -46,8 +46,10 @@ public class GetIterableElementTypeTest extends OperatorTest {
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Collection<String>>() {})));
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<Set<String>>() {})));
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<SortedSet<String>>() {})));
-        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<List<String[]>>() {}))));
-        assertTrue(TypeUtils.equals(new TypeLiteral<Typed<?>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Iterable<Typed<?>>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<String[]>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<List<String[]>>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<Typed<?>>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<Iterable<Typed<?>>>() {}))));
     }
 
 }

@@ -37,117 +37,123 @@ import therian.util.Types;
  */
 public class Keyed {
 
-	/**
-	 * Keyed value {@link RelativePositionFactory}.
-	 *
-	 * @param <K>
-	 * @param <V>
-	 */
-	public static class PositionFactory<K, V> extends RelativePositionFactory.ReadWrite<Map<K, V>, V> {
+    /**
+     * Keyed value {@link RelativePositionFactory}.
+     *
+     * @param <K>
+     * @param <V>
+     */
+    public static class PositionFactory<K, V> extends RelativePositionFactory.ReadWrite<Map<K, V>, V> {
 
-		private final K key;
+        private final K key;
 
-		private PositionFactory(K key) {
-			this.key = key;
-		}
+        private PositionFactory(K key) {
+            this.key = key;
+        }
 
-		@Override
-		public <P extends Map<K, V>> RelativePosition.ReadWrite<P, V> of(Readable<P> parentPosition) {
-			class Result extends RelativePositionImpl<P, K> implements RelativePosition.ReadWrite<P, V> {
+        @Override
+        public <P extends Map<K, V>> RelativePosition.ReadWrite<P, V> of(Readable<P> parentPosition) {
+            class Result extends RelativePositionImpl<P, K> implements RelativePosition.ReadWrite<P, V> {
 
-				Result(therian.position.Position.Readable<P> parentPosition, K name) {
-					super(parentPosition, name);
-				}
+                Result(therian.position.Position.Readable<P> parentPosition, K name) {
+                    super(parentPosition, name);
+                }
 
-				@Override
-				public Type getType() {
-					return Types.refine(getBasicType(), parentPosition.getType());
-				}
+                @Override
+                public Type getType() {
+                    return Types.refine(getBasicType(), parentPosition.getType());
+                }
 
-				private Type getBasicType() {
-					final TherianContext context = TherianContext.getInstance();
-					final P parent = parentPosition.getValue();
-					final String name = String.valueOf(key);
+                private Type getBasicType() {
+                    final TherianContext context = TherianContext.getInstance();
+                    final P parent = parentPosition.getValue();
+                    final String name = String.valueOf(key);
 
-					Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
-					if (parent != null) {
-						try {
-							final Iterator<FeatureDescriptor> fd = context.getELResolver().getFeatureDescriptors(context, parent);
-							featureDescriptors = IteratorUtils.toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
-						} catch (Exception e) {
-						}
-					}
-					for (FeatureDescriptor feature : featureDescriptors) {
-						final Type fromGenericTypeAttribute = Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-						if (fromGenericTypeAttribute != null) {
-							return fromGenericTypeAttribute;
-						}
-					}
+                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+                    if (parent != null) {
+                        try {
+                            final Iterator<FeatureDescriptor> fd =
+                                context.getELResolver().getFeatureDescriptors(context, parent);
+                            featureDescriptors =
+                                IteratorUtils
+                                    .toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
+                        } catch (Exception e) {
+                        }
+                    }
+                    for (FeatureDescriptor feature : featureDescriptors) {
+                        final Type fromGenericTypeAttribute =
+                            Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+                        if (fromGenericTypeAttribute != null) {
+                            return fromGenericTypeAttribute;
+                        }
+                    }
 
-					return ObjectUtils.defaultIfNull(
-							TypeUtils.getTypeArguments(parentPosition.getType(), Map.class).get(Map.class.getTypeParameters()[1]), Object.class);
-				}
+                    return ObjectUtils.defaultIfNull(TypeUtils.getTypeArguments(parentPosition.getType(), Map.class)
+                        .get(Map.class.getTypeParameters()[1]), Object.class);
+                }
 
-			}
-			return new Result(parentPosition, key);
-		}
+            }
+            return new Result(parentPosition, key);
+        }
 
-		@Override
-		public String toString() {
-			return String.format("Keyed Value [%s]", key);
-		}
+        @Override
+        public String toString() {
+            return String.format("Keyed Value [%s]", key);
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(key);
-		}
+        @Override
+        public int hashCode() {
+            return Objects.hash(key);
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if ((obj instanceof PositionFactory) == false) {
-				return false;
-			}
-			return Objects.equals(key, ((PositionFactory<?, ?>) obj).key);
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if ((obj instanceof PositionFactory) == false) {
+                return false;
+            }
+            return Objects.equals(key, ((PositionFactory<?, ?>) obj).key);
+        }
 
-		/**
-		 * Get the key.
-		 *
-		 * @return K
-		 */
-		public K getKey() {
-			return key;
-		}
-	}
+        /**
+         * Get the key.
+         *
+         * @return K
+         */
+        public K getKey() {
+            return key;
+        }
+    }
 
-	/**
-	 * Fluent step.
-	 *
-	 * @param <V>
-	 */
-	public static class Value<V> {
+    /**
+     * Fluent step.
+     *
+     * @param <V>
+     */
+    public static class Value<V> {
 
-		/**
-		 * "Keyed value at <em>key</em>".
-		 * @param key
-		 * @return {@link PositionFactory}
-		 */
-		public <K> PositionFactory<K, V> at(K key) {
-			return new PositionFactory<K, V>(key);
-		}
-	}
+        /**
+         * "Keyed value at <em>key</em>".
+         * 
+         * @param key
+         * @return {@link PositionFactory}
+         */
+        public <K> PositionFactory<K, V> at(K key) {
+            return new PositionFactory<K, V>(key);
+        }
+    }
 
-	private Keyed() {
-	}
+    private Keyed() {
+    }
 
-	/**
-	 * "Keyed value".
-	 * @return {@link Value}
-	 */
-	public static <V> Value<V> value() {
-		return new Value<V>();
-	}
+    /**
+     * "Keyed value".
+     * 
+     * @return {@link Value}
+     */
+    public static <V> Value<V> value() {
+        return new Value<V>();
+    }
 }

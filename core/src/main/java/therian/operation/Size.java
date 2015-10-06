@@ -26,46 +26,46 @@ import therian.position.Position;
  */
 public class Size<T> extends Operation<Integer> {
 
-	private final Position.Readable<T> position;
+    private final Position.Readable<T> position;
 
-	private Size(Position.Readable<T> position) {
-		super();
-		this.position = position;
-	}
+    private Size(Position.Readable<T> position) {
+        super();
+        this.position = position;
+    }
 
-	@BindTypeVariable
-	public Position.Readable<T> getPosition() {
-		return position;
-	}
+    @BindTypeVariable
+    public Position.Readable<T> getPosition() {
+        return position;
+    }
 
-	public void setResult(int result) {
-		setResult(Integer.valueOf(result));
-	}
+    public void setResult(int result) {
+        setResult(Integer.valueOf(result));
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!obj.getClass().equals(getClass())) {
-			return false;
-		}
-		Size<?> other = (Size<?>) obj;
-		return Objects.equals(other.getPosition(), getPosition());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        Size<?> other = (Size<?>) obj;
+        return Objects.equals(other.getPosition(), getPosition());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getClass(), getPosition());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), getPosition());
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Size of %s", getPosition());
-	}
+    @Override
+    public String toString() {
+        return String.format("Size of %s", getPosition());
+    }
 
-	public static <T> Size<T> of(Position.Readable<T> position) {
-		return new Size<T>(position);
-	}
+    public static <T> Size<T> of(Position.Readable<T> position) {
+        return new Size<T>(position);
+    }
 
 }

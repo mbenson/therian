@@ -53,7 +53,8 @@ public class AddToCollection implements therian.Operator<Add<?, ? extends Collec
             return false;
         }
         final Type targetElementType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class), Collection.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), Collection.class),
+                Collection.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw collection

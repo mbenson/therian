@@ -22,68 +22,62 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Implements an {@link Operation}. Note that a concrete {@link Operator}
- * implementation should host no direct type variables.
+ * Implements an {@link Operation}. Note that a concrete {@link Operator} implementation should host no direct type
+ * variables.
  *
  * @param <OPERATION>
  * @see Operators#validateImplementation(Operator)
  */
 public interface Operator<OPERATION extends Operation<?>> {
 
-	/**
-	 * Allows an Operator to specify that it depends on other Operators.
-	 * Such should be taken as an all-inclusive list, but may still be instructive.
-	 */
-	@Documented
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	public @interface DependsOn {
-		@SuppressWarnings("rawtypes")
-		Class<? extends Operator>[] value();
-	}
+    /**
+     * Allows an Operator to specify that it depends on other Operators. Such should be taken as an all-inclusive list,
+     * but may still be instructive.
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface DependsOn {
+        @SuppressWarnings("rawtypes")
+        Class<? extends Operator>[] value();
+    }
 
-	/**
-	 * Describes the "lifecycle", such as it is, of an {@link Operator}, in case
-	 * it is convenient for a given implementation to use this as a
-	 * "strategy trigger."
-	 * @since 0.2
-	 */
-	public enum Phase {
-		/**
-		 * Corresponds to {@link Operator#supports(TherianContext, Operation)}.
-		 */
-		SUPPORT_CHECK,
+    /**
+     * Describes the "lifecycle", such as it is, of an {@link Operator}, in case it is convenient for a given
+     * implementation to use this as a "strategy trigger."
+     * 
+     * @since 0.2
+     */
+    public enum Phase {
+        /**
+         * Corresponds to {@link Operator#supports(TherianContext, Operation)}.
+         */
+        SUPPORT_CHECK,
 
-		/**
-		 * Corresponds to {@link Operator#perform(TherianContext, Operation)}.
-		 */
-		EVALUATION;
-	}
+        /**
+         * Corresponds to {@link Operator#perform(TherianContext, Operation)}.
+         */
+        EVALUATION;
+    }
 
-	/**
-	 * Perform the specified operation.
-	 *
-	 * @param context
-	 *            active
-	 * @param operation
-	 *            to perform
-	 * @return whether the evaluation was successful
-	 */
-	boolean perform(TherianContext context, OPERATION operation);
+    /**
+     * Perform the specified operation.
+     *
+     * @param context active
+     * @param operation to perform
+     * @return whether the evaluation was successful
+     */
+    boolean perform(TherianContext context, OPERATION operation);
 
-	/**
-	 * Learn whether an operation is supported. This check can be fairly
-	 * perfunctory as the evaluation of a given {@link Operation} sets an
-	 * associated success status, thus just because an {@link Operation} is
-	 * deemed to be "supported" does not <em>guarantee</em> it will be
-	 * successfully evaluated.
-	 *
-	 * @param context
-	 *            active
-	 * @param operation
-	 *            to check
-	 *
-	 * @return true if supported
-	 */
-	boolean supports(TherianContext context, OPERATION operation);
+    /**
+     * Learn whether an operation is supported. This check can be fairly perfunctory as the evaluation of a given
+     * {@link Operation} sets an associated success status, thus just because an {@link Operation} is deemed to be
+     * "supported" does not <em>guarantee</em> it will be successfully evaluated.
+     *
+     * @param context active
+     * @param operation to check
+     *
+     * @return true if supported
+     */
+    boolean supports(TherianContext context, OPERATION operation);
 }

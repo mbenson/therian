@@ -30,7 +30,8 @@ import therian.operation.Convert;
  * 
  * @see Operators#standard()
  */
-@Reusable(Phase.SUPPORT_CHECK) // simpler to reinvoke than store value
+@Reusable(Phase.SUPPORT_CHECK)
+// simpler to reinvoke than store value
 @StandardOperator
 public class NOPConverter extends Converter.WithDynamicTarget<Object> {
     /**
@@ -41,12 +42,12 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
          * Indicates that a {@code null} source value will be considered unsupported.
          */
         UNSUPPORTED,
-        
+
         /**
          * Indicates that a {@code null} source value will be considered supported, but do nothing.
          */
         NOP,
-        
+
         /**
          * Indicates that a {@code null} source value will yield a {@code null} target value.
          */
@@ -72,8 +73,9 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
 
     @Override
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
-        return isNoop(convert) && (convert.getSourcePosition().getValue() != null
-            || context.getTypedContext(NullBehavior.class, NullBehavior.DEFAULT) == NullBehavior.DEFAULT);
+        return isNoop(convert)
+            && (convert.getSourcePosition().getValue() != null || context.getTypedContext(NullBehavior.class,
+                NullBehavior.DEFAULT) == NullBehavior.DEFAULT);
     }
 
 }

@@ -34,147 +34,152 @@ import therian.position.Position;
  * Abstract transform operation. A "transformer" is an operator over a transform operation. Defining "Transformer" in
  * terms of our object model would constrict the behavior of transformer implementations in detrimental ways.
  */
-public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends Operation<RESULT> {
+public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends
+    Operation<RESULT> {
 
-	private static Type narrow(Position.Readable<?> pos) {
-		final Type type = pos.getType();
-		Object value;
-		try {
-			value = pos.getValue();
-		} catch (Exception e) {
-			value = null;
-		}
-		if (value != null) {
-			final Class<?> rawValueType = value.getClass();
+    private static Type narrow(Position.Readable<?> pos) {
+        final Type type = pos.getType();
+        Object value;
+        try {
+            value = pos.getValue();
+        } catch (Exception e) {
+            value = null;
+        }
+        if (value != null) {
+            final Class<?> rawValueType = value.getClass();
 
-			if ((type instanceof ParameterizedType) && ((ParameterizedType) type).getRawType().equals(rawValueType)) {
-				final TypeVariable<?>[] typeParameters = rawValueType.getTypeParameters();
-				if (typeParameters.length > 0) {
-					final Map<TypeVariable<?>, Type> argMappings = TypeUtils.determineTypeArguments(rawValueType, (ParameterizedType) type);
-					final Type[] args = new Type[typeParameters.length];
+            if ((type instanceof ParameterizedType) && ((ParameterizedType) type).getRawType().equals(rawValueType)) {
+                final TypeVariable<?>[] typeParameters = rawValueType.getTypeParameters();
+                if (typeParameters.length > 0) {
+                    final Map<TypeVariable<?>, Type> argMappings =
+                        TypeUtils.determineTypeArguments(rawValueType, (ParameterizedType) type);
+                    final Type[] args = new Type[typeParameters.length];
 
-					int index = 0;
-					for (TypeVariable<?> typeVariable : typeParameters) {
-						args[index++] = ObjectUtils.defaultIfNull(argMappings.get(typeVariable), TypeUtils.WILDCARD_ALL);
-					}
-					return TypeUtils.parameterize(rawValueType, args);
-				}
-				return rawValueType;
-			}
-		}
-		return type;
-	}
+                    int index = 0;
+                    for (TypeVariable<?> typeVariable : typeParameters) {
+                        args[index++] =
+                            ObjectUtils.defaultIfNull(argMappings.get(typeVariable), TypeUtils.WILDCARD_ALL);
+                    }
+                    return TypeUtils.parameterize(rawValueType, args);
+                }
+                return rawValueType;
+            }
+        }
+        return type;
+    }
 
-	private final Position.Readable<SOURCE> sourcePosition;
-	private final TARGET_POSITION targetPosition;
+    private final Position.Readable<SOURCE> sourcePosition;
+    private final TARGET_POSITION targetPosition;
 
-	/**
-	 * Create a new Transform instance.
-	 *
-	 * @param sourcePosition
-	 * @param targetPosition
-	 */
-	protected Transform(Position.Readable<SOURCE> sourcePosition, TARGET_POSITION targetPosition) {
-		super();
-		this.sourcePosition = Validate.notNull(sourcePosition, "sourcePosition");
-		this.targetPosition = Validate.notNull(targetPosition, "targetPosition");
-	}
+    /**
+     * Create a new Transform instance.
+     *
+     * @param sourcePosition
+     * @param targetPosition
+     */
+    protected Transform(Position.Readable<SOURCE> sourcePosition, TARGET_POSITION targetPosition) {
+        super();
+        this.sourcePosition = Validate.notNull(sourcePosition, "sourcePosition");
+        this.targetPosition = Validate.notNull(targetPosition, "targetPosition");
+    }
 
-	/**
-	 * Get the narrowest possible source type, deduced from source position type/value.
-	 *
-	 * @return Typed
-	 */
-	@BindTypeVariable
-	public Typed<SOURCE> getSourceType() {
-		final Position.Readable<SOURCE> source = getSourcePosition();
-		final Type result = narrow(source);
-		if (!TypeUtils.equals(result, source.getType())) {
-			return new Typed<SOURCE>() {
+    /**
+     * Get the narrowest possible source type, deduced from source position type/value.
+     *
+     * @return Typed
+     */
+    @BindTypeVariable
+    public Typed<SOURCE> getSourceType() {
+        final Position.Readable<SOURCE> source = getSourcePosition();
+        final Type result = narrow(source);
+        if (!TypeUtils.equals(result, source.getType())) {
+            return new Typed<SOURCE>() {
 
-				@Override
-				public Type getType() {
-					return result;
-				}
-			};
-		}
-		return source;
-	}
+                @Override
+                public Type getType() {
+                    return result;
+                }
+            };
+        }
+        return source;
+    }
 
-	/**
-	 * Get the sourcePosition.
-	 *
-	 * @return Position.Readable<SOURCE>
-	 */
-	public Position.Readable<SOURCE> getSourcePosition() {
-		return sourcePosition;
-	}
+    /**
+     * Get the sourcePosition.
+     *
+     * @return Position.Readable<SOURCE>
+     */
+    public Position.Readable<SOURCE> getSourcePosition() {
+        return sourcePosition;
+    }
 
-	/**
-	 * Get the narrowest possible target type. If this {@link Transform} operation maps its {@code TARGET_POSITION} type
-	 * parameter as some {@link Readable} then this will be deduced from target position type/value, else the target
-	 * position will be returned.
-	 *
-	 * @return Typed
-	 */
-	@BindTypeVariable
-	public Typed<TARGET> getTargetType() {
-		final TARGET_POSITION target = getTargetPosition();
-		final Type targetPositionType = TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
-				Transform.class.getTypeParameters()[3]);
-		if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
-			final Type result = narrow((Position.Readable<TARGET>) target);
-			if (!TypeUtils.equals(result, target.getType())) {
-				return new Typed<TARGET>() {
+    /**
+     * Get the narrowest possible target type. If this {@link Transform} operation maps its {@code TARGET_POSITION} type
+     * parameter as some {@link Readable} then this will be deduced from target position type/value, else the target
+     * position will be returned.
+     *
+     * @return Typed
+     */
+    @BindTypeVariable
+    public Typed<TARGET> getTargetType() {
+        final TARGET_POSITION target = getTargetPosition();
+        final Type targetPositionType =
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
+                Transform.class.getTypeParameters()[3]);
+        if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
+            final Type result = narrow((Position.Readable<TARGET>) target);
+            if (!TypeUtils.equals(result, target.getType())) {
+                return new Typed<TARGET>() {
 
-					@Override
-					public Type getType() {
-						return result;
-					}
-				};
-			}
-		}
-		return target;
-	}
+                    @Override
+                    public Type getType() {
+                        return result;
+                    }
+                };
+            }
+        }
+        return target;
+    }
 
-	/**
-	 * Get the targetPosition.
-	 *
-	 * @return TARGET_POSITION
-	 */
-	public TARGET_POSITION getTargetPosition() {
-		return targetPosition;
-	}
+    /**
+     * Get the targetPosition.
+     *
+     * @return TARGET_POSITION
+     */
+    public TARGET_POSITION getTargetPosition() {
+        return targetPosition;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!obj.getClass().equals(getClass())) {
-			return false;
-		}
-		Transform<?, ?, ?, ?> other = (Transform<?, ?, ?, ?>) obj;
-		return Objects.equals(other.getSourcePosition(), getSourcePosition()) && Objects.equals(other.getTargetPosition(), getTargetPosition());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        Transform<?, ?, ?, ?> other = (Transform<?, ?, ?, ?>) obj;
+        return Objects.equals(other.getSourcePosition(), getSourcePosition())
+            && Objects.equals(other.getTargetPosition(), getTargetPosition());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getClass(), getSourcePosition(), getTargetPosition());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), getSourcePosition(), getTargetPosition());
+    }
 
-	@Override
-	public String toString() {
-		return String.format("%s%s to %s", getSimpleName(), getSourcePosition(), getTargetPosition());
-	}
+    @Override
+    public String toString() {
+        return String.format("%s%s to %s", getSimpleName(), getSourcePosition(), getTargetPosition());
+    }
 
-	private String getSimpleName() {
-		final StringBuilder buf = new StringBuilder();
-		Class<?> c = getClass();
-		while (c != null) {
-			buf.insert(0, ' ').insert(0, c.getSimpleName());
-			c = c.getEnclosingClass();
-		}
-		return buf.toString();
-	}
+    private String getSimpleName() {
+        final StringBuilder buf = new StringBuilder();
+        Class<?> c = getClass();
+        while (c != null) {
+            buf.insert(0, ' ').insert(0, c.getSimpleName());
+            c = c.getEnclosingClass();
+        }
+        return buf.toString();
+    }
 }

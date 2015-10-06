@@ -25,23 +25,24 @@ import java.util.Objects;
  */
 public class BusinessAddress extends Address {
 
-	private String company;
+    private String company;
 
-	public String getCompany() {
-		return company;
-	}
+    public String getCompany() {
+        return company;
+    }
 
-	public void setCompany(String company) {
-		this.company = company;
-	}
+    public void setCompany(String company) {
+        this.company = company;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof BusinessAddress) && super.equals(obj) && Objects.equals(((BusinessAddress) obj).getCompany(), getCompany());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof BusinessAddress) && super.equals(obj)
+            && Objects.equals(((BusinessAddress) obj).getCompany(), getCompany());
+    }
 
-	@Override
-	public int hashCode() {
-		return (super.hashCode() << 4) | Objects.hashCode(getCompany());
-	}
+    @Override
+    public int hashCode() {
+        return (super.hashCode() << 4) | Objects.hashCode(getCompany());
+    }
 }

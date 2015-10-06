@@ -57,6 +57,7 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
 
     /**
      * Fluent factory method.
+     * 
      * @param targetPosition
      * @param sourcePosition
      * @return Copy

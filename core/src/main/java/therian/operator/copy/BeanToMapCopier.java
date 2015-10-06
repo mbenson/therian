@@ -41,64 +41,67 @@ import therian.util.Positions;
 @DependsOn({ NOPConverter.class, ConvertingCopier.class })
 public class BeanToMapCopier extends Copier<Object, Map> {
 
-	public static final String IGNORE_CLASS_PROPERTY = "class";
+    public static final String IGNORE_CLASS_PROPERTY = "class";
 
-	private final Predicate<String> ignored = this::isIgnored;
+    private final Predicate<String> ignored = this::isIgnored;
 
-	protected boolean isIgnored(String propertyName) {
-		return IGNORE_CLASS_PROPERTY.equals(propertyName);
-	}
+    protected boolean isIgnored(String propertyName) {
+        return IGNORE_CLASS_PROPERTY.equals(propertyName);
+    }
 
-	@Override
-	public boolean perform(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
-		final Type targetKeyType = getKeyType(copy.getTargetPosition());
+    @Override
+    public boolean perform(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
+        final Type targetKeyType = getKeyType(copy.getTargetPosition());
 
-		boolean result = false;
-		final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
-		for (String propertyName : getProperties(context, copy.getSourcePosition())) {
-			final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
-			if (!context.supports(convertKey)) {
-				continue;
-			}
-			final Object key = context.eval(convertKey);
-			@SuppressWarnings("unchecked")
-			final Copy<?, ?> copyEntry = Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()),
-					Property.at(propertyName).of(copy.getSourcePosition()));
-			if (context.evalSuccess(copyEntry)) {
-				result = true;
-			}
-		}
-		return result;
-	}
+        boolean result = false;
+        final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
+        for (String propertyName : getProperties(context, copy.getSourcePosition())) {
+            final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
+            if (!context.supports(convertKey)) {
+                continue;
+            }
+            final Object key = context.eval(convertKey);
+            @SuppressWarnings("unchecked")
+            final Copy<?, ?> copyEntry =
+                Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()),
+                    Property.at(propertyName).of(copy.getSourcePosition()));
+            if (context.evalSuccess(copyEntry)) {
+                result = true;
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * If at least one property name can be converted to an assignable key, say the operation is supported and we'll
-	 * give it a shot.
-	 */
-	@Override
-	public boolean supports(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
-		if (!super.supports(context, copy)) {
-			return false;
-		}
+    /**
+     * If at least one property name can be converted to an assignable key, say the operation is supported and we'll
+     * give it a shot.
+     */
+    @Override
+    public boolean supports(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
+        if (!super.supports(context, copy)) {
+            return false;
+        }
 
-		final Type targetKeyType = getKeyType(copy.getTargetPosition());
+        final Type targetKeyType = getKeyType(copy.getTargetPosition());
 
-		final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
-		for (String propertyName : getProperties(context, copy.getSourcePosition())) {
-			if (context.supports(Convert.to(targetKey, Positions.readOnly(propertyName)))) {
-				return true;
-			}
-		}
-		return false;
-	}
+        final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
+        for (String propertyName : getProperties(context, copy.getSourcePosition())) {
+            if (context.supports(Convert.to(targetKey, Positions.readOnly(propertyName)))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private Iterable<String> getProperties(TherianContext context, Position.Readable<?> source) {
-		final Stream<String> stream = BeanProperties.getPropertyNames(context, source).stream().filter(ignored.negate());
-		return () -> stream.iterator();
-	}
+    private Iterable<String> getProperties(TherianContext context, Position.Readable<?> source) {
+        final Stream<String> stream =
+            BeanProperties.getPropertyNames(context, source).stream().filter(ignored.negate());
+        return () -> stream.iterator();
+    }
 
-	private Type getKeyType(Position<? extends Map> target) {
-		return ObjectUtils.defaultIfNull(
-				TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class), Map.class.getTypeParameters()[0]), Object.class);
-	}
+    private Type getKeyType(Position<? extends Map> target) {
+        return ObjectUtils.defaultIfNull(
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
+                Map.class.getTypeParameters()[0]), Object.class);
+    }
 }

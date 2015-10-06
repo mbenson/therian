@@ -64,21 +64,21 @@ public class MapCopier extends Copier<Map, Map> {
             targetEntryType = TypeUtils.parameterize(Map.Entry.class, targetKeyType, targetValueType);
         }
 
-
         final Map<?, ?> sourceMap = copy.getSourcePosition().getValue();
         for (Map.Entry<?, ?> e : sourceMap.entrySet()) {
             final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
             final Position.ReadWrite<?> targetValue = Positions.readWrite(targetValueType);
-            
+
             if (!context.evalSuccess(Convert.to(targetKey, Positions.readOnly(sourceKeyType, e.getKey())))) {
                 return false;
             }
             if (!context.evalSuccess(Convert.to(targetValue, Positions.readOnly(sourceValueType, e.getValue())))) {
                 return false;
             }
-            
+
             final MutablePair<?, ?> newEntry = MutablePair.of(targetKey.getValue(), targetValue.getValue());
-            if (!context.evalSuccess(Add.to(copy.getTargetPosition(), Positions.<Map.Entry> readOnly(targetEntryType, newEntry)))) {
+            if (!context.evalSuccess(Add.to(copy.getTargetPosition(),
+                Positions.<Map.Entry> readOnly(targetEntryType, newEntry)))) {
                 return false;
             }
         }

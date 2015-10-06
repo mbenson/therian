@@ -28,21 +28,22 @@ import therian.position.Position;
  */
 public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
 
-	protected AddAll(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
-		super(sourcePosition, targetPosition);
-	}
+    protected AddAll(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
+        super(sourcePosition, targetPosition);
+    }
 
-	public void setResult(boolean result) {
-		setResult(Boolean.valueOf(result));
-	}
+    public void setResult(boolean result) {
+        setResult(Boolean.valueOf(result));
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Add all %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
-	}
+    @Override
+    public String toString() {
+        return String.format("Add all %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
+    }
 
-	public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition, Position.Readable<SOURCE> sourcePosition) {
-		return new AddAll<SOURCE, TARGET>(sourcePosition, targetPosition);
-	}
+    public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
+        Position.Readable<SOURCE> sourcePosition) {
+        return new AddAll<SOURCE, TARGET>(sourcePosition, targetPosition);
+    }
 
 }

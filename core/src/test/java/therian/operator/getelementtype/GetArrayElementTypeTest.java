@@ -39,8 +39,10 @@ public class GetArrayElementTypeTest extends OperatorTest {
     public void test() {
         assertEquals(int.class, therianContext.eval(GetElementType.of(new TypeLiteral<int[]>() {})));
         assertEquals(String.class, therianContext.eval(GetElementType.of(new TypeLiteral<String[]>() {})));
-        assertTrue(TypeUtils.equals(new TypeLiteral<List<String>>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<List<String>[]>() {}))));
-        assertTrue(TypeUtils.equals(new TypeLiteral<Object[]>() {}.value, therianContext.eval(GetElementType.of(new TypeLiteral<Object[][]>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<List<String>>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<List<String>[]>() {}))));
+        assertTrue(TypeUtils.equals(new TypeLiteral<Object[]>() {}.value,
+            therianContext.eval(GetElementType.of(new TypeLiteral<Object[][]>() {}))));
     }
 
 }

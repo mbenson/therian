@@ -25,53 +25,54 @@ import java.util.Objects;
  */
 public class Employee implements Person {
 
-	private String firstName, lastName;
+    private String firstName, lastName;
 
-	public Employee() {
-	}
+    public Employee() {
+    }
 
-	public Employee(String firstN, String lastN) {
-		firstName = firstN;
-		lastName = lastN;
-	}
+    public Employee(String firstN, String lastN) {
+        firstName = firstN;
+        lastName = lastN;
+    }
 
-	@Override
-	public String getFirstName() {
-		return firstName;
-	}
+    @Override
+    public String getFirstName() {
+        return firstName;
+    }
 
-	@Override
-	public String getMiddleName() {
-		return null; // not supported
-	}
+    @Override
+    public String getMiddleName() {
+        return null; // not supported
+    }
 
-	@Override
-	public String getLastName() {
-		return lastName;
-	}
+    @Override
+    public String getLastName() {
+        return lastName;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if ((obj instanceof Employee) == false) {
-			return false;
-		}
-		final Employee other = (Employee) obj;
-		return Objects.equals(other.getFirstName(), getFirstName()) && Objects.equals(other.getLastName(), getLastName());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if ((obj instanceof Employee) == false) {
+            return false;
+        }
+        final Employee other = (Employee) obj;
+        return Objects.equals(other.getFirstName(), getFirstName())
+            && Objects.equals(other.getLastName(), getLastName());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getFirstName(), getLastName());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFirstName(), getLastName());
+    }
 }

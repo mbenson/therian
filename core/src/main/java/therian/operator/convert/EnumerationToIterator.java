@@ -48,7 +48,8 @@ public class EnumerationToIterator extends AssignableElementConverter<Enumeratio
         final Position.ReadWrite<Iterable> rw = Positions.readWrite(Iterable.class);
         Hint[] hints = {};
         return context.evalSuccess(Convert.to(rw, operation.getSourcePosition()))
-            && context.evalSuccess(Positions.writeValue(operation.getTargetPosition()), Convert.to(Iterator.class, rw),  hints);
+            && context.evalSuccess(Positions.writeValue(operation.getTargetPosition()), Convert.to(Iterator.class, rw),
+                hints);
     }
 
 }

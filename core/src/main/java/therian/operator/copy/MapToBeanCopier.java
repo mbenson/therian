@@ -102,6 +102,7 @@ public class MapToBeanCopier extends Copier<Map, Object> {
 
     private Type getKeyType(Position<? extends Map> target) {
         return ObjectUtils.defaultIfNull(
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class), Map.class.getTypeParameters()[0]), Object.class);
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
+                Map.class.getTypeParameters()[0]), Object.class);
     }
 }

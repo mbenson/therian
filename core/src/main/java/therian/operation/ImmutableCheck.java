@@ -31,56 +31,56 @@ import therian.position.Position.Readable;
 @Reusable({/* NEVER */})
 public final class ImmutableCheck<T> extends Operation<Boolean> {
 
-	private final Position.Readable<T> position;
+    private final Position.Readable<T> position;
 
-	private ImmutableCheck(Readable<T> position) {
-		super();
-		this.position = position;
-	}
+    private ImmutableCheck(Readable<T> position) {
+        super();
+        this.position = position;
+    }
 
-	@BindTypeVariable
-	public Position.Readable<T> getPosition() {
-		return position;
-	}
+    @BindTypeVariable
+    public Position.Readable<T> getPosition() {
+        return position;
+    }
 
-	/**
-	 * Success as result.
-	 */
-	@Override
-	public Boolean getResult() {
-		return isSuccessful();
-	}
+    /**
+     * Success as result.
+     */
+    @Override
+    public Boolean getResult() {
+        return isSuccessful();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!obj.getClass().equals(getClass())) {
-			return false;
-		}
-		ImmutableCheck<?> other = (ImmutableCheck<?>) obj;
-		return Objects.equals(other.getPosition(), getPosition());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        ImmutableCheck<?> other = (ImmutableCheck<?>) obj;
+        return Objects.equals(other.getPosition(), getPosition());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getClass(), getPosition());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), getPosition());
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Immutable check of %s", getPosition());
-	}
+    @Override
+    public String toString() {
+        return String.format("Immutable check of %s", getPosition());
+    }
 
-	/**
-	 * Create an {@link ImmutableCheck} operation against {@code position}.
-	 *
-	 * @param <T>
-	 * @param position
-	 * @return operation
-	 */
-	public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
-		return new ImmutableCheck<T>(position);
-	}
+    /**
+     * Create an {@link ImmutableCheck} operation against {@code position}.
+     *
+     * @param <T>
+     * @param position
+     * @return operation
+     */
+    public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
+        return new ImmutableCheck<T>(position);
+    }
 }

@@ -28,15 +28,16 @@ import therian.position.Position;
  */
 public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
 
-	protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
-		super(sourcePosition, targetPosition);
-	}
+    protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
+        super(sourcePosition, targetPosition);
+    }
 
-	public void setResult(boolean result) {
-		setResult(Boolean.valueOf(result));
-	}
+    public void setResult(boolean result) {
+        setResult(Boolean.valueOf(result));
+    }
 
-	public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition, Position.Readable<SOURCE> sourcePosition) {
-		return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
-	}
+    public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
+        Position.Readable<SOURCE> sourcePosition) {
+        return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
+    }
 }

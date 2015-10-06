@@ -22,70 +22,70 @@ import java.util.Objects;
 
 public class Address implements ZipCodeCityCarrier {
 
-	private String addressline1;
-	private String addressline2;
-	private String zipCode;
-	private Country country;
-	private String city;
+    private String addressline1;
+    private String addressline2;
+    private String zipCode;
+    private Country country;
+    private String city;
 
-	public String getAddressline1() {
-		return addressline1;
-	}
+    public String getAddressline1() {
+        return addressline1;
+    }
 
-	public void setAddressline1(String addressline1) {
-		this.addressline1 = addressline1;
-	}
+    public void setAddressline1(String addressline1) {
+        this.addressline1 = addressline1;
+    }
 
-	public String getAddressline2() {
-		return addressline2;
-	}
+    public String getAddressline2() {
+        return addressline2;
+    }
 
-	public void setAddressline2(String addressline2) {
-		this.addressline2 = addressline2;
-	}
+    public void setAddressline2(String addressline2) {
+        this.addressline2 = addressline2;
+    }
 
-	@Override
-	public String getZipCode() {
-		return zipCode;
-	}
+    @Override
+    public String getZipCode() {
+        return zipCode;
+    }
 
-	public void setZipCode(String zipCode) {
-		this.zipCode = zipCode;
-	}
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
 
-	@Override
-	public String getCity() {
-		return city;
-	}
+    @Override
+    public String getCity() {
+        return city;
+    }
 
-	public void setCity(String city) {
-		this.city = city;
-	}
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	public Country getCountry() {
-		return country;
-	}
+    public Country getCountry() {
+        return country;
+    }
 
-	public void setCountry(Country country) {
-		this.country = country;
-	}
+    public void setCountry(Country country) {
+        this.country = country;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if ((obj instanceof Address) == false) {
-			return false;
-		}
-		Address other = (Address) obj;
-		return Objects.equals(getAddressline1(), other.getAddressline1()) && Objects.equals(getAddressline2(), other.getAddressline2())
-				&& Objects.equals(getCity(), other.getCity()) && Objects.equals(getZipCode(), other.getZipCode())
-				&& Objects.equals(getCountry(), other.getCountry());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if ((obj instanceof Address) == false) {
+            return false;
+        }
+        Address other = (Address) obj;
+        return Objects.equals(getAddressline1(), other.getAddressline1())
+            && Objects.equals(getAddressline2(), other.getAddressline2()) && Objects.equals(getCity(), other.getCity())
+            && Objects.equals(getZipCode(), other.getZipCode()) && Objects.equals(getCountry(), other.getCountry());
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getAddressline1(), getAddressline2(), getCity(), getZipCode(), getCountry());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAddressline1(), getAddressline2(), getCity(), getZipCode(), getCountry());
+    }
 }

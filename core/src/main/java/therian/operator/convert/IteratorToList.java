@@ -31,7 +31,7 @@ import therian.operator.getelementtype.GetIteratorElementType;
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
-@DependsOn({GetIteratorElementType.class, GetIterableElementType.class})
+@DependsOn({ GetIteratorElementType.class, GetIterableElementType.class })
 public class IteratorToList extends AssignableElementConverter<Iterator<?>, List> {
     public IteratorToList() {
         super(Iterator.class.getTypeParameters()[0], List.class.getTypeParameters()[0]);

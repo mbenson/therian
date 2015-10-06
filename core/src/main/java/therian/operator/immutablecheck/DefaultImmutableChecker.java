@@ -42,95 +42,97 @@ import therian.buildweaver.StandardOperator;
 @StandardOperator
 public class DefaultImmutableChecker extends ImmutableChecker {
 
-	private static final String[] KNOWN_IMMUTABLE_PREFIXES;
-	private static final Set<Class<?>> KNOWN_IMMUTABLE_TYPES;
+    private static final String[] KNOWN_IMMUTABLE_PREFIXES;
+    private static final Set<Class<?>> KNOWN_IMMUTABLE_TYPES;
 
-	static {
-		KNOWN_IMMUTABLE_PREFIXES = new String[] { "immutable", "unmodifiable", "empty" };
-		final HashSet<Class<?>> s = new HashSet<Class<?>>();
-		Collections.<Class<?>> addAll(s, String.class, Enum.class, Annotation.class, Class.class, Arrays.asList().getClass());
-		addTypeTo(s, Collections.emptySet());
-		addTypeTo(s, Collections.unmodifiableSet(new HashSet<Object>()));
-		addTypeTo(s, Collections.emptyList());
-		addTypeTo(s, Collections.unmodifiableList(new ArrayList<Object>()));
-		addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<String>()));
-		addTypeTo(s, Collections.emptyMap());
-		addTypeTo(s, Collections.unmodifiableMap(new HashMap<Object, Object>()));
-		addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<String, Object>()));
+    static {
+        KNOWN_IMMUTABLE_PREFIXES = new String[] { "immutable", "unmodifiable", "empty" };
+        final HashSet<Class<?>> s = new HashSet<Class<?>>();
+        Collections.<Class<?>> addAll(s, String.class, Enum.class, Annotation.class, Class.class, Arrays.asList()
+            .getClass());
+        addTypeTo(s, Collections.emptySet());
+        addTypeTo(s, Collections.unmodifiableSet(new HashSet<Object>()));
+        addTypeTo(s, Collections.emptyList());
+        addTypeTo(s, Collections.unmodifiableList(new ArrayList<Object>()));
+        addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<String>()));
+        addTypeTo(s, Collections.emptyMap());
+        addTypeTo(s, Collections.unmodifiableMap(new HashMap<Object, Object>()));
+        addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<String, Object>()));
 
-		@SuppressWarnings({ "unused" })
-		boolean junk = Collections.addAll(s, Collections.singleton(null).getClass(), Collections.singletonList(null).getClass(), Collections
-				.singletonMap(null, null).getClass());
+        @SuppressWarnings({ "unused" })
+        boolean junk =
+            Collections.addAll(s, Collections.singleton(null).getClass(), Collections.singletonList(null).getClass(),
+                Collections.singletonMap(null, null).getClass());
 
-		KNOWN_IMMUTABLE_TYPES = Collections.unmodifiableSet(s);
-	}
+        KNOWN_IMMUTABLE_TYPES = Collections.unmodifiableSet(s);
+    }
 
-	private static void addTypeTo(final Set<Class<?>> target, final Collection<?> coll) {
-		addImmutableTypeTo(target, coll.getClass());
-		addImmutableTypeTo(target, coll.iterator().getClass());
-	}
+    private static void addTypeTo(final Set<Class<?>> target, final Collection<?> coll) {
+        addImmutableTypeTo(target, coll.getClass());
+        addImmutableTypeTo(target, coll.iterator().getClass());
+    }
 
-	private static void addTypeTo(final Set<Class<?>> target, final List<?> list) {
-		addTypeTo(target, (Collection<?>) list);
-		addImmutableTypeTo(target, list.listIterator().getClass());
-	}
+    private static void addTypeTo(final Set<Class<?>> target, final List<?> list) {
+        addTypeTo(target, (Collection<?>) list);
+        addImmutableTypeTo(target, list.listIterator().getClass());
+    }
 
-	private static void addTypeTo(final Set<Class<?>> target, final SortedSet<String> sortedSet) {
-		addTypeTo(target, (Collection<?>) sortedSet);
-		addTypeTo(target, (Set<String>) sortedSet.headSet("foo"));
-		addTypeTo(target, (Set<String>) sortedSet.tailSet("foo"));
-		addTypeTo(target, (Set<String>) sortedSet.subSet("foo", "foo"));
-	}
+    private static void addTypeTo(final Set<Class<?>> target, final SortedSet<String> sortedSet) {
+        addTypeTo(target, (Collection<?>) sortedSet);
+        addTypeTo(target, (Set<String>) sortedSet.headSet("foo"));
+        addTypeTo(target, (Set<String>) sortedSet.tailSet("foo"));
+        addTypeTo(target, (Set<String>) sortedSet.subSet("foo", "foo"));
+    }
 
-	private static void addTypeTo(final Set<Class<?>> target, final Map<?, ?> map) {
-		addImmutableTypeTo(target, map.getClass());
-		addTypeTo(target, map.keySet());
-		addTypeTo(target, map.values());
-	}
+    private static void addTypeTo(final Set<Class<?>> target, final Map<?, ?> map) {
+        addImmutableTypeTo(target, map.getClass());
+        addTypeTo(target, map.keySet());
+        addTypeTo(target, map.values());
+    }
 
-	private static void addTypeTo(final Set<Class<?>> target, final SortedMap<String, ?> sortedMap) {
-		addTypeTo(target, (Map<String, ?>) sortedMap);
-		addTypeTo(target, (Map<String, ?>) sortedMap.headMap("foo"));
-		addTypeTo(target, (Map<String, ?>) sortedMap.tailMap("foo"));
-		addTypeTo(target, (Map<String, ?>) sortedMap.subMap("foo", "foo"));
-	}
+    private static void addTypeTo(final Set<Class<?>> target, final SortedMap<String, ?> sortedMap) {
+        addTypeTo(target, (Map<String, ?>) sortedMap);
+        addTypeTo(target, (Map<String, ?>) sortedMap.headMap("foo"));
+        addTypeTo(target, (Map<String, ?>) sortedMap.tailMap("foo"));
+        addTypeTo(target, (Map<String, ?>) sortedMap.subMap("foo", "foo"));
+    }
 
-	private static void addImmutableTypeTo(final Set<Class<?>> target, final Class<?> type) {
-		if (target.contains(type)) {
-			return;
-		}
-		Class<?> c = type;
-		while (c.isAnonymousClass()) {
-			c = c.getEnclosingClass();
-		}
-		if ((target.contains(c) && !target.equals(c))
-				|| StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
-			target.add(type);
-		}
-	}
+    private static void addImmutableTypeTo(final Set<Class<?>> target, final Class<?> type) {
+        if (target.contains(type)) {
+            return;
+        }
+        Class<?> c = type;
+        while (c.isAnonymousClass()) {
+            c = c.getEnclosingClass();
+        }
+        if ((target.contains(c) && !target.equals(c))
+            || StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
+            target.add(type);
+        }
+    }
 
-	@Override
-	protected boolean isImmutable(Object object) {
-		if (object == null) {
-			return true;
-		}
-		final Class<?> cls = object.getClass();
-		if (cls.isPrimitive()) {
-			return true;
-		}
-		if (ClassUtils.wrapperToPrimitive(cls) != null) {
-			return true;
-		}
-		// quick check:
-		if (KNOWN_IMMUTABLE_TYPES.contains(cls)) {
-			return true;
-		}
-		// inheritance too:
-		for (final Class<?> type : KNOWN_IMMUTABLE_TYPES) {
-			if (type.isInstance(object)) {
-				return true;
-			}
-		}
-		return cls.equals(Object.class);
-	}
+    @Override
+    protected boolean isImmutable(Object object) {
+        if (object == null) {
+            return true;
+        }
+        final Class<?> cls = object.getClass();
+        if (cls.isPrimitive()) {
+            return true;
+        }
+        if (ClassUtils.wrapperToPrimitive(cls) != null) {
+            return true;
+        }
+        // quick check:
+        if (KNOWN_IMMUTABLE_TYPES.contains(cls)) {
+            return true;
+        }
+        // inheritance too:
+        for (final Class<?> type : KNOWN_IMMUTABLE_TYPES) {
+            if (type.isInstance(object)) {
+                return true;
+            }
+        }
+        return cls.equals(Object.class);
+    }
 }

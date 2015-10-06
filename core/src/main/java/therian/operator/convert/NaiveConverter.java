@@ -48,6 +48,7 @@ public abstract class NaiveConverter<SOURCE, TARGET> extends Converter<SOURCE, T
 
     /**
      * Convert source to target type.
+     * 
      * @param source
      * @return converted value
      */

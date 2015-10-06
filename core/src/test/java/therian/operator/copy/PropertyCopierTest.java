@@ -59,7 +59,8 @@ public class PropertyCopierTest extends OperatorTest {
     @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new NOPConverter(), new ConvertingCopier(),
-            new DefaultCopyingConverter(), new InvertNames(), new PersonToBook(), new BookToPerson(), new IllustratedBookToEmployee());
+            new DefaultCopyingConverter(), new InvertNames(), new PersonToBook(), new BookToPerson(),
+            new IllustratedBookToEmployee());
     }
 
     @Test
@@ -132,7 +133,7 @@ public class PropertyCopierTest extends OperatorTest {
         }
         new PropertyCopierWithInvalidAnnotation();
     }
-    
+
     @Test
     public void testExpressionMapping() {
         final IllustratedBook book = new IllustratedBook();

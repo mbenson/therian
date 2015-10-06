@@ -236,7 +236,7 @@ public class TherianContext extends ELContextWrapper {
             for (Map.Entry<Class<? extends Hint>, Hint> e : hints.entrySet()) {
                 final Class<? extends Hint> hintKey = e.getKey();
                 final Hint previous = isRoot() ? null : parent.getHint(hintKey);
-                if (previous == null ) {
+                if (previous == null) {
                     context.removeContext(hintKey);
                 } else {
                     context.putContext(hintKey, previous);

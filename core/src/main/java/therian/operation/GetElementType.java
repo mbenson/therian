@@ -30,40 +30,40 @@ import therian.Operation;
  */
 public class GetElementType<T> extends Operation<Type> {
 
-	private final Typed<T> typedItem;
+    private final Typed<T> typedItem;
 
-	private GetElementType(Typed<T> typedItem) {
-		this.typedItem = typedItem;
-	}
+    private GetElementType(Typed<T> typedItem) {
+        this.typedItem = typedItem;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!obj.getClass().equals(getClass())) {
-			return false;
-		}
-		GetElementType<?> other = (GetElementType<?>) obj;
-		return Objects.equals(other.typedItem, typedItem);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        GetElementType<?> other = (GetElementType<?>) obj;
+        return Objects.equals(other.typedItem, typedItem);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getClass(), typedItem);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), typedItem);
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Get element type of %s", typedItem);
-	}
+    @Override
+    public String toString() {
+        return String.format("Get element type of %s", typedItem);
+    }
 
-	@BindTypeVariable
-	public Typed<T> getTypedItem() {
-		return typedItem;
-	}
+    @BindTypeVariable
+    public Typed<T> getTypedItem() {
+        return typedItem;
+    }
 
-	public static <T> GetElementType<T> of(Typed<T> typedItem) {
-		return new GetElementType<T>(typedItem);
-	}
+    public static <T> GetElementType<T> of(Typed<T> typedItem) {
+        return new GetElementType<T>(typedItem);
+    }
 }

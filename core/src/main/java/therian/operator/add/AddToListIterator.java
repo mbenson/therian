@@ -69,7 +69,9 @@ public class AddToListIterator implements Operator<Add<?, ? extends ListIterator
             return false;
         }
         final Type targetElementType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(add.getTargetPosition().getType(), ListIterator.class), ListIterator.class.getTypeParameters()[0]);
+            TypeUtils.unrollVariables(
+                TypeUtils.getTypeArguments(add.getTargetPosition().getType(), ListIterator.class),
+                ListIterator.class.getTypeParameters()[0]);
 
         if (targetElementType == null) {
             // raw

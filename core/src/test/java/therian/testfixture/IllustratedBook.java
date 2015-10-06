@@ -23,29 +23,30 @@ import java.util.Objects;
  */
 public class IllustratedBook extends Book {
 
-	private Person illustrator;
+    private Person illustrator;
 
-	/**
-	 * @return the illustrator
-	 */
-	public Person getIllustrator() {
-		return illustrator;
-	}
+    /**
+     * @return the illustrator
+     */
+    public Person getIllustrator() {
+        return illustrator;
+    }
 
-	/**
-	 * @param illustrator the illustrator to set
-	 */
-	public void setIllustrator(Person illustrator) {
-		this.illustrator = illustrator;
-	}
+    /**
+     * @param illustrator the illustrator to set
+     */
+    public void setIllustrator(Person illustrator) {
+        this.illustrator = illustrator;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && (obj instanceof IllustratedBook) && Objects.equals(((IllustratedBook) obj).getIllustrator(), getIllustrator());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) && (obj instanceof IllustratedBook)
+            && Objects.equals(((IllustratedBook) obj).getIllustrator(), getIllustrator());
+    }
 
-	@Override
-	public int hashCode() {
-		return (super.hashCode() << 4) | Objects.hashCode(getIllustrator());
-	}
+    @Override
+    public int hashCode() {
+        return (super.hashCode() << 4) | Objects.hashCode(getIllustrator());
+    }
 }
