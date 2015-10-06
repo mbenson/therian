@@ -21,8 +21,10 @@ import java.beans.Introspector;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -45,17 +47,17 @@ public class BeanProperties {
     public static Set<String> getPropertyNames(ReturnProperties returnProperties, TherianContext context,
         Position.Readable<?> position) {
 
-        Iterable<? extends FeatureDescriptor> descriptors;
+        List<? extends FeatureDescriptor> descriptors;
         // first try ELResolver:
 
         try {
             descriptors =
-                IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, position.getValue()));
+                    IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, position.getValue()));
         } catch (Exception e) {
             descriptors = null;
         }
 
-        if ((descriptors == null) || !descriptors.iterator().hasNext()) {
+        if (CollectionUtils.isEmpty(descriptors)) {
             // java.beans introspection; on RT type if available, else raw position type:
             final Class<?> beanType;
             if (position.getValue() == null) {
