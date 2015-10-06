@@ -19,76 +19,69 @@
 package therian.testfixture;
 
 import java.util.List;
-
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 public class Author implements Person {
-    private String firstName;
-    private String lastName;
-    private String company;
-    private List<Address> addresses;
 
-    public List<Address> getAddresses() {
-        return addresses;
-    }
+	private String firstName;
+	private String lastName;
+	private String company;
+	private List<Address> addresses;
 
-    public void setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
-    }
+	public List<Address> getAddresses() {
+		return addresses;
+	}
 
-    public String getFirstName() {
-        return firstName;
-    }
+	public void setAddresses(List<Address> addresses) {
+		this.addresses = addresses;
+	}
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+	@Override
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	@Override
+	public String getLastName() {
+		return lastName;
+	}
 
-    public String getCompany() {
-        return company;
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
+	public String getCompany() {
+		return company;
+	}
 
-    public String getMiddleName() {
-        return null;
-    }
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Author == false) {
-            return false;
-        }
-        final Author other = (Author) obj;
-        return ObjectUtils.equals(other.getFirstName(), getFirstName())
-            && ObjectUtils.equals(other.getLastName(), getLastName())
-            && ObjectUtils.equals(other.getCompany(), getCompany())
-            && ObjectUtils.equals(other.getAddresses(), getAddresses());
-    }
+	@Override
+	public String getMiddleName() {
+		return null;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 73 << 4;
-        result |= ObjectUtils.hashCode(getFirstName());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getLastName());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getCompany());
-        result <<= 16;
-        result |= ObjectUtils.hashCode(getAddresses());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if ((obj instanceof Author) == false) {
+			return false;
+		}
+		final Author other = (Author) obj;
+		return Objects.equals(other.getFirstName(), getFirstName()) && Objects.equals(other.getLastName(), getLastName())
+				&& Objects.equals(other.getCompany(), getCompany()) && Objects.equals(other.getAddresses(), getAddresses());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getFirstName(), getLastName(), getCompany(), getAddresses());
+	}
 }

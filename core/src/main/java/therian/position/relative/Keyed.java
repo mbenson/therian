@@ -20,11 +20,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.functor.Predicate;
-import org.apache.commons.functor.core.collection.FilteredIterable;
-import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
-import org.apache.commons.functor.generator.util.CollectionTransformer;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -39,126 +37,117 @@ import therian.util.Types;
  */
 public class Keyed {
 
-    /**
-     * Keyed value {@link RelativePositionFactory}.
-     *
-     * @param <K>
-     * @param <V>
-     */
-    public static class PositionFactory<K, V> extends RelativePositionFactory.ReadWrite<Map<K, V>, V> {
-        private final K key;
+	/**
+	 * Keyed value {@link RelativePositionFactory}.
+	 *
+	 * @param <K>
+	 * @param <V>
+	 */
+	public static class PositionFactory<K, V> extends RelativePositionFactory.ReadWrite<Map<K, V>, V> {
 
-        private PositionFactory(K key) {
-            this.key = key;
-        }
+		private final K key;
 
-        @Override
-        public <P extends Map<K, V>> RelativePosition.ReadWrite<P, V> of(Readable<P> parentPosition) {
-            class Result extends RelativePositionImpl<P, K> implements RelativePosition.ReadWrite<P, V> {
+		private PositionFactory(K key) {
+			this.key = key;
+		}
 
-                Result(therian.position.Position.Readable<P> parentPosition, K name) {
-                    super(parentPosition, name);
-                }
+		@Override
+		public <P extends Map<K, V>> RelativePosition.ReadWrite<P, V> of(Readable<P> parentPosition) {
+			class Result extends RelativePositionImpl<P, K> implements RelativePosition.ReadWrite<P, V> {
 
-                @Override
-                public Type getType() {
-                    return Types.refine(getBasicType(), parentPosition.getType());
-                }
+				Result(therian.position.Position.Readable<P> parentPosition, K name) {
+					super(parentPosition, name);
+				}
 
-                private Type getBasicType() {
-                    final TherianContext context = TherianContext.getInstance();
-                    final P parent = parentPosition.getValue();
-                    final Predicate<FeatureDescriptor> filter = new Predicate<FeatureDescriptor>() {
-                        public boolean test(FeatureDescriptor obj) {
-                            return String.valueOf(key).equals(obj.getName());
-                        }
-                    };
+				@Override
+				public Type getType() {
+					return Types.refine(getBasicType(), parentPosition.getType());
+				}
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
-                    if (parent != null) {
-                        try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                FilteredIterable.of(
-                                    CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
-                                        IteratorToGeneratorAdapter.adapt(fd))).retain(filter);
-                        } catch (Exception e) {
-                        }
-                    }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
-                        }
-                    }
+				private Type getBasicType() {
+					final TherianContext context = TherianContext.getInstance();
+					final P parent = parentPosition.getValue();
+					final String name = String.valueOf(key);
 
-                    return ObjectUtils.defaultIfNull(TypeUtils.getTypeArguments(parentPosition.getType(), Map.class)
-                        .get(Map.class.getTypeParameters()[1]), Object.class);
-                }
+					Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+					if (parent != null) {
+						try {
+							final Iterator<FeatureDescriptor> fd = context.getELResolver().getFeatureDescriptors(context, parent);
+							featureDescriptors = IteratorUtils.toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
+						} catch (Exception e) {
+						}
+					}
+					for (FeatureDescriptor feature : featureDescriptors) {
+						final Type fromGenericTypeAttribute = Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+						if (fromGenericTypeAttribute != null) {
+							return fromGenericTypeAttribute;
+						}
+					}
 
-            }
-            return new Result(parentPosition, key);
-        }
+					return ObjectUtils.defaultIfNull(
+							TypeUtils.getTypeArguments(parentPosition.getType(), Map.class).get(Map.class.getTypeParameters()[1]), Object.class);
+				}
 
-        @Override
-        public String toString() {
-            return String.format("Keyed Value [%s]", key);
-        }
+			}
+			return new Result(parentPosition, key);
+		}
 
-        @Override
-        public int hashCode() {
-            int result = 53 << 4;
-            result |= ObjectUtils.hashCode(key);
-            return result;
-        }
+		@Override
+		public String toString() {
+			return String.format("Keyed Value [%s]", key);
+		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof PositionFactory == false) {
-                return false;
-            }
-            return ObjectUtils.equals(key, ((PositionFactory<?, ?>) obj).key);
-        }
+		@Override
+		public int hashCode() {
+			return Objects.hash(key);
+		}
 
-        /**
-         * Get the key.
-         *
-         * @return K
-         */
-        public K getKey() {
-            return key;
-        }
-    }
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if ((obj instanceof PositionFactory) == false) {
+				return false;
+			}
+			return Objects.equals(key, ((PositionFactory<?, ?>) obj).key);
+		}
 
-    /**
-     * Fluent step.
-     *
-     * @param <V>
-     */
-    public static class Value<V> {
-        /**
-         * "Keyed value at <em>key</em>".
-         * @param key
-         * @return {@link PositionFactory}
-         */
-        public <K> PositionFactory<K, V> at(K key) {
-            return new PositionFactory<K, V>(key);
-        }
-    }
+		/**
+		 * Get the key.
+		 *
+		 * @return K
+		 */
+		public K getKey() {
+			return key;
+		}
+	}
 
-    private Keyed() {
-    }
+	/**
+	 * Fluent step.
+	 *
+	 * @param <V>
+	 */
+	public static class Value<V> {
 
-    /**
-     * "Keyed value".
-     * @return {@link Value}
-     */
-    public static <V> Value<V> value() {
-        return new Value<V>();
-    }
+		/**
+		 * "Keyed value at <em>key</em>".
+		 * @param key
+		 * @return {@link PositionFactory}
+		 */
+		public <K> PositionFactory<K, V> at(K key) {
+			return new PositionFactory<K, V>(key);
+		}
+	}
+
+	private Keyed() {
+	}
+
+	/**
+	 * "Keyed value".
+	 * @return {@link Value}
+	 */
+	public static <V> Value<V> value() {
+		return new Value<V>();
+	}
 }

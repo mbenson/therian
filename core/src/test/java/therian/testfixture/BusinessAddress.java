@@ -18,30 +18,30 @@
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 /**
  *
  */
 public class BusinessAddress extends Address {
-    private String company;
 
-    public String getCompany() {
-        return company;
-    }
+	private String company;
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
+	public String getCompany() {
+		return company;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BusinessAddress && super.equals(obj)
-            && ObjectUtils.equals(((BusinessAddress) obj).getCompany(), getCompany());
-    }
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() << 4 | ObjectUtils.hashCode(getCompany());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BusinessAddress) && super.equals(obj) && Objects.equals(((BusinessAddress) obj).getCompany(), getCompany());
+	}
+
+	@Override
+	public int hashCode() {
+		return (super.hashCode() << 4) | Objects.hashCode(getCompany());
+	}
 }

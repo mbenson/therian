@@ -32,15 +32,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <annotationGeneratedSources>${project.build.directory}/generated-sources/annotations</annotationGeneratedSources>
-
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-functor</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>com.github.mbenson.therian</groupId>
       <artifactId>therian-build-processor</artifactId>
@@ -87,75 +81,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <!-- permit this only because we are shading commons-functor -->
-          <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <configuration>
-          <minimizeJar>true</minimizeJar>
-          <createDependencyReducedPom>true</createDependencyReducedPom>
-          <createSourcesJar>true</createSourcesJar>
-          <artifactSet>
-            <includes>
-              <include>org.apache.commons:commons-functor-api</include>
-              <include>org.apache.commons:commons-functor</include>
-            </includes>
-          </artifactSet>
-          <relocations>
-            <relocation>
-              <pattern>org.apache.commons.functor.adapter.</pattern>
-              <shadedPattern>therian._functor.adapter.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.core.collection.</pattern>
-              <shadedPattern>therian._functor.core.collection.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.core.composite.</pattern>
-              <shadedPattern>therian._functor.core.composite.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.core.</pattern>
-              <shadedPattern>therian._functor.core.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.generator.loop.</pattern>
-              <shadedPattern>therian._functor.generator.loop.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.generator.util.</pattern>
-              <shadedPattern>therian._functor.generator.util.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.generator.</pattern>
-              <shadedPattern>therian._functor.generator.__</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor._lang3.</pattern>
-              <shadedPattern>therian._functor._lang3.</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>org.apache.commons.functor.</pattern>
-              <shadedPattern>therian._functor.__</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>

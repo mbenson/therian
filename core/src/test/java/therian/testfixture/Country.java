@@ -14,67 +14,62 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 public class Country {
-    private String name;
-    private String ISO2Code;
-    private String ISO3Code;
 
-    public String getName() {
-        return name;
-    }
+	private String name;
+	private String ISO2Code;
+	private String ISO3Code;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getISO2Code() {
-        return ISO2Code;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setISO2Code(String ISO2Code) {
-        this.ISO2Code = ISO2Code;
-    }
+	public String getISO2Code() {
+		return ISO2Code;
+	}
 
-    public String getISO3Code() {
-        return ISO3Code;
-    }
+	public void setISO2Code(String ISO2Code) {
+		this.ISO2Code = ISO2Code;
+	}
 
-    public void setISO3Code(String ISO3Code) {
-        this.ISO3Code = ISO3Code;
-    }
+	public String getISO3Code() {
+		return ISO3Code;
+	}
 
-    @Override
-    public String toString() {
-        return getName();
-    }
+	public void setISO3Code(String ISO3Code) {
+		this.ISO3Code = ISO3Code;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Country == false) {
-            return false;
-        }
-        Country other = (Country) obj;
-        return ObjectUtils.equals(getName(), other.getName()) && ObjectUtils.equals(getISO2Code(), other.getISO2Code())
-            && ObjectUtils.equals(getISO3Code(), other.getISO3Code());
-    }
+	@Override
+	public String toString() {
+		return getName();
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 67 << 4;
-        result |= ObjectUtils.hashCode(getName());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getISO2Code());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getISO3Code());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if ((obj instanceof Country) == false) {
+			return false;
+		}
+		Country other = (Country) obj;
+		return Objects.equals(getName(), other.getName()) && Objects.equals(getISO2Code(), other.getISO2Code())
+				&& Objects.equals(getISO3Code(), other.getISO3Code());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getName(), getISO2Code(), getISO3Code());
+	}
 }

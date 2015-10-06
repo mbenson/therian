@@ -17,8 +17,6 @@ package therian.operation;
 
 import java.util.Collection;
 
-import org.apache.commons.lang3.ObjectUtils;
-
 import therian.position.Position;
 
 /**
@@ -30,40 +28,15 @@ import therian.position.Position;
  */
 public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
 
-    protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
-        super(sourcePosition, targetPosition);
-    }
+	protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
+		super(sourcePosition, targetPosition);
+	}
 
-    public void setResult(boolean result) {
-        setResult(Boolean.valueOf(result));
-    }
+	public void setResult(boolean result) {
+		setResult(Boolean.valueOf(result));
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!obj.getClass().equals(getClass())) {
-            return false;
-        }
-        Add<?, ?> other = (Add<?, ?>) obj;
-        return ObjectUtils.equals(other.getSourcePosition(), getSourcePosition())
-            && ObjectUtils.equals(other.getTargetPosition(), getTargetPosition());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 51 << 4;
-        result |= getClass().hashCode();
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getSourcePosition());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getTargetPosition());
-        return result;
-    }
-
-    public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
-        Position.Readable<SOURCE> sourcePosition) {
-        return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
-    }
+	public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition, Position.Readable<SOURCE> sourcePosition) {
+		return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
+	}
 }

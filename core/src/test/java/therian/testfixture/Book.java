@@ -18,68 +18,62 @@
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 public class Book {
-    private String title;
-    private String subtitle;
-    private Author author;
 
-    public String getTitle() {
-        return title;
-    }
+	private String title;
+	private String subtitle;
+	private Author author;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getSubtitle() {
-        return subtitle;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setSubtitle(String subtitle) {
-        this.subtitle = subtitle;
-    }
+	public String getSubtitle() {
+		return subtitle;
+	}
 
-    public Author getAuthor() {
-        return author;
-    }
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
 
-    public void setAuthor(Author author) {
-        this.author = author;
-    }
+	public Author getAuthor() {
+		return author;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Book == false) {
-            return false;
-        }
-        final Book other = (Book) obj;
-        return ObjectUtils.equals(other.getTitle(), getTitle())
-            && ObjectUtils.equals(other.getSubtitle(), getSubtitle())
-            && ObjectUtils.equals(other.getAuthor(), getAuthor());
-    }
+	public void setAuthor(Author author) {
+		this.author = author;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 83 << 4;
-        result |= ObjectUtils.hashCode(getTitle());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getSubtitle());
-        result <<= 24;
-        result |= ObjectUtils.hashCode(getAuthor());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if ((obj instanceof Book) == false) {
+			return false;
+		}
+		final Book other = (Book) obj;
+		return Objects.equals(other.getTitle(), getTitle()) && Objects.equals(other.getSubtitle(), getSubtitle())
+				&& Objects.equals(other.getAuthor(), getAuthor());
+	}
 
-    @Override
-    public String toString() {
-        final StringBuilder buf = new StringBuilder(getClass().getSimpleName()).append(' ').append(getTitle());
-        if (getSubtitle() != null) {
-            buf.append(": ").append(getSubtitle());
-        }
-        return buf.toString();
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(getTitle(), getSubtitle(), getAuthor());
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder buf = new StringBuilder(getClass().getSimpleName()).append(' ').append(getTitle());
+		if (getSubtitle() != null) {
+			buf.append(": ").append(getSubtitle());
+		}
+		return buf.toString();
+	}
 }

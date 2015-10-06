@@ -16,8 +16,8 @@
 package therian.operation;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.Typed;
 
 import therian.BindTypeVariable;
@@ -29,44 +29,41 @@ import therian.Operation;
  * @param <T>
  */
 public class GetElementType<T> extends Operation<Type> {
-    private final Typed<T> typedItem;
 
-    private GetElementType(Typed<T> typedItem) {
-        this.typedItem = typedItem;
-    }
+	private final Typed<T> typedItem;
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!obj.getClass().equals(getClass())) {
-            return false;
-        }
-        GetElementType<?> other = (GetElementType<?>) obj;
-        return ObjectUtils.equals(other.typedItem, typedItem);
-    }
+	private GetElementType(Typed<T> typedItem) {
+		this.typedItem = typedItem;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 53 << 4;
-        result |= getClass().hashCode();
-        result <<= 4;
-        result |= ObjectUtils.hashCode(typedItem);
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!obj.getClass().equals(getClass())) {
+			return false;
+		}
+		GetElementType<?> other = (GetElementType<?>) obj;
+		return Objects.equals(other.typedItem, typedItem);
+	}
 
-    @Override
-    public String toString() {
-        return String.format("Get element type of %s", typedItem);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(getClass(), typedItem);
+	}
 
-    @BindTypeVariable
-    public Typed<T> getTypedItem() {
-        return typedItem;
-    }
+	@Override
+	public String toString() {
+		return String.format("Get element type of %s", typedItem);
+	}
 
-    public static <T> GetElementType<T> of(Typed<T> typedItem) {
-        return new GetElementType<T>(typedItem);
-    }
+	@BindTypeVariable
+	public Typed<T> getTypedItem() {
+		return typedItem;
+	}
+
+	public static <T> GetElementType<T> of(Typed<T> typedItem) {
+		return new GetElementType<T>(typedItem);
+	}
 }

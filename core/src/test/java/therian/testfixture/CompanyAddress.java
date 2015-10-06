@@ -18,37 +18,37 @@
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 /**
  *
  */
 public class CompanyAddress {
-    private String email;
 
-    public CompanyAddress() {
-    }
+	private String email;
 
-    public CompanyAddress(String email) {
-        this.email = email;
-    }
+	public CompanyAddress() {
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public CompanyAddress(String email) {
+		this.email = email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof CompanyAddress && super.equals(obj)
-            && ObjectUtils.equals(((CompanyAddress) obj).getEmail(), getEmail());
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() << 4 | ObjectUtils.hashCode(getEmail());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof CompanyAddress) && super.equals(obj) && Objects.equals(((CompanyAddress) obj).getEmail(), getEmail());
+	}
+
+	@Override
+	public int hashCode() {
+		return (super.hashCode() << 4) | Objects.hashCode(getEmail());
+	}
 }

@@ -24,76 +24,66 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 /**
  *
  */
 public class Library {
-    private String libraryName;
-    private final Map<String, Book> taggedBooks = new HashMap<String, Book>();
 
-    private Person[] persons;
+	private String libraryName;
+	private final Map<String, Book> taggedBooks = new HashMap<String, Book>();
 
-    public String getLibraryName() {
-        return libraryName;
-    }
+	private Person[] persons;
 
-    public void setLibraryName(String libraryName) {
-        this.libraryName = libraryName;
-    }
+	public String getLibraryName() {
+		return libraryName;
+	}
 
-    public Map<String, Book> getTaggedBooks() {
-        return taggedBooks;
-    }
+	public void setLibraryName(String libraryName) {
+		this.libraryName = libraryName;
+	}
 
-    public Person[] getPersons() {
-        return persons;
-    }
+	public Map<String, Book> getTaggedBooks() {
+		return taggedBooks;
+	}
 
-    public void setPersons(Person[] persons) {
-        this.persons = persons;
-    }
+	public Person[] getPersons() {
+		return persons;
+	}
 
-    public List<Employee> getEmployees() {
-        if (persons == null) {
-            return Collections.emptyList();
-        }
-        ArrayList<Employee> emps = new ArrayList<Employee>(persons.length);
-        for (Person each : persons) {
-            if (each instanceof Employee) {
-                emps.add((Employee) each);
-            }
-        }
-        return emps;
-    }
+	public void setPersons(Person[] persons) {
+		this.persons = persons;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Library == false) {
-            return false;
-        }
-        final Library other = (Library) obj;
-        return ObjectUtils.equals(other.getLibraryName(), getLibraryName())
-            && ObjectUtils.equals(other.getTaggedBooks(), getTaggedBooks())
-            && ObjectUtils.equals(other.getEmployees(), getEmployees())
-            && Arrays.equals(other.getPersons(), getPersons());
-    }
+	public List<Employee> getEmployees() {
+		if (persons == null) {
+			return Collections.emptyList();
+		}
+		ArrayList<Employee> emps = new ArrayList<Employee>(persons.length);
+		for (Person each : persons) {
+			if (each instanceof Employee) {
+				emps.add((Employee) each);
+			}
+		}
+		return emps;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 91 << 4;
-        result |= ObjectUtils.hashCode(getLibraryName());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getTaggedBooks());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getEmployees());
-        result <<= 4;
-        result |= Arrays.hashCode(getPersons());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if ((obj instanceof Library) == false) {
+			return false;
+		}
+		final Library other = (Library) obj;
+		return Objects.equals(other.getLibraryName(), getLibraryName()) && Objects.equals(other.getTaggedBooks(), getTaggedBooks())
+				&& Objects.equals(other.getEmployees(), getEmployees()) && Arrays.equals(other.getPersons(), getPersons());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getLibraryName(), getTaggedBooks(), getEmployees(), getPersons());
+	}
 }

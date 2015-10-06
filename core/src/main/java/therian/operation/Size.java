@@ -15,60 +15,57 @@
  */
 package therian.operation;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
-import therian.Operation;
 import therian.BindTypeVariable;
+import therian.Operation;
 import therian.position.Position;
 
 /**
  * Size {@link Operation}.
  */
 public class Size<T> extends Operation<Integer> {
-    private final Position.Readable<T> position;
 
-    private Size(Position.Readable<T> position) {
-        super();
-        this.position = position;
-    }
+	private final Position.Readable<T> position;
 
-    @BindTypeVariable
-    public Position.Readable<T> getPosition() {
-        return position;
-    }
+	private Size(Position.Readable<T> position) {
+		super();
+		this.position = position;
+	}
 
-    public void setResult(int result) {
-        setResult(Integer.valueOf(result));
-    }
+	@BindTypeVariable
+	public Position.Readable<T> getPosition() {
+		return position;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!obj.getClass().equals(getClass())) {
-            return false;
-        }
-        Size<?> other = (Size<?>) obj;
-        return ObjectUtils.equals(other.getPosition(), getPosition());
-    }
+	public void setResult(int result) {
+		setResult(Integer.valueOf(result));
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 43 << 4;
-        result |= getClass().hashCode();
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getPosition());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!obj.getClass().equals(getClass())) {
+			return false;
+		}
+		Size<?> other = (Size<?>) obj;
+		return Objects.equals(other.getPosition(), getPosition());
+	}
 
-    @Override
-    public String toString() {
-        return String.format("Size of %s", getPosition());
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(getClass(), getPosition());
+	}
 
-    public static <T> Size<T> of(Position.Readable<T> position) {
-        return new Size<T>(position);
-    }
+	@Override
+	public String toString() {
+		return String.format("Size of %s", getPosition());
+	}
+
+	public static <T> Size<T> of(Position.Readable<T> position) {
+		return new Size<T>(position);
+	}
 
 }

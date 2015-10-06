@@ -16,36 +16,36 @@
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 /**
  * illustrated book.
  */
 public class IllustratedBook extends Book {
-    private Person illustrator;
 
-    /**
-     * @return the illustrator
-     */
-    public Person getIllustrator() {
-        return illustrator;
-    }
+	private Person illustrator;
 
-    /**
-     * @param illustrator the illustrator to set
-     */
-    public void setIllustrator(Person illustrator) {
-        this.illustrator = illustrator;
-    }
+	/**
+	 * @return the illustrator
+	 */
+	public Person getIllustrator() {
+		return illustrator;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj) && obj instanceof IllustratedBook
-            && ObjectUtils.equals(((IllustratedBook) obj).getIllustrator(), getIllustrator());
-    }
+	/**
+	 * @param illustrator the illustrator to set
+	 */
+	public void setIllustrator(Person illustrator) {
+		this.illustrator = illustrator;
+	}
 
-    @Override
-    public int hashCode() {
-        return super.hashCode() << 4 | ObjectUtils.hashCode(getIllustrator());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj) && (obj instanceof IllustratedBook) && Objects.equals(((IllustratedBook) obj).getIllustrator(), getIllustrator());
+	}
+
+	@Override
+	public int hashCode() {
+		return (super.hashCode() << 4) | Objects.hashCode(getIllustrator());
+	}
 }

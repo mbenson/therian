@@ -23,8 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
-import org.apache.commons.functor.generator.util.CollectionTransformer;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import therian.TherianContext;
@@ -34,63 +33,60 @@ import therian.position.Position;
  * Bean property utility methods.
  */
 public class BeanProperties {
-    public enum ReturnProperties {
-        ALL, WRITABLE;
-    }
 
-    public static Set<String> getPropertyNames(TherianContext context, Position.Readable<?> position) {
-        return getPropertyNames(ReturnProperties.ALL, context, position);
-    }
+	public enum ReturnProperties {
+		ALL, WRITABLE;
+	}
 
-    public static Set<String> getPropertyNames(ReturnProperties returnProperties, TherianContext context,
-        Position.Readable<?> position) {
+	public static Set<String> getPropertyNames(TherianContext context, Position.Readable<?> position) {
+		return getPropertyNames(ReturnProperties.ALL, context, position);
+	}
 
-        Iterable<? extends FeatureDescriptor> descriptors;
-        // first try ELResolver:
+	public static Set<String> getPropertyNames(ReturnProperties returnProperties, TherianContext context, Position.Readable<?> position) {
 
-        try {
-            descriptors =
-                CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
-                    IteratorToGeneratorAdapter.adapt(context.getELResolver().getFeatureDescriptors(context,
-                        position.getValue())));
-        } catch (Exception e) {
-            descriptors = null;
-        }
+		Iterable<? extends FeatureDescriptor> descriptors;
+		// first try ELResolver:
 
-        if (descriptors == null || !descriptors.iterator().hasNext()) {
-            // java.beans introspection; on RT type if available, else raw position type:
-            final Class<?> beanType;
-            if (position.getValue() == null) {
-                beanType = TypeUtils.getRawType(position.getType(), null);
-            } else {
-                beanType = position.getValue().getClass();
-            }
-            try {
-                descriptors = Arrays.asList(Introspector.getBeanInfo(beanType).getPropertyDescriptors());
-            } catch (IntrospectionException e1) {
-                return Collections.emptySet();
-            }
-        }
+		try {
+			descriptors = IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, position.getValue()));
+		} catch (Exception e) {
+			descriptors = null;
+		}
 
-        final Set<String> result = new HashSet<String>();
-        for (final FeatureDescriptor fd : descriptors) {
-            final String name = fd.getName();
-            if (returnProperties == ReturnProperties.WRITABLE) {
-                try {
-                    if (context.getELResolver().isReadOnly(context, position.getValue(), name)) {
-                        continue;
-                    }
-                } catch (Exception e) {
-                    // if we can't even _check_ for readOnly, assume not writable:
-                    continue;
-                }
-            }
-            result.add(name);
-        }
-        return result;
-    }
+		if ((descriptors == null) || !descriptors.iterator().hasNext()) {
+			// java.beans introspection; on RT type if available, else raw position type:
+			final Class<?> beanType;
+			if (position.getValue() == null) {
+				beanType = TypeUtils.getRawType(position.getType(), null);
+			} else {
+				beanType = position.getValue().getClass();
+			}
+			try {
+				descriptors = Arrays.asList(Introspector.getBeanInfo(beanType).getPropertyDescriptors());
+			} catch (IntrospectionException e1) {
+				return Collections.emptySet();
+			}
+		}
 
-    private BeanProperties() {
-    }
+		final Set<String> result = new HashSet<String>();
+		for (final FeatureDescriptor fd : descriptors) {
+			final String name = fd.getName();
+			if (returnProperties == ReturnProperties.WRITABLE) {
+				try {
+					if (context.getELResolver().isReadOnly(context, position.getValue(), name)) {
+						continue;
+					}
+				} catch (Exception e) {
+					// if we can't even _check_ for readOnly, assume not writable:
+					continue;
+				}
+			}
+			result.add(name);
+		}
+		return result;
+	}
+
+	private BeanProperties() {
+	}
 
 }

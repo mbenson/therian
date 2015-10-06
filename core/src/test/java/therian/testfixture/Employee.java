@@ -18,61 +18,60 @@
  */
 package therian.testfixture;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 
 /**
  *
  */
 public class Employee implements Person {
-    private String firstName, lastName;
 
-    public Employee() {
-    }
+	private String firstName, lastName;
 
-    public Employee(String firstN, String lastN) {
-        this.firstName = firstN;
-        this.lastName = lastN;
-    }
+	public Employee() {
+	}
 
-    public String getFirstName() {
-        return firstName;
-    }
+	public Employee(String firstN, String lastN) {
+		firstName = firstN;
+		lastName = lastN;
+	}
 
-    public String getMiddleName() {
-        return null; // not supported
-    }
+	@Override
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	@Override
+	public String getMiddleName() {
+		return null; // not supported
+	}
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+	@Override
+	public String getLastName() {
+		return lastName;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Employee == false) {
-            return false;
-        }
-        final Employee other = (Employee) obj;
-        return ObjectUtils.equals(other.getFirstName(), getFirstName())
-            && ObjectUtils.equals(other.getLastName(), getLastName());
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = 89 << 4;
-        result |= ObjectUtils.hashCode(getFirstName());
-        result <<= 4;
-        result |= ObjectUtils.hashCode(getLastName());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if ((obj instanceof Employee) == false) {
+			return false;
+		}
+		final Employee other = (Employee) obj;
+		return Objects.equals(other.getFirstName(), getFirstName()) && Objects.equals(other.getLastName(), getLastName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getFirstName(), getLastName());
+	}
 }

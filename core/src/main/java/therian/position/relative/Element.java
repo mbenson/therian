@@ -21,10 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.functor.Predicate;
-import org.apache.commons.functor.core.collection.FilteredIterable;
-import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
-import org.apache.commons.functor.generator.util.CollectionTransformer;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -33,8 +30,8 @@ import therian.TherianContext;
 import therian.el.ELConstants;
 import therian.operation.Add;
 import therian.position.Position;
-import uelbox.IterableELResolver;
 import therian.util.Types;
+import uelbox.IterableELResolver;
 
 /**
  * Provides fluent access to {@link RelativePositionFactory} instances for:
@@ -44,150 +41,143 @@ import therian.util.Types;
  * <li>{@link Iterable} elements (requires {@link IterableELResolver})</li>
  * </ul>
  * Because this implementation uses unified EL facilities, growing lists/collections is not supported.
- * 
+ *
  * @see Add
  */
 public class Element {
-    /**
-     * Element {@link RelativePositionFactory}.
-     *
-     * @param <PARENT>
-     * @param <TYPE>
-     */
-    public static abstract class PositionFactory<PARENT, TYPE> extends RelativePositionFactory.ReadWrite<PARENT, TYPE> {
 
-        private final int index;
+	/**
+	 * Element {@link RelativePositionFactory}.
+	 *
+	 * @param <PARENT>
+	 * @param <TYPE>
+	 */
+	public static abstract class PositionFactory<PARENT, TYPE> extends RelativePositionFactory.ReadWrite<PARENT, TYPE> {
 
-        private PositionFactory(int index) {
-            this.index = index;
-        }
+		private final int index;
 
-        @Override
-        public <P extends PARENT> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
-            class Result extends RelativePositionImpl<P, Integer> implements RelativePosition.ReadWrite<P, TYPE> {
+		private PositionFactory(int index) {
+			this.index = index;
+		}
 
-                Result(Position.Readable<P> parentPosition, int index) {
-                    super(parentPosition, Integer.valueOf(index));
-                }
+		@Override
+		public <P extends PARENT> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
+			class Result extends RelativePositionImpl<P, Integer> implements RelativePosition.ReadWrite<P, TYPE> {
 
-                @Override
-                public Type getType() {
-                    return Types.refine(getBasicType(), parentPosition.getType());
-                }
+				Result(Position.Readable<P> parentPosition, int index) {
+					super(parentPosition, Integer.valueOf(index));
+				}
 
-                private Type getBasicType() {
-                    final TherianContext context = TherianContext.getInstance();
-                    final P parent = parentPosition.getValue();
-                    final Predicate<FeatureDescriptor> filter = new Predicate<FeatureDescriptor>() {
-                        public boolean test(FeatureDescriptor obj) {
-                            return Integer.toString(index).equals(obj.getName());
-                        }
-                    };
+				@Override
+				public Type getType() {
+					return Types.refine(getBasicType(), parentPosition.getType());
+				}
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
-                    if (parent != null) {
-                        try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                FilteredIterable.of(
-                                    CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
-                                        IteratorToGeneratorAdapter.adapt(fd))).retain(filter);
-                        } catch (Exception e) {
-                        }
-                    }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
-                        }
-                    }
+				private Type getBasicType() {
+					final TherianContext context = TherianContext.getInstance();
+					final P parent = parentPosition.getValue();
+					final String name = Integer.toString(index);
 
-                    return ObjectUtils.defaultIfNull(evaluateElementType(parentPosition), Object.class);
-                }
-            }
-            return new Result(parentPosition, index);
-        }
+					Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+					if (parent != null) {
+						try {
+							final Iterator<FeatureDescriptor> fd = context.getELResolver().getFeatureDescriptors(context, parent);
+							featureDescriptors = IteratorUtils.toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
+						} catch (Exception e) {
+						}
+					}
+					for (FeatureDescriptor feature : featureDescriptors) {
+						final Type fromGenericTypeAttribute = Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+						if (fromGenericTypeAttribute != null) {
+							return fromGenericTypeAttribute;
+						}
+					}
 
-        protected abstract <P> Type evaluateElementType(Position<P> parentPosition);
+					return ObjectUtils.defaultIfNull(evaluateElementType(parentPosition), Object.class);
+				}
+			}
+			return new Result(parentPosition, index);
+		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!obj.getClass().equals(getClass())) {
-                return false;
-            }
-            return ((PositionFactory<?, ?>) obj).index == index;
-        }
+		protected abstract <P> Type evaluateElementType(Position<P> parentPosition);
 
-        /**
-         * Get the index
-         * 
-         * @return int
-         */
-        public int getIndex() {
-            return index;
-        }
-    }
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!obj.getClass().equals(getClass())) {
+				return false;
+			}
+			return ((PositionFactory<?, ?>) obj).index == index;
+		}
 
-    /**
-     * "Element at array index <em>n</em>".
-     * @param index
-     * @return {@link PositionFactory}
-     */
-    public static <T> PositionFactory<Object, T> atArrayIndex(final int index) {
-        final PositionFactory<Object, T> result = new PositionFactory<Object, T>(index) {
-            @Override
-            public <P> RelativePosition.ReadWrite<P, T> of(Position.Readable<P> parentPosition) {
-                final Type parentType = parentPosition.getType();
-                Validate.isTrue(TypeUtils.isArrayType(parentType), "%s is not an array type", parentType);
-                return super.of(parentPosition);
-            }
+		/**
+		 * Get the index
+		 *
+		 * @return int
+		 */
+		public int getIndex() {
+			return index;
+		}
+	}
 
-            @Override
-            public int hashCode() {
-                return 83 << 4 | index;
-            }
+	/**
+	 * "Element at array index <em>n</em>".
+	 * @param index
+	 * @return {@link PositionFactory}
+	 */
+	public static <T> PositionFactory<Object, T> atArrayIndex(final int index) {
+		final PositionFactory<Object, T> result = new PositionFactory<Object, T>(index) {
 
-            @Override
-            public String toString() {
-                return String.format("Array Element [%s]", index);
-            }
-            
-            @Override
-            protected <P> Type evaluateElementType(Position<P> parentPosition) {
-                return TypeUtils.getArrayComponentType(parentPosition.getType());
-            }
-        };
-        return result;
-    }
+			@Override
+			public <P> RelativePosition.ReadWrite<P, T> of(Position.Readable<P> parentPosition) {
+				final Type parentType = parentPosition.getType();
+				Validate.isTrue(TypeUtils.isArrayType(parentType), "%s is not an array type", parentType);
+				return super.of(parentPosition);
+			}
 
-    /**
-     * "Element at index <em>n</em>".
-     * @param index
-     * @return {@link PositionFactory}
-     */
-    public static <T> PositionFactory<Iterable<? extends T>, T> atIndex(final int index) {
-        final PositionFactory<Iterable<? extends T>, T> result = new PositionFactory<Iterable<? extends T>, T>(index) {
-            @Override
-            public int hashCode() {
-                return 79 << 4 | index;
-            }
+			@Override
+			public int hashCode() {
+				return (83 << 4) | index;
+			}
 
-            @Override
-            public String toString() {
-                return String.format("Element [%s]", index);
-            }
+			@Override
+			public String toString() {
+				return String.format("Array Element [%s]", index);
+			}
 
-            @Override
-            protected <P> Type evaluateElementType(Position<P> parentPosition) {
-                return TypeUtils.getTypeArguments(parentPosition.getType(), Iterable.class).get(
-                    Iterable.class.getTypeParameters()[0]);
-            }
-        };
-        return result;
-    }
+			@Override
+			protected <P> Type evaluateElementType(Position<P> parentPosition) {
+				return TypeUtils.getArrayComponentType(parentPosition.getType());
+			}
+		};
+		return result;
+	}
+
+	/**
+	 * "Element at index <em>n</em>".
+	 * @param index
+	 * @return {@link PositionFactory}
+	 */
+	public static <T> PositionFactory<Iterable<? extends T>, T> atIndex(final int index) {
+		final PositionFactory<Iterable<? extends T>, T> result = new PositionFactory<Iterable<? extends T>, T>(index) {
+
+			@Override
+			public int hashCode() {
+				return (79 << 4) | index;
+			}
+
+			@Override
+			public String toString() {
+				return String.format("Element [%s]", index);
+			}
+
+			@Override
+			protected <P> Type evaluateElementType(Position<P> parentPosition) {
+				return TypeUtils.getTypeArguments(parentPosition.getType(), Iterable.class).get(Iterable.class.getTypeParameters()[0]);
+			}
+		};
+		return result;
+	}
 }

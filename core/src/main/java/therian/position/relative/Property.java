@@ -32,10 +32,7 @@ import java.util.logging.Logger;
 
 import javax.el.ELResolver;
 
-import org.apache.commons.functor.Predicate;
-import org.apache.commons.functor.core.collection.FilteredIterable;
-import org.apache.commons.functor.generator.loop.IteratorToGeneratorAdapter;
-import org.apache.commons.functor.generator.util.CollectionTransformer;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -48,193 +45,187 @@ import therian.util.Types;
  * Fluent entry point for "property at" {@link RelativePositionFactory}.
  */
 public class Property {
-    private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
-    private enum FeatureExtractionStrategy {
-        GENERIC_TYPE_ATTRIBUTE {
+	private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
 
-            @Override
-            Type getType(FeatureDescriptor feature) {
-                return Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-            }
-        },
-        PROPERTY_DESCRIPTOR {
+	private enum FeatureExtractionStrategy {
+		GENERIC_TYPE_ATTRIBUTE {
 
-            @Override
-            Type getType(FeatureDescriptor feature) {
-                if (feature instanceof PropertyDescriptor) {
-                    PropertyDescriptor pd = (PropertyDescriptor) feature;
-                    Method readMethod = pd.getReadMethod();
-                    if (readMethod != null) {
-                        return readMethod.getGenericReturnType();
-                    }
-                    Method writeMethod = pd.getWriteMethod();
-                    if (writeMethod != null) {
-                        final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
-                        return writeMethod.getGenericParameterTypes()[arg];
-                    }
+			@Override
+			Type getType(FeatureDescriptor feature) {
+				return Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
+			}
+		},
+		PROPERTY_DESCRIPTOR {
 
-                }
-                return null;
-            }
-        },
-        TYPE_ATTRIBUTE {
+			@Override
+			Type getType(FeatureDescriptor feature) {
+				if (feature instanceof PropertyDescriptor) {
+					PropertyDescriptor pd = (PropertyDescriptor) feature;
+					Method readMethod = pd.getReadMethod();
+					if (readMethod != null) {
+						return readMethod.getGenericReturnType();
+					}
+					Method writeMethod = pd.getWriteMethod();
+					if (writeMethod != null) {
+						final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
+						return writeMethod.getGenericParameterTypes()[arg];
+					}
 
-            @Override
-            Type getType(FeatureDescriptor feature) {
-                return Class.class.cast(feature.getValue(ELResolver.TYPE));
-            }
-        };
-        abstract Type getType(FeatureDescriptor feature);
-    }
+				}
+				return null;
+			}
+		},
+		TYPE_ATTRIBUTE {
 
-    public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
+			@Override
+			Type getType(FeatureDescriptor feature) {
+				return Class.class.cast(feature.getValue(ELResolver.TYPE));
+			}
+		};
 
-        private final String propertyName;
-        private final boolean optional;
+		abstract Type getType(FeatureDescriptor feature);
+	}
 
-        private PositionFactory(final String propertyName) {
-            this(propertyName, false);
-        }
+	public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
 
-        private PositionFactory(final String propertyName, boolean optional) {
-            this.propertyName = propertyName;
-            this.optional = optional;
-        }
+		private final String propertyName;
+		private final boolean optional;
 
-        public String getPropertyName() {
-            return propertyName;
-        }
+		private PositionFactory(final String propertyName) {
+			this(propertyName, false);
+		}
 
-        @Override
-        public <P> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
-            class Result extends RelativePositionImpl<P, String> implements RelativePosition.ReadWrite<P, TYPE> {
+		private PositionFactory(final String propertyName, boolean optional) {
+			this.propertyName = propertyName;
+			this.optional = optional;
+		}
 
-                protected Result(therian.position.Position.Readable<P> parentPosition, String name) {
-                    super(parentPosition, name);
-                }
+		public String getPropertyName() {
+			return propertyName;
+		}
 
-                @Override
-                public Type getType() {
-                    return Types.refine(getBasicType(), parentPosition.getType());
-                }
+		@Override
+		public <P> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
+			class Result extends RelativePositionImpl<P, String> implements RelativePosition.ReadWrite<P, TYPE> {
 
-                private Type getBasicType() {
-                    final TherianContext context = TherianContext.getInstance();
-                    final P parent = parentPosition.getValue();
-                    final Predicate<FeatureDescriptor> filter = new Predicate<FeatureDescriptor>() {
-                        public boolean test(FeatureDescriptor obj) {
-                            return propertyName.equals(obj.getName());
-                        }
-                    };
+				protected Result(therian.position.Position.Readable<P> parentPosition, String name) {
+					super(parentPosition, name);
+				}
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
-                    if (parent != null) {
-                        try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                FilteredIterable.of(
-                                    CollectionTransformer.<FeatureDescriptor> toCollection().evaluate(
-                                        IteratorToGeneratorAdapter.adapt(fd))).retain(filter);
-                        } catch (Exception e) {
-                        }
-                    }
-                    for (FeatureDescriptor fd : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
-                        }
-                    }
+				@Override
+				public Type getType() {
+					return Types.refine(getBasicType(), parentPosition.getType());
+				}
 
-                    final Type parentType = parentPosition.getType();
-                    final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
-                    try {
-                        final List<PropertyDescriptor> beanPropertyDescriptors =
-                            Arrays.asList(Introspector.getBeanInfo(rawParentType).getPropertyDescriptors());
-                        for (PropertyDescriptor pd : FilteredIterable.of(beanPropertyDescriptors).retain(filter)) {
-                            Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
-                            if (fromPropertyDescriptor != null) {
-                                return fromPropertyDescriptor;
-                            }
-                        }
-                    } catch (IntrospectionException e) {
-                        if (LOG.isLoggable(Level.WARNING)) {
-                            LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
-                        }
-                    }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
-                        if (fromTypeAttribute != null) {
-                            return fromTypeAttribute;
-                        }
-                    }
-                    final Class<?> type =
-                        context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
-                    Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s",
-                        propertyName, parentPosition);
-                    return type;
-                }
+				private Type getBasicType() {
+					final TherianContext context = TherianContext.getInstance();
+					final P parent = parentPosition.getValue();
 
-                @Override
-                public TYPE getValue() {
-                    final TherianContext context = TherianContext.getInstance();
-                    final P parent = parentPosition.getValue();
-                    final Object value = context.getELResolver().getValue(context, parent, propertyName);
-                    if (context.isPropertyResolved()) {
-                        @SuppressWarnings("unchecked")
-                        final TYPE result = (TYPE) value;
-                        return result;
-                    }
-                    if (optional && parent == null) {
-                        return null;
-                    }
-                    throw new IllegalStateException(String.format("could not get value %s from %s", propertyName,
-                        parentPosition));
-                }
-            }
-            return new Result(parentPosition, propertyName);
-        }
+					Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+					if (parent != null) {
+						try {
+							final Iterator<FeatureDescriptor> fd = context.getELResolver().getFeatureDescriptors(context, parent);
+							featureDescriptors = IteratorUtils.toList(IteratorUtils.filteredIterator(fd, (d) -> propertyName.equals(d.getName())));
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            return obj instanceof PositionFactory && propertyName.equals(((PositionFactory<?>) obj).propertyName);
-        }
+						} catch (Exception e) {
+						}
+					}
+					for (FeatureDescriptor fd : featureDescriptors) {
+						final Type fromGenericTypeAttribute = FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
+						if (fromGenericTypeAttribute != null) {
+							return fromGenericTypeAttribute;
+						}
+					}
 
-        @Override
-        public int hashCode() {
-            return (71 << 4) | propertyName.hashCode();
-        }
+					final Type parentType = parentPosition.getType();
+					final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
+					try {
+						final List<PropertyDescriptor> beanPropertyDescriptors = Arrays.asList(Introspector.getBeanInfo(rawParentType)
+								.getPropertyDescriptors());
 
-        @Override
-        public String toString() {
-            return String.format("Property %s", propertyName);
-        }
-    }
+						final Iterable<PropertyDescriptor> matching = () -> beanPropertyDescriptors.stream()
+								.filter((d) -> propertyName.equals(d.getName())).iterator();
 
-    /**
-     * Create a {@link Property.PositionFactory} for the specified property.
-     * 
-     * @param propertyName
-     * @return {@link PositionFactory}
-     */
-    public static <T> PositionFactory<T> at(String propertyName) {
-        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"));
-    }
+						for (PropertyDescriptor pd : matching) {
+							Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
+							if (fromPropertyDescriptor != null) {
+								return fromPropertyDescriptor;
+							}
+						}
+					} catch (IntrospectionException e) {
+						if (LOG.isLoggable(Level.WARNING)) {
+							LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
+						}
+					}
+					for (FeatureDescriptor feature : featureDescriptors) {
+						Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
+						if (fromTypeAttribute != null) {
+							return fromTypeAttribute;
+						}
+					}
+					final Class<?> type = context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
+					Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s", propertyName, parentPosition);
+					return type;
+				}
 
-    /**
-     * Create a {@link Property.PositionFactory} for an optional property. A position created from such a factory will
-     * silently return {@code null} as its value if its parent's value is {@code null}.
-     * 
-     * @param propertyName
-     * @return {@link PositionFactory}
-     */
-    public static <T> PositionFactory<T> optional(String propertyName) {
-        final boolean optional = true;
-        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"), optional);
-    }
+				@Override
+				public TYPE getValue() {
+					final TherianContext context = TherianContext.getInstance();
+					final P parent = parentPosition.getValue();
+					final Object value = context.getELResolver().getValue(context, parent, propertyName);
+					if (context.isPropertyResolved()) {
+						@SuppressWarnings("unchecked")
+						final TYPE result = (TYPE) value;
+						return result;
+					}
+					if (optional && (parent == null)) {
+						return null;
+					}
+					throw new IllegalStateException(String.format("could not get value %s from %s", propertyName, parentPosition));
+				}
+			}
+			return new Result(parentPosition, propertyName);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			return (obj instanceof PositionFactory) && propertyName.equals(((PositionFactory<?>) obj).propertyName);
+		}
+
+		@Override
+		public int hashCode() {
+			return (71 << 4) | propertyName.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Property %s", propertyName);
+		}
+	}
+
+	/**
+	 * Create a {@link Property.PositionFactory} for the specified property.
+	 *
+	 * @param propertyName
+	 * @return {@link PositionFactory}
+	 */
+	public static <T> PositionFactory<T> at(String propertyName) {
+		return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"));
+	}
+
+	/**
+	 * Create a {@link Property.PositionFactory} for an optional property. A position created from such a factory will
+	 * silently return {@code null} as its value if its parent's value is {@code null}.
+	 *
+	 * @param propertyName
+	 * @return {@link PositionFactory}
+	 */
+	public static <T> PositionFactory<T> optional(String propertyName) {
+		final boolean optional = true;
+		return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"), optional);
+	}
 }
