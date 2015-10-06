@@ -65,12 +65,12 @@ public class DefaultToIteratorConverterTest extends OperatorTest {
 
     @Test
     public void testPrimitiveArray() {
-        final int[] beast = new int[] { 6, 6, 6 };
+        final int[] beast = { 6, 6, 6 };
         final Iterator<Integer> result =
             therianContext.eval(Convert.to(new TypeLiteral<Iterator<Integer>>() {}, Positions.readOnly(beast)));
-        for (int i = 0; i < beast.length; i++) {
+        for (int element : beast) {
             assertTrue(result.hasNext());
-            assertEquals(beast[i], result.next().intValue());
+            assertEquals(element, result.next().intValue());
         }
         assertFalse(result.hasNext());
     }

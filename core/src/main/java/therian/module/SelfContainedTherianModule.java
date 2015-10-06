@@ -62,7 +62,7 @@ public abstract class SelfContainedTherianModule extends TherianModule {
     }
 
     private Operator<?>[] getSelfContainedOperators() {
-        final List<Operator<?>> result = new ArrayList<Operator<?>>();
+        final List<Operator<?>> result = new ArrayList<>();
 
         for (Class<?> c : ClassUtils.hierarchy(getClass(), interfacesPolicy)) {
             for (Class<?> inner : c.getDeclaredClasses()) {

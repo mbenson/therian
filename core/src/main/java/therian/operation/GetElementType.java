@@ -64,6 +64,6 @@ public class GetElementType<T> extends Operation<Type> {
     }
 
     public static <T> GetElementType<T> of(Typed<T> typedItem) {
-        return new GetElementType<T>(typedItem);
+        return new GetElementType<>(typedItem);
     }
 }

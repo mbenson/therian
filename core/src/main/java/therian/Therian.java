@@ -47,12 +47,12 @@ public class Therian {
     /**
      * Return an instance configured as {@link Therian#standard()} + {@link TherianModule}s discovered using the
      * {@link ServiceLoader} mechanism.
-     * 
+     *
      * @return Therian
      */
     public static synchronized Therian usingDiscoveredModules() {
         if (usingDiscoveredModules == null) {
-            final List<TherianModule> modules = new ArrayList<TherianModule>();
+            final List<TherianModule> modules = new ArrayList<>();
             modules.add(DEFAULT_MODULE);
             for (TherianModule module : ServiceLoader.load(TherianModule.class)) {
                 modules.add(module);
@@ -68,7 +68,7 @@ public class Therian {
 
     /**
      * Get a Therian instance configured with standard {@link Operator}s and {@link ELResolver}s.
-     * 
+     *
      * @return Therian
      */
     public static Therian standard() {
@@ -76,14 +76,14 @@ public class Therian {
     }
 
     private final TherianModule[] modules;
-    private final List<ELResolver> elResolvers = new ArrayList<ELResolver>();
+    private final List<ELResolver> elResolvers = new ArrayList<>();
 
     private final OperatorManager operatorManager;
 
     private Therian(TherianModule... modules) {
         this.modules = Validate.noNullElements(modules, "modules");
 
-        final Set<Operator<?>> operators = new LinkedHashSet<Operator<?>>();
+        final Set<Operator<?>> operators = new LinkedHashSet<>();
         int moduleNumber = 0;
         for (TherianModule module : this.modules) {
             Validate.noNullElements(module.getOperators(), "null operator at index %2$s of module %1$s", moduleNumber);

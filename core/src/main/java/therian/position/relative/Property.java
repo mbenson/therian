@@ -219,7 +219,7 @@ public class Property {
      * @return {@link PositionFactory}
      */
     public static <T> PositionFactory<T> at(String propertyName) {
-        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"));
+        return new PositionFactory<>(Validate.notEmpty(propertyName, "propertyName"));
     }
 
     /**
@@ -231,6 +231,6 @@ public class Property {
      */
     public static <T> PositionFactory<T> optional(String propertyName) {
         final boolean optional = true;
-        return new PositionFactory<T>(Validate.notEmpty(propertyName, "propertyName"), optional);
+        return new PositionFactory<>(Validate.notEmpty(propertyName, "propertyName"), optional);
     }
 }

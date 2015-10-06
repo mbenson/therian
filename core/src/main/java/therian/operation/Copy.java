@@ -47,7 +47,7 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
         }
 
         public static <S, T> Safely<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
-            return new Safely<S, T>(sourcePosition, targetPosition);
+            return new Safely<>(sourcePosition, targetPosition);
         }
     }
 
@@ -57,12 +57,12 @@ public class Copy<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Void, Positi
 
     /**
      * Fluent factory method.
-     * 
+     *
      * @param targetPosition
      * @param sourcePosition
      * @return Copy
      */
     public static <S, T> Copy<S, T> to(Position.Readable<T> targetPosition, Position.Readable<S> sourcePosition) {
-        return new Copy<S, T>(sourcePosition, targetPosition);
+        return new Copy<>(sourcePosition, targetPosition);
     }
 }

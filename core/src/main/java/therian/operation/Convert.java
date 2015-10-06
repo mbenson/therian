@@ -26,7 +26,7 @@ import therian.util.Types;
 
 /**
  * Convert operation.
- * 
+ *
  * @param <SOURCE>
  * @param <TARGET>
  */
@@ -45,7 +45,7 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
                 Validate.isTrue(!isPrimitive(type), "Null value illegal for type %s", value, type);
             }
             getTarget().setValue(value);
-            Convert.this.setResult(value);
+            setResult(value);
         }
 
         @Override
@@ -99,34 +99,34 @@ public class Convert<SOURCE, TARGET> extends Transform<SOURCE, TARGET, TARGET, P
 
     /**
      * Fluent factory method.
-     * 
+     *
      * @param targetType
      * @param sourcePosition
      * @return Convert
      */
     public static <S, T> Convert<S, T> to(Class<T> targetType, Position.Readable<S> sourcePosition) {
-        return new Convert<S, T>(sourcePosition, targetType);
+        return new Convert<>(sourcePosition, targetType);
     }
 
     /**
      * Fluent factory method.
-     * 
+     *
      * @param targetType
      * @param sourcePosition
      * @return Convert
      */
     public static <S, T> Convert<S, T> to(Typed<T> targetType, Position.Readable<S> sourcePosition) {
-        return new Convert<S, T>(sourcePosition, targetType.getType());
+        return new Convert<>(sourcePosition, targetType.getType());
     }
 
     /**
      * Fluent factory method.
-     * 
+     *
      * @param targetPosition
      * @param sourcePosition
      * @return Convert
      */
     public static <S, T> Convert<S, T> to(Position.Writable<T> targetPosition, Position.Readable<S> sourcePosition) {
-        return new Convert<S, T>(sourcePosition, targetPosition);
+        return new Convert<>(sourcePosition, targetPosition);
     }
 }

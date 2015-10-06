@@ -51,13 +51,13 @@ public class DefaultImmutableChecker extends ImmutableChecker {
         Collections.<Class<?>> addAll(s, String.class, Enum.class, Annotation.class, Class.class, Arrays.asList()
             .getClass());
         addTypeTo(s, Collections.emptySet());
-        addTypeTo(s, Collections.unmodifiableSet(new HashSet<Object>()));
+        addTypeTo(s, Collections.unmodifiableSet(new HashSet<>()));
         addTypeTo(s, Collections.emptyList());
-        addTypeTo(s, Collections.unmodifiableList(new ArrayList<Object>()));
-        addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<String>()));
+        addTypeTo(s, Collections.unmodifiableList(new ArrayList<>()));
+        addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<>()));
         addTypeTo(s, Collections.emptyMap());
-        addTypeTo(s, Collections.unmodifiableMap(new HashMap<Object, Object>()));
-        addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<String, Object>()));
+        addTypeTo(s, Collections.unmodifiableMap(new HashMap<>()));
+        addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<>()));
 
         @SuppressWarnings({ "unused" })
         boolean junk =
@@ -105,7 +105,7 @@ public class DefaultImmutableChecker extends ImmutableChecker {
         while (c.isAnonymousClass()) {
             c = c.getEnclosingClass();
         }
-        if ((target.contains(c) && !target.equals(c))
+        if (target.contains(c) && !target.equals(c)
             || StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
             target.add(type);
         }

@@ -18,13 +18,13 @@
  */
 package therian.testfixture;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -32,7 +32,7 @@ import java.util.Objects;
 public class Library {
 
     private String libraryName;
-    private final Map<String, Book> taggedBooks = new HashMap<String, Book>();
+    private final Map<String, Book> taggedBooks = new HashMap<>();
 
     private Person[] persons;
 
@@ -60,13 +60,8 @@ public class Library {
         if (persons == null) {
             return Collections.emptyList();
         }
-        ArrayList<Employee> emps = new ArrayList<Employee>(persons.length);
-        for (Person each : persons) {
-            if (each instanceof Employee) {
-                emps.add((Employee) each);
-            }
-        }
-        return emps;
+        return Arrays.stream(persons).filter(Employee.class::isInstance).map(Employee.class::cast)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -74,7 +69,7 @@ public class Library {
         if (obj == this) {
             return true;
         }
-        if ((obj instanceof Library) == false) {
+        if (obj instanceof Library == false) {
             return false;
         }
         final Library other = (Library) obj;

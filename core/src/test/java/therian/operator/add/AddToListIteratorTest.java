@@ -27,7 +27,7 @@ public class AddToListIteratorTest extends OperatorTest {
 
     @Test
     public void testRaw() {
-        final List<?> l = new ArrayList<Object>();
+        final List<?> l = new ArrayList<>();
         assertTrue(therianContext.eval(
             Add.to(Positions.readWrite(ListIterator.class, l.listIterator()), Positions.readOnly("foo")))
             .booleanValue());
@@ -37,7 +37,7 @@ public class AddToListIteratorTest extends OperatorTest {
 
     @Test
     public void testTyped() {
-        final List<String> l = new ArrayList<String>();
+        final List<String> l = new ArrayList<>();
         assertTrue(therianContext.eval(
             Add.to(Positions.readWrite(new TypeLiteral<ListIterator<String>>() {}.value, l.listIterator()),
                 Positions.readOnly("foo"))).booleanValue());
@@ -62,7 +62,7 @@ public class AddToListIteratorTest extends OperatorTest {
 
     @Test
     public void testHasContent() {
-        final List<String> l = new ArrayList<String>(Arrays.asList("foo", "bar", "baz"));
+        final List<String> l = new ArrayList<>(Arrays.asList("foo", "bar", "baz"));
         final ListIterator<String> listIterator = l.listIterator();
         listIterator.next();
         listIterator.next();

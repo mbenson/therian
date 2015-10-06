@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import therian.TherianContext;
 import therian.Operator.DependsOn;
+import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operator.getelementtype.GetEnumerationElementType;
@@ -39,7 +39,7 @@ public class EnumerationToList extends AssignableElementConverter<Enumeration<?>
 
     @Override
     public boolean perform(TherianContext context, Convert<? extends Enumeration<?>, ? super List> operation) {
-        final List<Object> result = new ArrayList<Object>();
+        final List<Object> result = new ArrayList<>();
         for (Enumeration<?> e = operation.getSourcePosition().getValue(); e != null && e.hasMoreElements();) {
             result.add(e.nextElement());
         }

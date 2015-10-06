@@ -65,7 +65,7 @@ public class Size<T> extends Operation<Integer> {
     }
 
     public static <T> Size<T> of(Position.Readable<T> position) {
-        return new Size<T>(position);
+        return new Size<>(position);
     }
 
 }

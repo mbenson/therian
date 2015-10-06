@@ -35,7 +35,7 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
 
     public static TypeVariableMap wrap(Map<TypeVariable<?>, Type> m) {
         return m instanceof TypeVariableMap ? (TypeVariableMap) m : new TypeVariableMap(m == null
-            ? Collections.<TypeVariable<?>, Type> emptyMap() : m);
+            ? Collections.emptyMap() : m);
     }
 
     private static String toString(Type type) {
@@ -48,7 +48,7 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
     private final Map<TypeVariable<?>, Type> wrapped;
 
     public TypeVariableMap() {
-        this(new HashMap<TypeVariable<?>, Type>());
+        this(new HashMap<>());
     }
 
     private TypeVariableMap(Map<TypeVariable<?>, Type> wrapped) {

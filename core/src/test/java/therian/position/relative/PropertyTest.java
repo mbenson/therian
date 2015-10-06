@@ -63,7 +63,7 @@ public class PropertyTest {
         final Type addressListType = new TypeLiteral<List<Address>>() {}.value;
         assertEquals(addressListType, bookAuthorAddresses.getType());
 
-        bookAuthorAddresses.setValue(new ArrayList<Address>());
+        bookAuthorAddresses.setValue(new ArrayList<>());
         bookAuthorAddresses.getValue().add(new Address());
         bookAuthorAddresses.getValue().get(0).setZipCode("66666");
         assertEquals("66666", book.getAuthor().getAddresses().get(0).getZipCode());

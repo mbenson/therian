@@ -38,7 +38,7 @@ public class KeyedValueTest {
 
     @Before
     public void setup() {
-        map = new LinkedHashMap<String, MetasyntacticVariable>();
+        map = new LinkedHashMap<>();
         for (MetasyntacticVariable var : MetasyntacticVariable.values()) {
             map.put(var.name().toLowerCase(Locale.US), var);
         }
@@ -67,7 +67,7 @@ public class KeyedValueTest {
 
     @Test
     public void testToString() {
-        final Position.Readable<HashMap<String, Object>> mapRef = Positions.readOnly(new HashMap<String, Object>());
+        final Position.Readable<HashMap<String, Object>> mapRef = Positions.readOnly(new HashMap<>());
         assertEquals(String.format("Relative Position: Keyed Value [foo] of %s", mapRef),
             Keyed.value().at("foo").of(mapRef).toString());
     }

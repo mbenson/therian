@@ -273,7 +273,7 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      * @return {@link Implementing} step
      */
     public static <TARGET> Implementing<TARGET> implementing(Class<TARGET> targetType) {
-        return new Implementing<TARGET>(TypeUtils.wrap(targetType));
+        return new Implementing<>(TypeUtils.wrap(targetType));
     }
 
     /**
@@ -284,6 +284,6 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      * @return {@link Implementing} step
      */
     public static <TARGET> Implementing<TARGET> implementing(Typed<TARGET> targetType) {
-        return new Implementing<TARGET>(targetType);
+        return new Implementing<>(targetType);
     }
 }

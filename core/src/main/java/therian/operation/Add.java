@@ -38,6 +38,6 @@ public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Posi
 
     public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
         Position.Readable<SOURCE> sourcePosition) {
-        return new Add<SOURCE, TARGET>(sourcePosition, targetPosition);
+        return new Add<>(sourcePosition, targetPosition);
     }
 }

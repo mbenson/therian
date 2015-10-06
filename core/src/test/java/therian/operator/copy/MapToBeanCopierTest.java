@@ -59,7 +59,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test
     public void testCopy() {
-        final Map<String, String> sourceMap = new HashMap<String, String>();
+        final Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put("firstName", "Beetle");
         sourceMap.put("lastName", "Bailey");
 
@@ -74,7 +74,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test
     public void testCopyWithReadOnlyProperty() {
-        final Map<String, String> sourceMap = new HashMap<String, String>();
+        final Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put("firstName", "Beetle");
         sourceMap.put("middleName", "Aloysius");
         sourceMap.put("lastName", "Bailey");
@@ -90,7 +90,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test(expected = OperationException.class)
     public void testCopyWithOnlyReadOnlyProperty() {
-        final Map<String, String> sourceMap = new HashMap<String, String>();
+        final Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put("middleName", "Aloysius");
 
         final Employee targetValue = new Employee();
@@ -100,7 +100,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test
     public void testCopyWithOnePropertyAndExtraneousValues() {
-        final Map<String, String> sourceMap = new HashMap<String, String>();
+        final Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put("firstName", "Beetle");
         for (MetasyntacticVariable mv : MetasyntacticVariable.values()) {
             sourceMap.put(mv.name(), mv.name().toLowerCase());
@@ -117,7 +117,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test
     public void testConvert() {
-        final Map<String, Object> sourceMap = new HashMap<String, Object>();
+        final Map<String, Object> sourceMap = new HashMap<>();
         sourceMap.put("firstName", "Beetle");
         sourceMap.put("lastName", "Bailey");
 
@@ -132,7 +132,7 @@ public class MapToBeanCopierTest extends OperatorTest {
 
     @Test
     public void testConvertOtherKeyType() {
-        final Map<StringWrapper, StringWrapper> sourceMap = new HashMap<StringWrapper, StringWrapper>();
+        final Map<StringWrapper, StringWrapper> sourceMap = new HashMap<>();
         sourceMap.put(new StringWrapper("firstName"), new StringWrapper("Beetle"));
         sourceMap.put(new StringWrapper("lastName"), new StringWrapper("Bailey"));
 

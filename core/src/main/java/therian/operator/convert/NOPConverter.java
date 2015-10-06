@@ -15,10 +15,10 @@
  */
 package therian.operator.convert;
 
+import therian.Operator.Phase;
 import therian.Operators;
 import therian.Reusable;
 import therian.TherianContext;
-import therian.Operator.Phase;
 import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
@@ -27,7 +27,7 @@ import therian.operation.Convert;
  * Uses source value as target value when assignable. This is a so-called "standard converter," but a more strongly
  * typed Converter can be specified for any given datatype that requires a new instance. Some type of
  * {@link CopyingConverter} is recommended for this purpose.
- * 
+ *
  * @see Operators#standard()
  */
 @Reusable(Phase.SUPPORT_CHECK)

@@ -136,7 +136,7 @@ public class Positions {
 
     /**
      * Learn whether {@code pos} is {@link Readable}.
-     * 
+     *
      * @param pos
      * @return boolean
      */
@@ -146,7 +146,7 @@ public class Positions {
 
     /**
      * Learn whether {@code pos} is {@link Writable}.
-     * 
+     *
      * @param pos
      * @return boolean
      */
@@ -156,7 +156,7 @@ public class Positions {
 
     /**
      * Get a read-only position of value {@code value} (type of {@code value#getClass()}.
-     * 
+     *
      * @param value not {@code null}
      * @return Position.Readable
      */
@@ -166,7 +166,7 @@ public class Positions {
 
     /**
      * Get a read-only position of type {@code type} and value {@code value}.
-     * 
+     *
      * @param type not {@code null}
      * @param value
      * @return Position.Readable
@@ -174,12 +174,12 @@ public class Positions {
     public static <T> Position.Readable<T> readOnly(final Type type, final T value) {
         Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, Types.toString(type));
-        return new RO<T>(type, value);
+        return new RO<>(type, value);
     }
 
     /**
      * Get a read-only position of type {@code type} and value {@code value}.
-     * 
+     *
      * @param type not {@code null}
      * @param value
      * @return Position.Readable
@@ -190,7 +190,7 @@ public class Positions {
 
     /**
      * Get a read-only position of type {@code type#value} and value {@code value}.
-     * 
+     *
      * @param typed not {@code null}
      * @param value
      * @return Position.Readable
@@ -202,18 +202,18 @@ public class Positions {
     /**
      * Get a read-write position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
      * {@code T}.
-     * 
+     *
      * @param type not {@code null}
      * @return Position.ReadWrite
      */
     public static <T> Position.ReadWrite<T> readWrite(final Type type) {
         Validate.notNull(type, "type");
-        return new RW<T>(type);
+        return new RW<>(type);
     }
 
     /**
      * Get a read-write position of type {@code type}.
-     * 
+     *
      * @param type not {@code null}
      * @return Position.ReadWrite
      */
@@ -223,7 +223,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type#value}.
-     * 
+     *
      * @param typed not {@code null}
      * @return Position.ReadWrite
      */
@@ -233,7 +233,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type} and with initial value {@code initialValue}.
-     * 
+     *
      * @param type not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -242,12 +242,12 @@ public class Positions {
         Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(initialValue, type), "%s is not an instance of %s", initialValue,
             Types.toString(type));
-        return new RW<T>(type, initialValue);
+        return new RW<>(type, initialValue);
     }
 
     /**
      * Get a read-write position of type {@code type} and with initial value {@code initialValue}.
-     * 
+     *
      * @param type not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -258,7 +258,7 @@ public class Positions {
 
     /**
      * Get a read-write position of type {@code type#value} and with initial value {@code initialValue}.
-     * 
+     *
      * @param typed not {@code null}
      * @param initialValue
      * @return Position.ReadWrite
@@ -270,18 +270,18 @@ public class Positions {
     /**
      * Get a writable position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
      * {@code T}.
-     * 
+     *
      * @param type not {@code null}
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Type type) {
         Validate.notNull(type, "type");
-        return new W<T>(type);
+        return new W<>(type);
     }
 
     /**
      * Get a writable position of type {@code type#value}.
-     * 
+     *
      * @param typed not {@code null}
      * @return Position.Writable
      */
@@ -291,7 +291,7 @@ public class Positions {
 
     /**
      * Get a writable position of type {@code type}.
-     * 
+     *
      * @param type not {@code null}
      * @return Position.Writable
      */
@@ -301,7 +301,7 @@ public class Positions {
 
     /**
      * Get a UnaryProcedure callback for writing a position value.
-     * 
+     *
      * @param pos
      * @return UnaryProcedure
      * @see TherianContext#forwardTo(therian.Operation, Callback)

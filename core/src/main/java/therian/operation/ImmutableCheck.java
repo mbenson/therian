@@ -81,6 +81,6 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
      * @return operation
      */
     public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
-        return new ImmutableCheck<T>(position);
+        return new ImmutableCheck<>(position);
     }
 }

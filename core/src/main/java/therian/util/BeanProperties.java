@@ -52,7 +52,7 @@ public class BeanProperties {
 
         try {
             descriptors =
-                    IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, position.getValue()));
+                IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, position.getValue()));
         } catch (Exception e) {
             descriptors = null;
         }
@@ -72,7 +72,7 @@ public class BeanProperties {
             }
         }
 
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         for (final FeatureDescriptor fd : descriptors) {
             final String name = fd.getName();
             if (returnProperties == ReturnProperties.WRITABLE) {

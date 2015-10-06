@@ -46,7 +46,7 @@ public class GenericAddAllOperatorTest extends OperatorTest {
 
     @Test
     public void testAddObjectToList() {
-        final List<String> targetList = new ArrayList<String>();
+        final List<String> targetList = new ArrayList<>();
         final Position.Readable<List<String>> target =
             Positions.readOnly(new TypeLiteral<List<String>>() {}, targetList);
 
@@ -58,7 +58,7 @@ public class GenericAddAllOperatorTest extends OperatorTest {
 
     @Test
     public void testAddObjectToListIterator() {
-        final List<String> targetList = new ArrayList<String>();
+        final List<String> targetList = new ArrayList<>();
         final Position.Readable<ListIterator<String>> target =
             Positions.readOnly(new TypeLiteral<ListIterator<String>>() {}, targetList.listIterator());
 
@@ -70,8 +70,7 @@ public class GenericAddAllOperatorTest extends OperatorTest {
 
     @Test
     public void testReaddObjectToSet() {
-        final Set<MetasyntacticVariable> targetSet =
-            new LinkedHashSet<MetasyntacticVariable>(Arrays.asList(MetasyntacticVariable.values()));
+        final Set<MetasyntacticVariable> targetSet = new LinkedHashSet<>(Arrays.asList(MetasyntacticVariable.values()));
         final Position.Readable<Set<MetasyntacticVariable>> target =
             Positions.readOnly(new TypeLiteral<Set<MetasyntacticVariable>>() {}, targetSet);
 
@@ -88,7 +87,7 @@ public class GenericAddAllOperatorTest extends OperatorTest {
         System.arraycopy(mv, 0, sourceArray, 0, mv.length);
         System.arraycopy(mv, 0, sourceArray, mv.length, mv.length);
 
-        final Set<MetasyntacticVariable> targetSet = new LinkedHashSet<MetasyntacticVariable>();
+        final Set<MetasyntacticVariable> targetSet = new LinkedHashSet<>();
         final Position.Readable<Set<MetasyntacticVariable>> target =
             Positions.readOnly(new TypeLiteral<Set<MetasyntacticVariable>>() {}, targetSet);
 

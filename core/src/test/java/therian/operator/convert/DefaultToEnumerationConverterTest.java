@@ -65,12 +65,12 @@ public class DefaultToEnumerationConverterTest extends OperatorTest {
 
     @Test
     public void testPrimitiveArray() {
-        final int[] beast = new int[] { 6, 6, 6 };
+        final int[] beast = { 6, 6, 6 };
         final Enumeration<Integer> result =
             therianContext.eval(Convert.to(new TypeLiteral<Enumeration<Integer>>() {}, Positions.readOnly(beast)));
-        for (int i = 0; i < beast.length; i++) {
+        for (int element : beast) {
             assertTrue(result.hasMoreElements());
-            assertEquals(beast[i], result.nextElement().intValue());
+            assertEquals(element, result.nextElement().intValue());
         }
         assertFalse(result.hasMoreElements());
     }

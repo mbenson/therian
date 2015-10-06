@@ -103,7 +103,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
             // of target elements to copy onto, so we're good
             return true;
         }
-        final List<Object> sourceElementsForConversion = new ArrayList<Object>();
+        final List<Object> sourceElementsForConversion = new ArrayList<>();
         while (sourceIterator.hasNext()) {
             sourceElementsForConversion.add(sourceIterator.next());
         }
@@ -134,7 +134,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (!Positions.isWritable(copy.getTargetPosition())) {
             return false;
         }
-        final List<Object> allElements = new ArrayList<Object>();
+        final List<Object> allElements = new ArrayList<>();
         // add original elements
         for (Object t : targetIterable) {
             allElements.add(t);
@@ -201,7 +201,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (!sourceIterator.hasNext()) {
             return true;
         }
-        final List<Object> sourceElementsForConversion = new ArrayList<Object>();
+        final List<Object> sourceElementsForConversion = new ArrayList<>();
         while (sourceIterator.hasNext()) {
             sourceElementsForConversion.add(sourceIterator.next());
         }
@@ -248,7 +248,7 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (!Positions.isWritable(copy.getTargetPosition())) {
             return false;
         }
-        final List<Object> allElements = new ArrayList<Object>();
+        final List<Object> allElements = new ArrayList<>();
         for (Object t : targetIterable) {
             allElements.add(t);
         }

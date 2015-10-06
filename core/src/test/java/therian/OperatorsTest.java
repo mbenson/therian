@@ -112,7 +112,7 @@ public class OperatorsTest {
 
     @Test
     public void testComparatorComplex() {
-        final ArrayList<Operator<?>> expected = new ArrayList<Operator<?>>();
+        final ArrayList<Operator<?>> expected = new ArrayList<>();
         expected.add(new AppendixSurgeon());
         expected.add(new TonsilSurgeon());
         expected.add(new MasterSurgeon());
@@ -120,7 +120,7 @@ public class OperatorsTest {
         expected.add(new ELCoercionConverter());
         expected.add(new DefaultImmutableChecker());
 
-        final ArrayList<Operator<?>> input = new ArrayList<Operator<?>>(expected);
+        final ArrayList<Operator<?>> input = new ArrayList<>(expected);
         Collections.shuffle(input);
 
         assertThat((Iterable<? extends Operator<?>>) new Operators(input).keySet(),

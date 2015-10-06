@@ -30,13 +30,13 @@ import therian.util.Types;
 /**
  * Some operation; note that these are not intended for use on multiple threads. A concrete {@link Operation} class
  * should have its {@code RESULT} type parameter fully bound.
- * 
+ *
  * @param <RESULT>
  */
 public abstract class Operation<RESULT> {
     private static final TypeVariable<?> TYPE_VARIABLE_RESULT = Operation.class.getTypeParameters()[0];
 
-    private static final Map<Class<?>, Boolean> VALID_INFO = new HashMap<Class<?>, Boolean>();
+    private static final Map<Class<?>, Boolean> VALID_INFO = new HashMap<>();
 
     private static boolean init(Class<?> type) {
         final boolean valid;
@@ -74,7 +74,7 @@ public abstract class Operation<RESULT> {
     /**
      * Get the result. Default implementation throws {@link OperationException} if the operation was unsuccessful, else
      * defers to {@link #provideResult()}.
-     * 
+     *
      * @return RESULT
      * @see #provideResult()
      */
@@ -87,7 +87,7 @@ public abstract class Operation<RESULT> {
 
     /**
      * Set the result of this {@link Operation}.
-     * 
+     *
      * @param result
      */
     public void setResult(RESULT result) {
@@ -104,7 +104,7 @@ public abstract class Operation<RESULT> {
 
     /**
      * Learn whether {@code operator} seems to implement {@code this}.
-     * 
+     *
      * @param operator
      * @return boolean
      */

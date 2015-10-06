@@ -297,7 +297,7 @@ public class Expression {
      * @return {@link PositionFactory}
      */
     public static <T> PositionFactory<T> at(String expr) {
-        return new PositionFactory<T>(Validate.notEmpty(expr, "expr"));
+        return new PositionFactory<>(Validate.notEmpty(expr, "expr"));
     }
 
     /**
@@ -309,6 +309,6 @@ public class Expression {
      */
     public static <T> PositionFactory<T> optional(String expr) {
         final boolean optional = true;
-        return new PositionFactory<T>(Validate.notEmpty(expr, "expr"), optional);
+        return new PositionFactory<>(Validate.notEmpty(expr, "expr"), optional);
     }
 }

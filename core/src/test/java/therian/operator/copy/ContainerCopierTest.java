@@ -112,6 +112,7 @@ public class ContainerCopierTest extends OperatorTest {
                 new Jerk("Lehrer", "Keith", "Michael", "\"Lucky\"") };
     }
 
+    @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new ContainerCopier.ToIterable(), new ContainerCopier.ToIterator(),
             new ContainerCopier.ToEnumeration(), new ContainerCopier.ToArray(), CopyingConverter.IMPLEMENTING_SET,
@@ -155,7 +156,7 @@ public class ContainerCopierTest extends OperatorTest {
     @Test
     public void testToSmallerSet() {
         final Book targetElement = new Book();
-        final Set<Book> targetValue = new LinkedHashSet<Book>();
+        final Set<Book> targetValue = new LinkedHashSet<>();
         targetValue.add(targetElement);
         final Position.Readable<Set<Book>> target = Positions.readOnly(LocalTypes.SET_OF_BOOK, targetValue);
 
@@ -200,7 +201,7 @@ public class ContainerCopierTest extends OperatorTest {
     @Test
     public void testSingletonToLargerList() {
         final Book[] targetElements = { new Book(), new Book(), new Book() };
-        final List<Book> targetValue = new ArrayList<Book>(Arrays.asList(targetElements));
+        final List<Book> targetValue = new ArrayList<>(Arrays.asList(targetElements));
         final Position.Readable<List<Book>> target = Positions.readOnly(LocalTypes.LIST_OF_BOOK, targetValue);
         therianContext.eval(Copy.to(target, Positions.readOnly(books[0])));
 
@@ -221,7 +222,7 @@ public class ContainerCopierTest extends OperatorTest {
 
     @Test
     public void testSingletonToEmptySet() {
-        final LinkedHashSet<Book> targetValue = new LinkedHashSet<Book>();
+        final LinkedHashSet<Book> targetValue = new LinkedHashSet<>();
         final Position.Readable<Set<Book>> target = Positions.readOnly(LocalTypes.SET_OF_BOOK, targetValue);
         therianContext.eval(Copy.to(target, Positions.readOnly(books[0])));
         assertSame(targetValue, target.getValue());
@@ -232,14 +233,14 @@ public class ContainerCopierTest extends OperatorTest {
     @Test(expected = OperationException.class)
     public void testSingletonToUnmodifiableEmptySet() {
         therianContext.eval(Copy.to(
-            Positions.readOnly(LocalTypes.SET_OF_BOOK, Collections.unmodifiableSet(new HashSet<Book>())),
+            Positions.readOnly(LocalTypes.SET_OF_BOOK, Collections.unmodifiableSet(new HashSet<>())),
             Positions.readOnly(books[0])));
     }
 
     @Test
     public void testSingletonToUnmodifiableEmptySetWithWritableTargetPosition() {
         final Position.ReadWrite<Set<Book>> target =
-            Positions.readWrite(LocalTypes.SET_OF_BOOK, Collections.unmodifiableSet(new HashSet<Book>()));
+            Positions.readWrite(LocalTypes.SET_OF_BOOK, Collections.unmodifiableSet(new HashSet<>()));
         therianContext.eval(Copy.to(target, Positions.readOnly(books[0])));
         assertEquals(1, target.getValue().size());
         assertSame(books[0], target.getValue().iterator().next());
@@ -247,14 +248,13 @@ public class ContainerCopierTest extends OperatorTest {
 
     @Test
     public void testTypeConversionToList() {
-        final List<Employee> targetList = new ArrayList<Employee>();
+        final List<Employee> targetList = new ArrayList<>();
         therianContext.eval(Copy.to(Positions.readOnly(LocalTypes.LIST_OF_EMPLOYEE, targetList),
             Positions.readOnly(jerks)));
         final Iterator<Employee> eachEmployee = targetList.iterator();
 
-        for (final Iterator<Jerk> eachJerk = Arrays.asList(jerks).iterator(); eachJerk.hasNext();) {
+        for (Jerk jerk : Arrays.asList(jerks)) {
             assertTrue(eachEmployee.hasNext());
-            final Jerk jerk = eachJerk.next();
             final Employee employee = eachEmployee.next();
             assertEquals(jerk.getFirstName(), employee.getFirstName());
             assertNull(employee.getMiddleName());

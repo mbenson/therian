@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.el.ELContext;
@@ -31,7 +32,6 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ import uelbox.ELContextWrapper;
 public class TherianContext extends ELContextWrapper {
     /**
      * Callback interface.
-     * 
+     *
      * @param <T>
      */
     public interface Callback<T> {
@@ -56,14 +56,14 @@ public class TherianContext extends ELContextWrapper {
     /**
      * Generalizes a hint targeted to some {@link Operator} that can be set on the context. Note that a Hint should
      * properly implement {@link #equals(Object)} and {@link #hashCode()}.
-     * 
+     *
      * @see TherianContext#doWithHints(Job, Hint...)
      */
     public interface Hint {
 
         /**
          * Get the hint type to use.
-         * 
+         *
          * @return Class
          */
         Class<? extends Hint> getType();
@@ -80,15 +80,15 @@ public class TherianContext extends ELContextWrapper {
          * Test whether an object is reusable, i.e. cacheable. By default, everything is considered reusable, so to mark
          * an item as *not* being reusable one would declare the {@link Reusable} annotation with the desired operator
          * phases. i.e., if the item is never reusable, it should be declared as:
-         * 
+         *
          * <pre>
          * @Reusable({ })
          * </pre>
-         * 
+         *
          * It is considered nonsensical that the evaluation of a given operation/operator be reusable, without the
          * corresponding support check being likewise reusable; therefore specifying {@link Phase#EVALUATION} is
          * understood to imply {@link Phase#SUPPORT_CHECK} whether or not it is explicitly included.
-         * 
+         *
          * @param o
          * @param phase
          * @return whether
@@ -153,7 +153,7 @@ public class TherianContext extends ELContextWrapper {
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder().append(operation).append(effectiveHints).toHashCode();
+            return Objects.hash(operation, effectiveHints);
         }
 
         @Override
@@ -176,7 +176,7 @@ public class TherianContext extends ELContextWrapper {
         /**
          * General-purpose root stack frame.
          */
-        static final Frame<Void> ROOT = new Frame<Void>();
+        static final Frame<Void> ROOT = new Frame<>();
 
         private static final String BRANCH = "\u2514\u2500";
 
@@ -184,13 +184,12 @@ public class TherianContext extends ELContextWrapper {
             if (hints.length == 0) {
                 return Collections.emptyMap();
             }
-            final Map<Class<? extends Hint>, Hint> localHints = new LinkedHashMap<Class<? extends Hint>, Hint>();
+            final Map<Class<? extends Hint>, Hint> localHints = new LinkedHashMap<>();
             for (Hint hint : hints) {
                 final Class<? extends Hint> key = hint.getType();
-                if (localHints.containsKey(key)) {
-                    throw new IllegalArgumentException(String.format("Found hints [%s, %s] with same type %s",
-                        localHints.get(key), hint, key));
-                }
+                Validate.isTrue(!localHints.containsKey(key), "Found hints [%s, %s] with same type %s",
+                    localHints.get(key), hint, key);
+
                 localHints.put(key, hint);
             }
             return Collections.unmodifiableMap(localHints);
@@ -261,17 +260,17 @@ public class TherianContext extends ELContextWrapper {
         }
 
         private Set<Hint> effectiveHints() {
-            final Map<Class<? extends Hint>, Hint> m = new HashMap<Class<? extends Hint>, Hint>();
+            final Map<Class<? extends Hint>, Hint> m = new HashMap<>();
             populate(m);
             if (m.isEmpty()) {
                 return Collections.emptySet();
             }
-            return Collections.unmodifiableSet(new LinkedHashSet<Hint>(m.values()));
+            return Collections.unmodifiableSet(new LinkedHashSet<>(m.values()));
         }
 
         private synchronized OperationRequest<RESULT> getKey() {
             if (key == null) {
-                key = new OperationRequest<RESULT>(operation, effectiveHints());
+                key = new OperationRequest<>(operation, effectiveHints());
             }
             return key;
         }
@@ -295,8 +294,9 @@ public class TherianContext extends ELContextWrapper {
 
         int depth(Frame<?> parent) {
             int result = 0;
-            for (Frame<?> f = parent; f != null && f.key != null; f = f.parent, result++)
+            for (Frame<?> f = parent; f != null && f.key != null; f = f.parent, result++) {
                 ;
+            }
             return result;
         }
 
@@ -345,11 +345,10 @@ public class TherianContext extends ELContextWrapper {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
-    private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<TherianContext>();
+    private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
 
-    private final Deque<Frame<?>> stack = new ArrayDeque<Frame<?>>();
-    private final Map<OperationRequest<?>, CachedEvaluator<?>> cache =
-        new HashMap<OperationRequest<?>, CachedEvaluator<?>>();
+    private final Deque<Frame<?>> stack = new ArrayDeque<>();
+    private final Map<OperationRequest<?>, CachedEvaluator<?>> cache = new HashMap<>();
 
     private final SupportChecker supportChecker;
 
@@ -365,7 +364,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get current thread-bound instance.
-     * 
+     *
      * @return {@link TherianContext} or {@code null}
      */
     private static TherianContext getCurrentInstance() {
@@ -374,7 +373,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Get some usable {@link TherianContext} instance.
-     * 
+     *
      * @return current thread-bound instance or {@code Therian.standard().context()}
      */
     public static TherianContext getInstance() {
@@ -387,13 +386,13 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Learn whether {@code operation} is supported by this context.
-     * 
+     *
      * @param operation
      * @return boolean
      * @throws NullPointerException on {@code null} input
      */
     public synchronized <RESULT> boolean supports(final Operation<RESULT> operation, Hint... hints) {
-        final Frame<RESULT> frame = new Frame<RESULT>(Phase.SUPPORT_CHECK, operation, hints);
+        final Frame<RESULT> frame = new Frame<>(Phase.SUPPORT_CHECK, operation, hints);
         try {
             return handle(frame);
         } catch (Frame.RecursionException e) {
@@ -405,7 +404,7 @@ public class TherianContext extends ELContextWrapper {
      * Evaluates {@code operation} if supported; otherwise returns {@code null}. You may distinguish between a
      * {@code null} result and "not supported" by calling {@link #supports(Operation)} and {@link #eval(Operation)}
      * independently.
-     * 
+     *
      * @param operation
      * @param hints
      * @return RESULT or {@code null}
@@ -419,7 +418,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Evaluates {@code operation} if supported; otherwise returns {@code defaultValue}.
-     * 
+     *
      * @param operation
      * @param defaultValue
      * @param hints
@@ -434,7 +433,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
+     *
      * @param callback
      * @param operation
      * @param hints
@@ -455,7 +454,7 @@ public class TherianContext extends ELContextWrapper {
 
     /**
      * Convenience method to perform an operation, discarding its result, and report whether it succeeded.
-     * 
+     *
      * @param operation
      * @param hints
      * @return whether {@code operation} was supported and successful
@@ -485,7 +484,7 @@ public class TherianContext extends ELContextWrapper {
      * Performs the specified {@link Operation} by invoking any compatible {@link Operator} until the {@link Operation}
      * is marked as having been successful, then returns the result from {@link Operation#getResult()}. Note that
      * <em>most</em> unsuccessful {@link Operation}s will, at this point, throw an {@link OperationException}.
-     * 
+     *
      * @param RESULT
      * @param OPERATION
      * @param operation
@@ -498,7 +497,7 @@ public class TherianContext extends ELContextWrapper {
      */
     public final synchronized <RESULT, OPERATION extends Operation<RESULT>> RESULT eval(final OPERATION operation,
         Hint... hints) {
-        final Frame<RESULT> frame = new Frame<RESULT>(Phase.EVALUATION, operation, hints);
+        final Frame<RESULT> frame = new Frame<>(Phase.EVALUATION, operation, hints);
         try {
             handle(frame);
         } catch (Frame.RecursionException e) {
@@ -581,12 +580,12 @@ public class TherianContext extends ELContextWrapper {
                                 // supports; therefore safe:
                                 final Operator<? extends Operation<RESULT>> strongOperator =
                                     (Operator<? extends Operation<RESULT>>) operator;
-                                cache.put(request, new CachedOperator<RESULT>(strongOperator));
+                                cache.put(request, new CachedOperator<>(strongOperator));
                             }
                             break;
                         case EVALUATION:
                             if (cache.get(request) instanceof CachedResult<?> == false) {
-                                cache.put(request, new CachedResult<RESULT>(frame.operation.getResult()));
+                                cache.put(request, new CachedResult<>(frame.operation.getResult()));
                             }
                             break;
                         default:
@@ -617,10 +616,9 @@ public class TherianContext extends ELContextWrapper {
 
     private synchronized void pop(Frame<?> frame) {
         final Frame<?> popFrame = stack.pop();
-        if (popFrame != frame) {
-            throw new IllegalStateException(String.format(
-                "operation stack out of whack; found %s where %s was expected", popFrame.getKey(), frame.getKey()));
-        }
+        Validate.validState(popFrame == frame, "operation stack out of whack; found %s where %s was expected",
+            popFrame.getKey(), frame.getKey());
+
         frame.part(this);
 
         // clear cache when stack is empty:

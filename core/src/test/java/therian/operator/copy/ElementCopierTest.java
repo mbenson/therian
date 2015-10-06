@@ -41,8 +41,8 @@ import therian.operator.convert.NOPConverter;
 import therian.position.Position;
 import therian.testfixture.Author;
 import therian.testfixture.Employee;
-import uelbox.IterableELResolver;
 import therian.util.Positions;
+import uelbox.IterableELResolver;
 
 /**
  *
@@ -96,7 +96,7 @@ public class ElementCopierTest extends OperatorTest {
     @Test
     public void testArrayToPopulatedList() {
         final List<Employee> targetList = Arrays.asList(fill(new Employee[3]));
-        final List<Employee> saveList = new ArrayList<Employee>(targetList);
+        final List<Employee> saveList = new ArrayList<>(targetList);
         final Position.Readable<List<Employee>> target = Positions.readOnly(LocalTypes.LIST_OF_EMPLOYEE, targetList);
         assertTrue(therianContext.evalSuccess(Copy.to(target, Positions.readOnly(employees))));
         assertArrayEquals(employees, target.getValue().toArray(new Employee[3]));
@@ -118,7 +118,7 @@ public class ElementCopierTest extends OperatorTest {
     public void testSetToList() {
         final Position.Readable<List<Employee>> target =
             Positions.readOnly(LocalTypes.LIST_OF_EMPLOYEE, Arrays.asList(new Employee[3]));
-        final Set<Employee> sourceValue = new LinkedHashSet<Employee>(Arrays.asList(employees));
+        final Set<Employee> sourceValue = new LinkedHashSet<>(Arrays.asList(employees));
         assertTrue(therianContext.evalSuccess(Copy.to(target,
             Positions.readOnly(LocalTypes.SET_OF_EMPLOYEE, sourceValue))));
         int index = 0;

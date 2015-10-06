@@ -51,11 +51,11 @@ import uelbox.UEL;
 /**
  * Copies based on annotations. Concrete subclasses must specify one or both of {@link Mapping} and {@link Matching} to
  * designate property/expression (using
- * 
+ *
  * <pre>
  * #{}
  * </pre>
- * 
+ *
  * embedding syntax).
  *
  * @param <SOURCE>
@@ -157,7 +157,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     {
         final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> m =
-            new ArrayList<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>>();
+            new ArrayList<>();
 
         try {
             @SuppressWarnings("rawtypes")
@@ -176,7 +176,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                     final String from = StringUtils.trimToNull(v.from());
                     final String to = StringUtils.trimToNull(v.to());
 
-                    Validate.validState((from != null) || (to != null),
+                    Validate.validState(from != null || to != null,
                         "both from and to cannot be blank/empty for a single @Mapping.Value");
 
                     final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, !optional);
@@ -207,11 +207,11 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             return false;
         }
         final Iterable<Copy<?, ?>> mapped = map(context, copy);
-        if ((nullBehavior == NullBehavior.NOOP) && mapped.iterator().hasNext()) {
+        if (nullBehavior == NullBehavior.NOOP && mapped.iterator().hasNext()) {
             return true;
         }
         final Iterable<Copy<?, ?>> matched = match(context, copy);
-        if ((nullBehavior == NullBehavior.NOOP) && matched.iterator().hasNext()) {
+        if (nullBehavior == NullBehavior.NOOP && matched.iterator().hasNext()) {
             return true;
         }
 
@@ -241,7 +241,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
             switch (phase) {
             case SUPPORT_CHECK:
                 // safe copies have already been verified supported:
-                if (!((nestedCopy instanceof Copy.Safely) || context.supports(nestedCopy))) {
+                if (!(nestedCopy instanceof Copy.Safely || context.supports(nestedCopy))) {
                     return false;
                 }
                 result = true;
@@ -272,7 +272,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (mappings.isEmpty()) {
             return Collections.emptySet();
         }
-        final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
+        final List<Copy<?, ?>> result = new ArrayList<>();
 
         for (Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> mapping : mappings) {
             final Position.Readable<?> propertySource = dereference(mapping.getLeft(), copy.getSourcePosition());
@@ -286,7 +286,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (matching == null) {
             return Collections.emptySet();
         }
-        final Set<String> properties = new HashSet<String>(Arrays.asList(matching.value()));
+        final Set<String> properties = new HashSet<>(Arrays.asList(matching.value()));
 
         // if no properties were explicitly specified for matching, take whatever we can get
         final boolean lenient = properties.isEmpty();
@@ -298,7 +298,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
         properties.removeAll(Arrays.asList(matching.exclude()));
 
-        final List<Copy<?, ?>> result = new ArrayList<Copy<?, ?>>();
+        final List<Copy<?, ?>> result = new ArrayList<>();
         for (String property : properties) {
             if (StringUtils.isBlank(property)) {
                 continue;

@@ -38,9 +38,9 @@ public class TherianModule {
         Validate.noNullElements(operators, "null operator at index %s");
 
         @SuppressWarnings("rawtypes")
-        final Set<Class<? extends Operator>> operatorTypesPresent = new HashSet<Class<? extends Operator>>();
+        final Set<Class<? extends Operator>> operatorTypesPresent = new HashSet<>();
         @SuppressWarnings("rawtypes")
-        final Set<Class<? extends Operator>> operatorTypesNeeded = new HashSet<Class<? extends Operator>>();
+        final Set<Class<? extends Operator>> operatorTypesNeeded = new HashSet<>();
 
         @SuppressWarnings("rawtypes")
         class DependencyManager {

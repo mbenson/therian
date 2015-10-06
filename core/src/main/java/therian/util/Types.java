@@ -19,18 +19,17 @@ import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.ClassUtils.Interfaces;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.ClassUtils.Interfaces;
-import org.apache.commons.lang3.reflect.Typed;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.BindTypeVariable;
 
 public class Types {
 
-    private static final Map<Class<?>, Map<TypeVariable<?>, Method>> TYPED_GETTERS =
-        new HashMap<Class<?>, Map<TypeVariable<?>, Method>>();
+    private static final Map<Class<?>, Map<TypeVariable<?>, Method>> TYPED_GETTERS = new HashMap<>();
 
     // borrowed from Commons Lang MemberUtils
     private static final int ACCESS_TEST = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
@@ -41,7 +40,7 @@ public class Types {
      * <li>If {@code type} is a {@link TypeVariable}, return its normalized upper bound.</li>
      * <li>If {@code type} is a {@link WildcardType}, return its normalized upper bound.</li>
      * </ul>
-     * 
+     *
      * @param type
      * @param parentType
      * @return Type
@@ -59,7 +58,7 @@ public class Types {
     /**
      * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
      * {@link Typed} before falling back to basic type
-     * 
+     *
      * @param o
      * @param var
      * @return Type resolved or {@code null}
@@ -67,16 +66,15 @@ public class Types {
     public static Type resolveAt(Object o, TypeVariable<?> var) {
         Validate.notNull(var, "no variable to read");
         final GenericDeclaration genericDeclaration = var.getGenericDeclaration();
-        if (genericDeclaration instanceof Class == false) {
-            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " is not declared by a Class");
-        }
+        Validate.isInstanceOf(Class.class, genericDeclaration, "%s is not declared by a Class",
+            TypeUtils.toLongString(var));
         return resolveAt(o, var, TypeUtils.getTypeArguments(o.getClass(), (Class<?>) genericDeclaration));
     }
 
     /**
      * Tries to "read" a {@link TypeVariable} from an object instance, taking into account {@link BindTypeVariable} and
      * {@link Typed} before falling back to basic type.
-     * 
+     *
      * @param o
      * @param var
      * @param variablesMap prepopulated map for efficiency
@@ -86,20 +84,19 @@ public class Types {
         final Class<?> rt = Validate.notNull(o, "null target").getClass();
         Validate.notNull(var, "no variable to read");
         final GenericDeclaration genericDeclaration = var.getGenericDeclaration();
-        if (genericDeclaration instanceof Class == false) {
-            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " is not declared by a Class");
-        }
+        Validate.isInstanceOf(Class.class, genericDeclaration, "%s is not declared by a Class",
+            TypeUtils.toLongString(var));
+
         final Class<?> declaring = (Class<?>) genericDeclaration;
-        if (!declaring.isInstance(o)) {
-            throw new IllegalArgumentException(TypeUtils.toLongString(var) + " does not belong to " + rt);
-        }
+        Validate.isInstanceOf(declaring, o, "%s does not belong to %s", TypeUtils.toLongString(var), rt);
+
         return unrollVariables(variablesMap, var, o);
     }
 
     /**
      * Get the narrowest {@link Type} assignable to {@code subClass} that binds all type parameters of the specified
      * {@link ParameterizedType}.
-     * 
+     *
      * @param subClass
      * @param parameterizedType
      * @return Type
@@ -165,7 +162,7 @@ public class Types {
                 if (p.getOwnerType() == null) {
                     parameterizedTypeArguments = typeArguments;
                 } else {
-                    parameterizedTypeArguments = new HashMap<TypeVariable<?>, Type>(typeArguments);
+                    parameterizedTypeArguments = new HashMap<>(typeArguments);
                     parameterizedTypeArguments.putAll(TypeUtils.getTypeArguments(p));
                 }
                 final Type[] args = p.getActualTypeArguments();
@@ -203,7 +200,7 @@ public class Types {
 
     /**
      * Friendlier string formatting of types that appends brackets for array types.
-     * 
+     *
      * @param type
      * @return String
      */
@@ -244,13 +241,13 @@ public class Types {
 
     /**
      * XXX Default access superclass workaround
-     * 
+     *
      * When a {@code public} class has a default access superclass with {@code public} members, these members are
      * accessible. Calling them from compiled code works fine. Unfortunately, on some JVMs, using reflection to invoke
      * these members seems to (wrongly) prevent access even when the modifier is {@code public}. Calling
      * {@code setAccessible(true)} solves the problem but will only work from sufficiently privileged code. Better
      * workarounds would be gratefully accepted.
-     * 
+     *
      * @param o the AccessibleObject to set as accessible
      */
     // borrowed from Commons Lang MemberUtils
@@ -270,7 +267,7 @@ public class Types {
 
     /**
      * Returns whether a given set of modifiers implies package access.
-     * 
+     *
      * @param modifiers to test
      * @return {@code true} unless {@code package}/{@code protected}/{@code private} modifier detected
      */
@@ -294,7 +291,7 @@ public class Types {
             synchronized (TYPED_GETTERS) {
                 Map<TypeVariable<?>, Method> m = TYPED_GETTERS.get(c);
                 if (m == null) {
-                    m = new HashMap<TypeVariable<?>, Method>();
+                    m = new HashMap<>();
                     putTypedGetters(m, c);
                     TYPED_GETTERS.put(c, m.isEmpty() ? Collections.<TypeVariable<?>, Method> emptyMap() : m);
                 }
@@ -316,7 +313,7 @@ public class Types {
         }
 
         void expandMappings(Map<TypeVariable<?>, Method> m) {
-            final Map<TypeVariable<?>, Method> additionalMappings = new HashMap<TypeVariable<?>, Method>();
+            final Map<TypeVariable<?>, Method> additionalMappings = new HashMap<>();
             for (Map.Entry<TypeVariable<?>, Method> e : m.entrySet()) {
                 traverseAssignments(additionalMappings, e, assignments);
                 traverseAssignments(additionalMappings, e, inverseAssignments);
@@ -359,12 +356,12 @@ public class Types {
 
     /**
      * Get a map of all {@link TypeVariable} assignments for a given type.
-     * 
+     *
      * @param t
      * @return Map<TypeVariable<?>, Type>
      */
     private static Map<TypeVariable<?>, Type> getAllAssignments(final Type t) {
-        return spider(new TypeVariableMap(), new HashSet<Class<?>>(), t);
+        return spider(new TypeVariableMap(), new HashSet<>(), t);
     }
 
     private static Map<TypeVariable<?>, Type> spider(final Map<TypeVariable<?>, Type> result,
@@ -397,7 +394,7 @@ public class Types {
 
     /**
      * Return the inverse map of {@code m} for all entries whose value is a {@link TypeVariable}.
-     * 
+     *
      * @param m
      * @return Map<TypeVariable<?>, Type>
      */
@@ -413,7 +410,7 @@ public class Types {
 
     /**
      * Format a {@link Class} as a {@link String}.
-     * 
+     *
      * @param c {@code Class} to format
      * @return String
      * @since 3.2
@@ -436,7 +433,7 @@ public class Types {
 
     /**
      * Format a {@link TypeVariable} as a {@link String}.
-     * 
+     *
      * @param v {@code TypeVariable} to format
      * @return String
      * @since 3.2
@@ -453,7 +450,7 @@ public class Types {
 
     /**
      * Format a {@link ParameterizedType} as a {@link String}.
-     * 
+     *
      * @param p {@code ParameterizedType} to format
      * @return String
      * @since 3.2
@@ -481,7 +478,7 @@ public class Types {
 
     /**
      * Format a {@link WildcardType} as a {@link String}.
-     * 
+     *
      * @param w {@code WildcardType} to format
      * @return String
      * @since 3.2
@@ -500,7 +497,7 @@ public class Types {
 
     /**
      * Format a {@link GenericArrayType} as a {@link String}.
-     * 
+     *
      * @param g {@code GenericArrayType} to format
      * @return String
      * @since 3.2
@@ -511,7 +508,7 @@ public class Types {
 
     /**
      * Append {@code types} to @{code buf} with separator {@code sep}.
-     * 
+     *
      * @param buf destination
      * @param sep separator
      * @param types to append

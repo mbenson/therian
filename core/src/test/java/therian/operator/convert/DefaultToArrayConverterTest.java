@@ -45,8 +45,9 @@ public class DefaultToArrayConverterTest extends OperatorTest {
 
     }
 
-    private static final String[] STRINGS = new String[] { "foo", "bar", "baz" };
+    private static final String[] STRINGS = { "foo", "bar", "baz" };
 
+    @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new DefaultToArrayConverter(), new DefaultToListConverter(),
             new IterableToList(), new IteratorToList());

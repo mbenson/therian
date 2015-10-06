@@ -43,6 +43,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.kohsuke.MetaInfServices;
 
@@ -55,8 +56,8 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
     public static final String TARGET_CLASSNAME = "therian.StandardOperators";
     public static final String TEMPLATE_RESOURCE = "/therian/StandardOperators";
 
-    private final Set<Element> originatingElements = new LinkedHashSet<Element>();
-    private final Set<String> operators = new LinkedHashSet<String>();
+    private final Set<Element> originatingElements = new LinkedHashSet<>();
+    private final Set<String> operators = new LinkedHashSet<>();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -92,10 +93,9 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
             originatingElements.addAll(standardOperatorElements);
 
             for (Element element : standardOperatorElements) {
-                if (!isValidStandardOperator(element)) {
-                    throw new IllegalStateException(String.format("%s is not a valid @StandardOperator",
-                        appendTo(new StringBuilder(), element).toString()));
-                }
+                Validate.validState(isValidStandardOperator(element), "%s is not a valid @StandardOperator",
+                    appendTo(new StringBuilder(), element).toString());
+
                 if (element.getKind() == ElementKind.CLASS) {
                     operators.add(appendTo(new StringBuilder("new "), element).append("()").toString());
                 }
@@ -148,7 +148,7 @@ public class StandardOperatorsProcessor extends AbstractProcessor {
     /**
      * Must be a public static concrete class with a default constructor, public static zero-arg method, or public
      * static final field.
-     * 
+     *
      * @param e
      * @return boolean
      */

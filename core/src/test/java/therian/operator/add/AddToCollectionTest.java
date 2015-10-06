@@ -27,7 +27,7 @@ public class AddToCollectionTest extends OperatorTest {
 
     @Test
     public void testRawList() {
-        final List<?> l = new ArrayList<Object>();
+        final List<?> l = new ArrayList<>();
         assertTrue(therianContext.eval(Add.to(Positions.readWrite(List.class, l), Positions.readOnly("foo")))
             .booleanValue());
         assertEquals(1, l.size());
@@ -36,7 +36,7 @@ public class AddToCollectionTest extends OperatorTest {
 
     @Test
     public void testTypedList() {
-        final List<String> l = new ArrayList<String>();
+        final List<String> l = new ArrayList<>();
         assertTrue(therianContext.eval(
             Add.to(Positions.readWrite(new TypeLiteral<List<String>>() {}, l), Positions.readOnly("foo")))
             .booleanValue());
@@ -53,13 +53,13 @@ public class AddToCollectionTest extends OperatorTest {
 
     @Test(expected = OperationException.class)
     public void testWrongTypeList() {
-        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<List<String>>() {}, new ArrayList<String>()),
+        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<List<String>>() {}, new ArrayList<>()),
             Positions.readOnly(new Object())));
     }
 
     @Test
     public void testRawSet() {
-        final Set<?> s = new HashSet<Object>();
+        final Set<?> s = new HashSet<>();
         assertTrue(therianContext.eval(Add.to(Positions.readWrite(Set.class, s), Positions.readOnly("foo")))
             .booleanValue());
         assertEquals(1, s.size());
@@ -68,7 +68,7 @@ public class AddToCollectionTest extends OperatorTest {
 
     @Test
     public void testTypedSet() {
-        final Set<String> s = new HashSet<String>();
+        final Set<String> s = new HashSet<>();
         assertTrue(therianContext.eval(
             Add.to(Positions.readWrite(new TypeLiteral<Set<String>>() {}, s), Positions.readOnly("foo")))
             .booleanValue());
@@ -86,7 +86,7 @@ public class AddToCollectionTest extends OperatorTest {
 
     @Test(expected = OperationException.class)
     public void testWrongTypeSet() {
-        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Set<String>>() {}, new HashSet<String>()),
+        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Set<String>>() {}, new HashSet<>()),
             Positions.readOnly(new Object())));
     }
 }

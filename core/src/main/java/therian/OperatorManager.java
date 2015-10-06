@@ -110,10 +110,10 @@ class OperatorManager {
                 }
 
                 final Map<TypeVariable<?>, Type> operationArgs =
-                        TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
+                    TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
 
                 final Map<TypeVariable<?>, Type> operatorArgs =
-                        TypeUtils.getTypeArguments(operatorInfo.targetType, Operation.class);
+                    TypeUtils.getTypeArguments(operatorInfo.targetType, Operation.class);
 
                 if (operatorArgs != null) {
                     for (Class<?> c : ClassUtils.hierarchy(operatorInfo.rawTargetType)) {
@@ -126,8 +126,8 @@ class OperatorManager {
                             if (operationVariableType == null) {
                                 continue;
                             }
-                            if ((operationVariableType instanceof Class<?>)
-                                    && ((Class<?>) operationVariableType).isPrimitive()) {
+                            if (operationVariableType instanceof Class<?>
+                                && ((Class<?>) operationVariableType).isPrimitive()) {
                                 operationVariableType = ClassUtils.primitiveToWrapper((Class<?>) operationVariableType);
                             }
                             final Type operatorVariableType = TypeUtils.unrollVariables(operatorArgs, var);
@@ -161,7 +161,7 @@ class OperatorManager {
 
                         @Override
                         public boolean hasNext() {
-                            while ((currentInfo == null) || !currentInfo.hasNext()) {
+                            while (currentInfo == null || !currentInfo.hasNext()) {
                                 if (hierarchy.hasNext()) {
                                     final Class<?> c = hierarchy.next();
                                     if (subgroups.containsKey(c)) {
@@ -202,8 +202,8 @@ class OperatorManager {
     }
 
     private static void validate(Set<Operator<?>> operators) {
-        final Set<Class<?>> operatorsPresent = new HashSet<Class<?>>();
-        final Set<Class<?>> operatorsNeeded = new HashSet<Class<?>>();
+        final Set<Class<?>> operatorsPresent = new HashSet<>();
+        final Set<Class<?>> operatorsNeeded = new HashSet<>();
 
         for (Operator<?> operator : operators) {
             Operators.validateImplementation(operator);
@@ -223,7 +223,7 @@ class OperatorManager {
     }
 
     private static List<OperatorInfo> buildOperatorInfos(Set<Operator<?>> operators) {
-        final List<OperatorInfo> result = new ArrayList<OperatorInfo>(operators.size());
+        final List<OperatorInfo> result = new ArrayList<>(operators.size());
         for (Map.Entry<Operator<?>, Type> entry : new Operators(operators).entrySet()) {
             result.add(new OperatorInfo(entry.getKey(), entry.getValue()));
         }

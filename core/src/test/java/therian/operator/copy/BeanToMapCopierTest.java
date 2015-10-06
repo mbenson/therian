@@ -15,7 +15,9 @@
  */
 package therian.operator.copy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +46,7 @@ public class BeanToMapCopierTest extends OperatorTest {
 
     @Test
     public void testCopy() {
-        final HashMap<String, Object> targetValue = new HashMap<String, Object>();
+        final HashMap<String, Object> targetValue = new HashMap<>();
         final Position.Readable<Map<String, Object>> target =
             Positions.readOnly(new TypeLiteral<Map<String, Object>>() {}, targetValue);
 

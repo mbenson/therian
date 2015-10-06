@@ -135,7 +135,7 @@ public class Keyed {
          * @return {@link PositionFactory}
          */
         public <K> PositionFactory<K, V> at(K key) {
-            return new PositionFactory<K, V>(key);
+            return new PositionFactory<>(key);
         }
     }
 
@@ -148,6 +148,6 @@ public class Keyed {
      * @return {@link Value}
      */
     public static <V> Value<V> value() {
-        return new Value<V>();
+        return new Value<>();
     }
 }

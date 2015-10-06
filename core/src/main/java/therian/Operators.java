@@ -42,7 +42,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
 
     /**
      * Get standard operators.
-     * 
+     *
      * @return Operator[]
      * @see Therian#standard()
      */
@@ -52,7 +52,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
 
     /**
      * Validate an {@link Operator} implementation.
-     * 
+     *
      * @param operator
      * @param <OPERATOR>
      * @return {@code operator}
@@ -68,8 +68,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
         return operator;
     }
 
-    private ListOrderedMap<Operator<?>, Type> contents = ListOrderedMap
-        .listOrderedMap(new IdentityHashMap<Operator<?>, Type>());
+    private final ListOrderedMap<Operator<?>, Type> contents = ListOrderedMap.listOrderedMap(new IdentityHashMap<>());
 
     public Operators(Collection<? extends Operator<?>> c) {
         super();

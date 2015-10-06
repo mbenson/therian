@@ -43,7 +43,7 @@ public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, P
 
     public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
         Position.Readable<SOURCE> sourcePosition) {
-        return new AddAll<SOURCE, TARGET>(sourcePosition, targetPosition);
+        return new AddAll<>(sourcePosition, targetPosition);
     }
 
 }

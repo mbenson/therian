@@ -58,7 +58,7 @@ public class AddEntryToMapTest extends OperatorTest {
 
     @Test
     public void testTypedMap() {
-        final Map<String, MetasyntacticVariable> m = new HashMap<String, MetasyntacticVariable>();
+        final Map<String, MetasyntacticVariable> m = new HashMap<>();
         assertTrue(therianContext.eval(
             Add.to(Positions.readWrite(new TypeLiteral<Map<String, MetasyntacticVariable>>() {}, m),
                 Positions.readOnly(Pair.of(MetasyntacticVariable.FOO.name(), MetasyntacticVariable.FOO))))
@@ -80,35 +80,32 @@ public class AddEntryToMapTest extends OperatorTest {
     public void testWrongKeyTypeMap() {
         therianContext
             .eval(Add.to(
-                Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<String, String>()),
+                Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<>()),
                 Positions.readOnly(new TypeLiteral<Map.Entry<Integer, String>>() {},
                     Pair.of(Integer.valueOf(666), "foo"))));
     }
 
     @Test(expected = OperationException.class)
     public void testWrongValueTypeMap() {
-        therianContext.eval(Add.to(
-            Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<String, String>()),
+        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<>()),
             Positions.readOnly(new TypeLiteral<Map.Entry<String, Object>>() {}, Pair.of("foo", new Object()))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleKeyMap() {
-        therianContext.eval(Add.to(
-            Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<String, String>()),
+        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<>()),
             Positions.readOnly(Pair.of(Integer.valueOf(666), "foo"))));
     }
 
     @Test(expected = OperationException.class)
     public void testIncompatibleValueMap() {
-        therianContext.eval(Add.to(
-            Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<String, String>()),
+        therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Map<String, String>>() {}, new HashMap<>()),
             Positions.readOnly(Pair.of("foo", new Object()))));
     }
 
     @Test(expected = OperationException.class)
     public void testAddNullEntry() {
-        final Map<String, MetasyntacticVariable> m = new HashMap<String, MetasyntacticVariable>();
+        final Map<String, MetasyntacticVariable> m = new HashMap<>();
         therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Map<String, MetasyntacticVariable>>() {}, m),
             Positions.readOnly(new TypeLiteral<Map.Entry<String, MetasyntacticVariable>>() {}, null)));
     }

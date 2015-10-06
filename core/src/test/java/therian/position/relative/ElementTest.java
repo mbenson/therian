@@ -33,7 +33,7 @@ public class ElementTest {
 
     @Test
     public void testGetIterableElementType() {
-        final List<String> l = new ArrayList<String>();
+        final List<String> l = new ArrayList<>();
         assertEquals(String.class, Element.atIndex(0).of(Positions.readOnly(new TypeLiteral<List<String>>() {}, l))
             .getType());
         assertEquals(Object.class, Element.atIndex(0).of(Positions.readOnly(l)).getType());
@@ -41,7 +41,7 @@ public class ElementTest {
 
     @Test
     public void testGetIterableElementValue() {
-        final List<String> l = new ArrayList<String>();
+        final List<String> l = new ArrayList<>();
         l.add("foo");
         assertEquals("foo", Element.atIndex(0).of(Positions.readOnly(l)).getValue());
     }
@@ -53,7 +53,7 @@ public class ElementTest {
 
     @Test
     public void testSetIterableElementValue() {
-        final List<String> l = new ArrayList<String>();
+        final List<String> l = new ArrayList<>();
         l.add("foo");
         Element.atIndex(0).of(Positions.readOnly(l)).setValue("bar");
         assertEquals("bar", l.get(0));
@@ -92,7 +92,7 @@ public class ElementTest {
 
     @Test
     public void testToString() {
-        final Position.Readable<ArrayList<String>> listRef = Positions.readOnly(new ArrayList<String>());
+        final Position.Readable<ArrayList<String>> listRef = Positions.readOnly(new ArrayList<>());
         assertEquals(String.format("Relative Position: Element [0] of %s", listRef), Element.atIndex(0).of(listRef)
             .toString());
 

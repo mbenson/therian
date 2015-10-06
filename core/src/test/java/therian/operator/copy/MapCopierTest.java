@@ -57,7 +57,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Before
     public void setupData() {
-        nameToMetasyntacticVariable = new LinkedHashMap<String, MetasyntacticVariable>();
+        nameToMetasyntacticVariable = new LinkedHashMap<>();
         for (MetasyntacticVariable mv : MetasyntacticVariable.values()) {
             nameToMetasyntacticVariable.put(mv.name(), mv);
         }
@@ -70,7 +70,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Test
     public void testNoConversion() {
-        final Map<String, MetasyntacticVariable> targetMap = new LinkedHashMap<String, MetasyntacticVariable>();
+        final Map<String, MetasyntacticVariable> targetMap = new LinkedHashMap<>();
 
         assertTrue(therianContext.evalSuccess(Copy.to(
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_METASYNTACTIC_VARIABLE, targetMap),
@@ -81,8 +81,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Test
     public void testKeyConversion() {
-        final Map<MetasyntacticVariable, MetasyntacticVariable> targetMap =
-            new LinkedHashMap<MetasyntacticVariable, MetasyntacticVariable>();
+        final Map<MetasyntacticVariable, MetasyntacticVariable> targetMap = new LinkedHashMap<>();
         assertTrue(therianContext.evalSuccess(Copy.to(
             Positions.readOnly(LocalTypes.MAP_OF_METASYNTACTIC_VARIABLE_TO_METASYNTACTIC_VARIABLE, targetMap),
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_METASYNTACTIC_VARIABLE, nameToMetasyntacticVariable))));
@@ -98,7 +97,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Test
     public void testValueConversion() {
-        final Map<String, String> targetMap = new LinkedHashMap<String, String>();
+        final Map<String, String> targetMap = new LinkedHashMap<>();
         assertTrue(therianContext.evalSuccess(Copy.to(
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_STRING, targetMap),
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_METASYNTACTIC_VARIABLE, nameToMetasyntacticVariable))));
@@ -112,7 +111,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Test
     public void testKeyAndValueConversion() {
-        final Map<MetasyntacticVariable, String> targetMap = new LinkedHashMap<MetasyntacticVariable, String>();
+        final Map<MetasyntacticVariable, String> targetMap = new LinkedHashMap<>();
         assertTrue(therianContext.evalSuccess(Copy.to(
             Positions.readOnly(LocalTypes.MAP_OF_METASYNTACTIC_VARIABLE_TO_STRING, targetMap),
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_METASYNTACTIC_VARIABLE, nameToMetasyntacticVariable))));
@@ -127,7 +126,7 @@ public class MapCopierTest extends OperatorTest {
 
     @Test(expected = OperationException.class)
     public void testUnsupportedConversion() {
-        final Map<String, Object> sourceMap = new LinkedHashMap<String, Object>();
+        final Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("blah", new Object());
         therianContext.eval(Copy.to(
             Positions.readOnly(LocalTypes.MAP_OF_STRING_TO_METASYNTACTIC_VARIABLE, nameToMetasyntacticVariable),
