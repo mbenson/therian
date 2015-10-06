@@ -70,17 +70,12 @@ public abstract class RelativePositionFactory<PARENT, TYPE> {
             @SuppressWarnings("unchecked")
             final RelativePositionImpl<?, ?> other = (RelativePositionImpl<?, ?>) obj;
             return Objects.equals(getFactory(), other.getFactory())
-                && Objects.equals(parentPosition, other.parentPosition);
+                    && Objects.equals(parentPosition, other.parentPosition);
         }
 
         @Override
         public int hashCode() {
-            int result = 97;
-            result <<= 8;
-            result |= getFactory().hashCode();
-            result <<= 8;
-            result |= parentPosition.hashCode();
-            return result;
+            return Objects.hash(getFactory(), parentPosition);
         }
 
         @Override
