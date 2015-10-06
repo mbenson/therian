@@ -17,9 +17,9 @@ package therian.position.relative;
 
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -76,27 +76,25 @@ public class Element {
                 private Type getBasicType() {
                     final TherianContext context = TherianContext.getInstance();
                     final P parent = parentPosition.getValue();
-                    final String name = Integer.toString(index);
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
                     if (parent != null) {
                         try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                IteratorUtils
-                                    .toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
+                            final String name = Integer.toString(index);
+
+                            for (Iterator<FeatureDescriptor> fd =
+                                IteratorUtils.filteredIterator(
+                                    context.getELResolver().getFeatureDescriptors(context, parent),
+                                    d -> name.equals(d.getName())); fd.hasNext();) {
+
+                                final Type fromGenericTypeAttribute =
+                                    Type.class.cast(fd.next().getValue(ELConstants.GENERIC_TYPE));
+                                if (fromGenericTypeAttribute != null) {
+                                    return fromGenericTypeAttribute;
+                                }
+                            }
                         } catch (Exception e) {
                         }
                     }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
-                        }
-                    }
-
                     return ObjectUtils.defaultIfNull(evaluateElementType(parentPosition), Object.class);
                 }
             }
@@ -128,7 +126,7 @@ public class Element {
 
     /**
      * "Element at array index <em>n</em>".
-     * 
+     *
      * @param index
      * @return {@link PositionFactory}
      */
@@ -144,7 +142,7 @@ public class Element {
 
             @Override
             public int hashCode() {
-                return (83 << 4) | index;
+                return Objects.hash(index);
             }
 
             @Override
@@ -162,7 +160,7 @@ public class Element {
 
     /**
      * "Element at index <em>n</em>".
-     * 
+     *
      * @param index
      * @return {@link PositionFactory}
      */
@@ -171,7 +169,7 @@ public class Element {
 
             @Override
             public int hashCode() {
-                return (79 << 4) | index;
+                return Objects.hash(index);
             }
 
             @Override

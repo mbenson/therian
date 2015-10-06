@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +32,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -110,10 +110,10 @@ class OperatorManager {
                 }
 
                 final Map<TypeVariable<?>, Type> operationArgs =
-                    TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
+                        TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
 
                 final Map<TypeVariable<?>, Type> operatorArgs =
-                    TypeUtils.getTypeArguments(operatorInfo.targetType, Operation.class);
+                        TypeUtils.getTypeArguments(operatorInfo.targetType, Operation.class);
 
                 if (operatorArgs != null) {
                     for (Class<?> c : ClassUtils.hierarchy(operatorInfo.rawTargetType)) {
@@ -127,7 +127,7 @@ class OperatorManager {
                                 continue;
                             }
                             if ((operationVariableType instanceof Class<?>)
-                                && ((Class<?>) operationVariableType).isPrimitive()) {
+                                    && ((Class<?>) operationVariableType).isPrimitive()) {
                                 operationVariableType = ClassUtils.primitiveToWrapper((Class<?>) operationVariableType);
                             }
                             final Type operatorVariableType = TypeUtils.unrollVariables(operatorArgs, var);
@@ -139,7 +139,6 @@ class OperatorManager {
                 }
                 return true;
             }
-
         }
 
         private final TherianContext context;
@@ -166,9 +165,7 @@ class OperatorManager {
                                 if (hierarchy.hasNext()) {
                                     final Class<?> c = hierarchy.next();
                                     if (subgroups.containsKey(c)) {
-                                        currentInfo =
-                                            IteratorUtils.filteredIterator(subgroups.get(c).iterator(),
-                                                (d) -> filter.test(d));
+                                        currentInfo = subgroups.get(c).stream().filter(filter).iterator();
                                     }
                                     continue;
                                 }
@@ -196,7 +193,7 @@ class OperatorManager {
     }
 
     private final List<OperatorInfo> operatorInfos;
-    private final Map<Class<?>, Iterable<OperatorInfo>> subgroups;
+    private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
 
     OperatorManager(Set<Operator<?>> operators) {
         validate(operators);
@@ -233,8 +230,8 @@ class OperatorManager {
         return result;
     }
 
-    private static Map<Class<?>, Iterable<OperatorInfo>> buildOperatorInfoSubgroups(List<OperatorInfo> operatorInfos) {
-        final Map<Class<?>, Iterable<OperatorInfo>> result = new HashMap<Class<?>, Iterable<OperatorInfo>>();
+    private static Map<Class<?>, Collection<OperatorInfo>> buildOperatorInfoSubgroups(List<OperatorInfo> operatorInfos) {
+        final Map<Class<?>, Collection<OperatorInfo>> result = new HashMap<>();
 
         Class<?> opType = null;
         int mark = -1;

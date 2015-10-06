@@ -17,7 +17,9 @@ package therian.operator.copy;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -53,23 +55,25 @@ public class BeanToMapCopier extends Copier<Object, Map> {
     public boolean perform(TherianContext context, Copy<? extends Object, ? extends Map> copy) {
         final Type targetKeyType = getKeyType(copy.getTargetPosition());
 
-        boolean result = false;
         final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
-        for (String propertyName : getProperties(context, copy.getSourcePosition())) {
-            final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
-            if (!context.supports(convertKey)) {
-                continue;
-            }
-            final Object key = context.eval(convertKey);
-            @SuppressWarnings("unchecked")
-            final Copy<?, ?> copyEntry =
-                Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()),
-                    Property.at(propertyName).of(copy.getSourcePosition()));
-            if (context.evalSuccess(copyEntry)) {
-                result = true;
-            }
-        }
-        return result;
+
+        @SuppressWarnings("unchecked")
+        final Stream<Copy<?, ?>> copyEntries =
+            getProperties(context, copy.getSourcePosition()).<Copy<?, ?>> map(
+                propertyName -> {
+                    final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
+                    if (!context.supports(convertKey)) {
+                        return null;
+                    }
+                    final Object key = context.eval(convertKey);
+                    final Copy<?, ?> copyEntry =
+                        Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()), Property.at(propertyName)
+                            .of(copy.getSourcePosition()));
+                    return copyEntry;
+                }).filter(Objects::nonNull);
+
+        return copyEntries.map(copyEntry -> Boolean.valueOf(context.evalSuccess(copyEntry)))
+            .collect(Collectors.toSet()).contains(Boolean.TRUE);
     }
 
     /**
@@ -85,18 +89,14 @@ public class BeanToMapCopier extends Copier<Object, Map> {
         final Type targetKeyType = getKeyType(copy.getTargetPosition());
 
         final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
-        for (String propertyName : getProperties(context, copy.getSourcePosition())) {
-            if (context.supports(Convert.to(targetKey, Positions.readOnly(propertyName)))) {
-                return true;
-            }
-        }
-        return false;
+
+        return getProperties(context, copy.getSourcePosition())
+            .filter(propertyName -> context.supports(Convert.to(targetKey, Positions.readOnly(propertyName))))
+            .findFirst().isPresent();
     }
 
-    private Iterable<String> getProperties(TherianContext context, Position.Readable<?> source) {
-        final Stream<String> stream =
-            BeanProperties.getPropertyNames(context, source).stream().filter(ignored.negate());
-        return () -> stream.iterator();
+    private Stream<String> getProperties(TherianContext context, Position.Readable<?> source) {
+        return BeanProperties.getPropertyNames(context, source).stream().filter(ignored.negate());
     }
 
     private Type getKeyType(Position<? extends Map> target) {

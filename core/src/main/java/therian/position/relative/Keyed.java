@@ -17,7 +17,6 @@ package therian.position.relative;
 
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -67,31 +66,26 @@ public class Keyed {
                 private Type getBasicType() {
                     final TherianContext context = TherianContext.getInstance();
                     final P parent = parentPosition.getValue();
-                    final String name = String.valueOf(key);
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
                     if (parent != null) {
                         try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                IteratorUtils
-                                    .toList(IteratorUtils.filteredIterator(fd, (d) -> name.equals(d.getName())));
+                            final String name = String.valueOf(key);
+                            for (Iterator<FeatureDescriptor> fd =
+                                IteratorUtils.filteredIterator(
+                                    context.getELResolver().getFeatureDescriptors(context, parent),
+                                    d -> name.equals(d.getName())); fd.hasNext();) {
+                                final Type fromGenericTypeAttribute =
+                                    Type.class.cast(fd.next().getValue(ELConstants.GENERIC_TYPE));
+                                if (fromGenericTypeAttribute != null) {
+                                    return fromGenericTypeAttribute;
+                                }
+                            }
                         } catch (Exception e) {
                         }
                     }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            Type.class.cast(feature.getValue(ELConstants.GENERIC_TYPE));
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
-                        }
-                    }
-
                     return ObjectUtils.defaultIfNull(TypeUtils.getTypeArguments(parentPosition.getType(), Map.class)
                         .get(Map.class.getTypeParameters()[1]), Object.class);
                 }
-
             }
             return new Result(parentPosition, key);
         }
@@ -111,7 +105,7 @@ public class Keyed {
             if (obj == this) {
                 return true;
             }
-            if ((obj instanceof PositionFactory) == false) {
+            if (obj instanceof PositionFactory == false) {
                 return false;
             }
             return Objects.equals(key, ((PositionFactory<?, ?>) obj).key);
@@ -136,7 +130,7 @@ public class Keyed {
 
         /**
          * "Keyed value at <em>key</em>".
-         * 
+         *
          * @param key
          * @return {@link PositionFactory}
          */
@@ -150,7 +144,7 @@ public class Keyed {
 
     /**
      * "Keyed value".
-     * 
+     *
      * @return {@link Value}
      */
     public static <V> Value<V> value() {

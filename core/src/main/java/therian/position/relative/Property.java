@@ -23,12 +23,13 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.el.ELResolver;
 
@@ -85,6 +86,10 @@ public class Property {
         };
 
         abstract Type getType(FeatureDescriptor feature);
+
+        Optional<Type> findType(Stream<? extends FeatureDescriptor> features) {
+            return features.map(this::getType).filter(Objects::nonNull).findFirst();
+        }
     }
 
     public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
@@ -121,54 +126,46 @@ public class Property {
                 private Type getBasicType() {
                     final TherianContext context = TherianContext.getInstance();
                     final P parent = parentPosition.getValue();
+                    final Predicate<FeatureDescriptor> featureMatchingName = d -> propertyName.equals(d.getName());
 
-                    Iterable<FeatureDescriptor> featureDescriptors = Collections.emptyList();
+                    Stream<FeatureDescriptor> matchingFeatures = Stream.empty();
                     if (parent != null) {
                         try {
-                            final Iterator<FeatureDescriptor> fd =
-                                context.getELResolver().getFeatureDescriptors(context, parent);
-                            featureDescriptors =
-                                IteratorUtils.toList(IteratorUtils.filteredIterator(fd,
-                                    (d) -> propertyName.equals(d.getName())));
+                            matchingFeatures =
+                                IteratorUtils.toList(context.getELResolver().getFeatureDescriptors(context, parent))
+                                    .stream().filter(featureMatchingName);
 
+                            final Optional<Type> fromGenericTypeAttribute =
+                                FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.findType(matchingFeatures);
+                            if (fromGenericTypeAttribute.isPresent()) {
+                                return fromGenericTypeAttribute.get();
+                            }
                         } catch (Exception e) {
-                        }
-                    }
-                    for (FeatureDescriptor fd : featureDescriptors) {
-                        final Type fromGenericTypeAttribute =
-                            FeatureExtractionStrategy.GENERIC_TYPE_ATTRIBUTE.getType(fd);
-                        if (fromGenericTypeAttribute != null) {
-                            return fromGenericTypeAttribute;
                         }
                     }
 
                     final Type parentType = parentPosition.getType();
                     final Class<?> rawParentType = TypeUtils.getRawType(parentType, null);
                     try {
-                        final List<PropertyDescriptor> beanPropertyDescriptors =
-                            Arrays.asList(Introspector.getBeanInfo(rawParentType).getPropertyDescriptors());
+                        final Optional<Type> fromPropertyDescriptor =
+                            FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.findType(Arrays.stream(
+                                Introspector.getBeanInfo(rawParentType).getPropertyDescriptors()).filter(
+                                featureMatchingName));
 
-                        final Iterable<PropertyDescriptor> matching =
-                            () -> beanPropertyDescriptors.stream().filter((d) -> propertyName.equals(d.getName()))
-                                .iterator();
-
-                        for (PropertyDescriptor pd : matching) {
-                            Type fromPropertyDescriptor = FeatureExtractionStrategy.PROPERTY_DESCRIPTOR.getType(pd);
-                            if (fromPropertyDescriptor != null) {
-                                return fromPropertyDescriptor;
-                            }
+                        if (fromPropertyDescriptor.isPresent()) {
+                            return fromPropertyDescriptor.get();
                         }
                     } catch (IntrospectionException e) {
                         if (LOG.isLoggable(Level.WARNING)) {
                             LOG.log(Level.WARNING, String.format("Could not introspect %s", rawParentType), e);
                         }
                     }
-                    for (FeatureDescriptor feature : featureDescriptors) {
-                        Type fromTypeAttribute = FeatureExtractionStrategy.TYPE_ATTRIBUTE.getType(feature);
-                        if (fromTypeAttribute != null) {
-                            return fromTypeAttribute;
-                        }
+                    final Optional<Type> fromTypeAttribute =
+                        FeatureExtractionStrategy.TYPE_ATTRIBUTE.findType(matchingFeatures);
+                    if (fromTypeAttribute.isPresent()) {
+                        return fromTypeAttribute.get();
                     }
+
                     final Class<?> type =
                         context.getELResolver().getType(context, parentPosition.getValue(), propertyName);
                     Validate.validState(context.isPropertyResolved(), "could not resolve type of %s from %s",
@@ -186,7 +183,7 @@ public class Property {
                         final TYPE result = (TYPE) value;
                         return result;
                     }
-                    if (optional && (parent == null)) {
+                    if (optional && parent == null) {
                         return null;
                     }
                     throw new IllegalStateException(String.format("could not get value %s from %s", propertyName,
@@ -201,12 +198,12 @@ public class Property {
             if (obj == this) {
                 return true;
             }
-            return (obj instanceof PositionFactory) && propertyName.equals(((PositionFactory<?>) obj).propertyName);
+            return obj instanceof PositionFactory && propertyName.equals(((PositionFactory<?>) obj).propertyName);
         }
 
         @Override
         public int hashCode() {
-            return (71 << 4) | propertyName.hashCode();
+            return Objects.hash(propertyName);
         }
 
         @Override
