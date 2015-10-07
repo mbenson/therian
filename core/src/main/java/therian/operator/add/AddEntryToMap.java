@@ -21,12 +21,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
+import therian.operator.OperatorBase;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 /**
@@ -35,7 +35,7 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
 @SuppressWarnings("rawtypes")
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddEntryToMap implements Operator<Add<? extends Map.Entry, ? extends Map>> {
+public class AddEntryToMap extends OperatorBase<Add<? extends Map.Entry, ? extends Map>> {
 
     @SuppressWarnings("unchecked")
     @Override
@@ -68,4 +68,5 @@ public class AddEntryToMap implements Operator<Add<? extends Map.Entry, ? extend
         return targetValueType == null
             || TypeUtils.isInstance(add.getSourcePosition().getValue().getValue(), targetValueType);
     }
+
 }

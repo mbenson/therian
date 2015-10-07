@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
@@ -28,6 +27,7 @@ import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
 import therian.operation.Size;
+import therian.operator.OperatorBase;
 import therian.operator.convert.DefaultToArrayConverter;
 import therian.operator.convert.NOPConverter;
 import therian.operator.size.DefaultSizeOperator;
@@ -41,7 +41,7 @@ import therian.util.Positions;
  */
 @StandardOperator
 @DependsOn({ DefaultToArrayConverter.class, DefaultSizeOperator.class, NOPConverter.class })
-public class AddAllToArray implements Operator<AddAll<?, ?>> {
+public class AddAllToArray extends OperatorBase<AddAll<?, ?>> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

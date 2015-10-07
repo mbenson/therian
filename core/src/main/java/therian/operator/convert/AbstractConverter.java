@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operation;
 import therian.Operator;
 import therian.operation.Convert;
 import therian.operator.FromSourceToTarget;
@@ -30,7 +31,7 @@ import therian.util.Types;
 /**
  * Abstract {@link Convert} {@link Operator} superclass.
  */
-public abstract class AbstractConverter extends FromSourceToTarget {
+public abstract class AbstractConverter<T extends Operation<?>> extends FromSourceToTarget<T> {
 
     /**
      * Learn whether a {@link Convert} operation's source value is (already) an instance of its target type,

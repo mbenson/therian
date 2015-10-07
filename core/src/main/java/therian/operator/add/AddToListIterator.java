@@ -20,12 +20,12 @@ import java.util.ListIterator;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
-import therian.TherianContext;
 import therian.Operator.DependsOn;
+import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
+import therian.operator.OperatorBase;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 /**
@@ -33,7 +33,7 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
  */
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddToListIterator implements Operator<Add<?, ? extends ListIterator<?>>> {
+public class AddToListIterator extends OperatorBase<Add<?, ? extends ListIterator<?>>> {
 
     @Override
     @SuppressWarnings("unchecked")

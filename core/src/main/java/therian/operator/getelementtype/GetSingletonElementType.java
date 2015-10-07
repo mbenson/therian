@@ -17,10 +17,10 @@ package therian.operator.getelementtype;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
+import therian.operator.OperatorBase;
 import therian.operator.convert.DefaultToListConverter;
 
 /**
@@ -29,7 +29,7 @@ import therian.operator.convert.DefaultToListConverter;
  * @see DefaultToListConverter
  */
 @StandardOperator
-public class GetSingletonElementType implements Operator<GetElementType<?>> {
+public class GetSingletonElementType extends OperatorBase<GetElementType<?>> {
 
     @Override
     public boolean perform(TherianContext context, GetElementType<?> operation) {

@@ -45,16 +45,15 @@ import therian.operator.FromSourceToTarget;
  * @param <SOURCE>
  * @param <TARGET>
  */
-public abstract class Converter<SOURCE, TARGET> extends AbstractConverter implements
-    Operator<Convert<? extends SOURCE, ? super TARGET>>, FromSourceToTarget.FromSource<SOURCE>,
-    FromSourceToTarget.ToTarget<TARGET> {
+public abstract class Converter<SOURCE, TARGET> extends AbstractConverter<Convert<? extends SOURCE, ? super TARGET>>
+    implements FromSourceToTarget.FromSource<SOURCE>, FromSourceToTarget.ToTarget<TARGET> {
 
     /**
      * Accommodates the situation where a {@link Converter} applies to multiple target types that share no common
      * descendant as in the case of e.g. array types.
      */
-    public static abstract class WithDynamicTarget<SOURCE> extends AbstractConverter implements
-        Operator<Convert<? extends SOURCE, ?>>, FromSourceToTarget.FromSource<SOURCE> {
+    public static abstract class WithDynamicTarget<SOURCE> extends AbstractConverter<Convert<? extends SOURCE, ?>>
+        implements FromSourceToTarget.FromSource<SOURCE> {
 
         /**
          * {@link Logger} instance.

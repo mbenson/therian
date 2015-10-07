@@ -21,7 +21,7 @@ import therian.TherianContext;
 import therian.operation.Convert;
 
 /**
- * Simple superclass for implementing "naive" conversions.
+ * Simple superclass for implementing "naive" conversions. Automatically handles {@code null} values.
  *
  * @param <SOURCE>
  * @param <TARGET>
@@ -48,7 +48,7 @@ public abstract class NaiveConverter<SOURCE, TARGET> extends Converter<SOURCE, T
 
     /**
      * Convert source to target type.
-     * 
+     *
      * @param source
      * @return converted value
      */

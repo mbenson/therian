@@ -21,24 +21,20 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
+import therian.operator.OptimisticOperatorBase;
 
 /**
  * Default {@link Size} {@link Operator}. Handles arrays (of which those with primitive component types of course cannot
  * be generalized), returns {@code 0} for {@code null}, and 1 otherwise.
  */
 @StandardOperator
-public class DefaultSizeOperator implements Operator<Size<?>> {
+public class DefaultSizeOperator extends OptimisticOperatorBase<Size<?>> {
 
     @Override
     public boolean perform(TherianContext context, Size<?> operation) {
         final Object value = operation.getPosition().getValue();
         final int result = value == null ? 0 : value.getClass().isArray() ? Array.getLength(value) : 1;
         operation.setResult(result);
-        return true;
-    }
-
-    @Override
-    public boolean supports(TherianContext context, Size<?> operation) {
         return true;
     }
 

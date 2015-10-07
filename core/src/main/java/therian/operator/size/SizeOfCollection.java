@@ -21,6 +21,7 @@ import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
+import therian.operator.OptimisticOperatorBase;
 
 /**
  * {@link Operator} to take the size of a {@link Collection}. Functionality is duplicated by {@link SizeOfIterable};
@@ -28,17 +29,12 @@ import therian.operation.Size;
  * <em>not</em> {@link Collection}s.
  */
 @StandardOperator
-public class SizeOfCollection implements Operator<Size<Collection<?>>> {
+public class SizeOfCollection extends OptimisticOperatorBase<Size<Collection<?>>> {
 
     @Override
     public boolean perform(TherianContext context, Size<Collection<?>> operation) {
         Collection<?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
-        return true;
-    }
-
-    @Override
-    public boolean supports(TherianContext context, Size<Collection<?>> operation) {
         return true;
     }
 

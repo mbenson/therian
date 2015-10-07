@@ -17,19 +17,23 @@ package therian.operator;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Objects;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.Operation;
 import therian.util.Types;
 
 /**
  * Manages source/target bounds.
  */
-public abstract class FromSourceToTarget {
+public abstract class FromSourceToTarget<T extends Operation<?>> extends OperatorBase<T> {
+
+    private static final String UNKNOWN = "<unknown>";
 
     /**
      * Describes some type that has a source.
-     * 
+     *
      * @param <S>
      */
     public interface FromSource<S> {
@@ -37,7 +41,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Describes some type that has a target.
-     * 
+     *
      * @param <T>
      */
     public interface ToTarget<T> {
@@ -57,7 +61,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Get the Type detected for type parameter {@code SOURCE}.
-     * 
+     *
      * @return Type
      */
     protected Type getSourceBound() {
@@ -66,7 +70,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * Get the Type detected for type parameter {@code TARGET}.
-     * 
+     *
      * @return Type
      */
     protected Type getTargetBound() {
@@ -75,7 +79,7 @@ public abstract class FromSourceToTarget {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * By default, any instance that fully binds type parameters is considered equal to an instance of the same class.
      */
     @Override
@@ -87,5 +91,16 @@ public abstract class FromSourceToTarget {
             return false;
         }
         return obj.getClass().equals(getClass()) && sourceBound != null && targetBound != null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), sourceBound, targetBound);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s from %s to %s", getClass().getSimpleName(), Objects.toString(sourceBound, UNKNOWN),
+            Objects.toString(targetBound, UNKNOWN));
     }
 }

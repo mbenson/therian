@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
@@ -12,6 +11,7 @@ import therian.operation.Add;
 import therian.operation.AddAll;
 import therian.operation.Convert;
 import therian.operation.GetElementType;
+import therian.operator.OperatorBase;
 import therian.operator.add.AddToCollection;
 import therian.operator.add.AddToListIterator;
 import therian.operator.convert.DefaultToListConverter;
@@ -27,7 +27,7 @@ import therian.util.Positions;
 @StandardOperator
 @DependsOn({ AddToCollection.class, AddToListIterator.class, IterableToList.class, EnumerationToList.class,
     DefaultToListConverter.class })
-public class GenericAddAllOperator implements Operator<AddAll<?, ?>> {
+public class GenericAddAllOperator extends OperatorBase<AddAll<?, ?>> {
 
     @Override
     public boolean perform(TherianContext context, AddAll<?, ?> addAll) {

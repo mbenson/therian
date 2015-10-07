@@ -197,6 +197,51 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
 
     }
 
+    private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {
+        return Validate.notNull(ConstructorUtils.getAccessibleConstructor(type),
+            "Could not find default constructor for %s", type);
+    }
+
+    /**
+     * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
+     *
+     * @param target type which must have an accessible no-arg constructor
+     * @param <TARGET>
+     * @return CopyingConverter instance
+     */
+    public static <TARGET> CopyingConverter<Object, TARGET> forTargetType(final Class<TARGET> target) {
+        final Typed<TARGET> targetType = TypeUtils.wrap(target);
+
+        return new Fluent<TARGET>(requireDefaultConstructor(target)) {
+            @Override
+            public Typed<TARGET> getTargetType() {
+                return targetType;
+            }
+        };
+    }
+
+    /**
+     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
+     * target type using the default constructor of a specific implementation.
+     *
+     * @param targetType
+     * @return {@link Implementing} step
+     */
+    public static <TARGET> Implementing<TARGET> implementing(Class<TARGET> targetType) {
+        return new Implementing<>(TypeUtils.wrap(targetType));
+    }
+
+    /**
+     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
+     * target type using the default constructor of a specific implementation.
+     *
+     * @param targetType
+     * @return {@link Implementing} step
+     */
+    public static <TARGET> Implementing<TARGET> implementing(Typed<TARGET> targetType) {
+        return new Implementing<>(targetType);
+    }
+
     @Override
     public final boolean perform(final TherianContext context, final Convert<? extends SOURCE, ? super TARGET> convert) {
         final TARGET target;
@@ -242,48 +287,4 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
             Types.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
     }
 
-    private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {
-        return Validate.notNull(ConstructorUtils.getAccessibleConstructor(type),
-            "Could not find default constructor for %s", type);
-    }
-
-    /**
-     * Create a {@link CopyingConverter} instance that instantiates the target type using the default constructor.
-     *
-     * @param target type which must have an accessible no-arg constructor
-     * @param <TARGET>
-     * @return CopyingConverter instance
-     */
-    public static <TARGET> CopyingConverter<Object, TARGET> forTargetType(final Class<TARGET> target) {
-        final Typed<TARGET> targetType = TypeUtils.wrap(target);
-
-        return new Fluent<TARGET>(requireDefaultConstructor(target)) {
-            @Override
-            public Typed<TARGET> getTargetType() {
-                return targetType;
-            }
-        };
-    }
-
-    /**
-     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
-     * target type using the default constructor of a specific implementation.
-     *
-     * @param targetType
-     * @return {@link Implementing} step
-     */
-    public static <TARGET> Implementing<TARGET> implementing(Class<TARGET> targetType) {
-        return new Implementing<>(TypeUtils.wrap(targetType));
-    }
-
-    /**
-     * Intermediate step to create a {@link CopyingConverter} instance that instantiates the (most likely abstract)
-     * target type using the default constructor of a specific implementation.
-     *
-     * @param targetType
-     * @return {@link Implementing} step
-     */
-    public static <TARGET> Implementing<TARGET> implementing(Typed<TARGET> targetType) {
-        return new Implementing<>(targetType);
-    }
 }

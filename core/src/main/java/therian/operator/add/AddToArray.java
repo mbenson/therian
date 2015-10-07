@@ -20,13 +20,13 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.Operator.DependsOn;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.GetElementType;
 import therian.operation.Size;
+import therian.operator.OperatorBase;
 import therian.operator.convert.NOPConverter;
 import therian.operator.getelementtype.GetArrayElementType;
 import therian.operator.size.DefaultSizeOperator;
@@ -35,11 +35,11 @@ import therian.position.Position.Writable;
 import therian.util.Positions;
 
 /**
- * Overwrites an array at a {@link Writable} {@link Position}s with an enlarged array.
+ * Overwrites an array at a {@link Writable} {@link Position} with an enlarged array.
  */
 @StandardOperator
 @DependsOn({ DefaultSizeOperator.class, GetArrayElementType.class, NOPConverter.class })
-public class AddToArray implements Operator<Add<?, ?>> {
+public class AddToArray extends OperatorBase<Add<?, ?>> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

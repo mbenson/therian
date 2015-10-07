@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
-import therian.TherianContext;
 import therian.Operator.DependsOn;
+import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Copy;
 import therian.operation.Size;
+import therian.operator.OperatorBase;
 import therian.operator.size.DefaultSizeOperator;
 import therian.operator.size.SizeOfCollection;
 import therian.operator.size.SizeOfIterable;
@@ -23,7 +23,7 @@ import therian.position.relative.Element;
  */
 @StandardOperator
 @DependsOn({ DefaultSizeOperator.class, SizeOfCollection.class, SizeOfIterable.class })
-public class ElementCopier implements Operator<Copy<?, ?>> {
+public class ElementCopier extends OperatorBase<Copy<?, ?>> {
     private interface ElementFactory {
         ReadWrite<?> element(int index);
     }

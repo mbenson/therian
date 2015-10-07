@@ -25,6 +25,7 @@ import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Add;
 import therian.operation.ImmutableCheck;
+import therian.operator.OperatorBase;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 /**
@@ -32,7 +33,7 @@ import therian.operator.immutablecheck.DefaultImmutableChecker;
  */
 @StandardOperator
 @DependsOn(DefaultImmutableChecker.class)
-public class AddToCollection implements therian.Operator<Add<?, ? extends Collection<?>>> {
+public class AddToCollection extends OperatorBase<Add<?, ? extends Collection<?>>> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -62,5 +63,4 @@ public class AddToCollection implements therian.Operator<Add<?, ? extends Collec
         }
         return TypeUtils.isAssignable(add.getSourcePosition().getType(), targetElementType);
     }
-
 }

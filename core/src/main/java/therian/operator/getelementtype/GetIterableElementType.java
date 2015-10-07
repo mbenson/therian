@@ -20,14 +20,14 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
+import therian.operator.OptimisticOperatorBase;
 
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class GetIterableElementType implements Operator<GetElementType<Iterable>> {
+public class GetIterableElementType extends OptimisticOperatorBase<GetElementType<Iterable>> {
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Iterable> op) {
@@ -36,11 +36,6 @@ public class GetIterableElementType implements Operator<GetElementType<Iterable>
                 TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class),
                 Iterable.class.getTypeParameters()[0]), Object.class);
         op.setResult(result);
-        return true;
-    }
-
-    @Override
-    public boolean supports(TherianContext context, GetElementType<Iterable> op) {
         return true;
     }
 

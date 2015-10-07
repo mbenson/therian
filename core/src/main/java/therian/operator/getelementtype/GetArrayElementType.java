@@ -17,13 +17,13 @@ package therian.operator.getelementtype;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.Operator;
 import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
 import therian.operation.GetElementType;
+import therian.operator.OperatorBase;
 
 @StandardOperator
-public class GetArrayElementType implements Operator<GetElementType<Object>> {
+public class GetArrayElementType extends OperatorBase<GetElementType<Object>> {
 
     @Override
     public boolean perform(TherianContext context, GetElementType<Object> op) {
