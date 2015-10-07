@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
+import therian.TherianContext.Hint;
 import therian.el.TherianContextELResolver;
 import uelbox.ELContextWrapper;
 
@@ -112,17 +113,6 @@ public class TherianContext extends ELContextWrapper {
         @Override
         public Class<? extends Hint> getType() {
             return Caching.class;
-        }
-    }
-
-    /**
-     * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
-     * "utility" {@link ELResolver} wrappers.
-     */
-    public abstract class NestedELContextWrapper extends ELContextWrapper {
-
-        public NestedELContextWrapper() {
-            super(TherianContext.this.wrapped);
         }
     }
 
@@ -309,6 +299,20 @@ public class TherianContext extends ELContextWrapper {
         boolean evaluate(Operation<T> operation);
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
+    private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
+
+    /**
+     * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
+     * "utility" {@link ELResolver} wrappers.
+     */
+    public abstract class NestedELContextWrapper extends ELContextWrapper {
+
+        public NestedELContextWrapper() {
+            super(TherianContext.this.wrapped);
+        }
+    }
+
     private class CachedOperator<T> implements CachedEvaluator<T> {
         final Operator<? extends Operation<T>> operator;
 
@@ -343,9 +347,6 @@ public class TherianContext extends ELContextWrapper {
         }
 
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
-    private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
 
     private final Deque<Frame<?>> stack = new ArrayDeque<>();
     private final Map<OperationRequest<?>, CachedEvaluator<?>> cache = new HashMap<>();
