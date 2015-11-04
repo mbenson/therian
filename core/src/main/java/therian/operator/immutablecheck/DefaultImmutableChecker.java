@@ -59,10 +59,8 @@ public class DefaultImmutableChecker extends ImmutableChecker {
         addTypeTo(s, Collections.unmodifiableMap(new HashMap<>()));
         addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<>()));
 
-        @SuppressWarnings({ "unused" })
-        boolean junk =
-            Collections.addAll(s, Collections.singleton(null).getClass(), Collections.singletonList(null).getClass(),
-                Collections.singletonMap(null, null).getClass());
+        Collections.addAll(s, Collections.singleton(null).getClass(), Collections.singletonList(null).getClass(),
+            Collections.singletonMap(null, null).getClass());
 
         KNOWN_IMMUTABLE_TYPES = Collections.unmodifiableSet(s);
     }
