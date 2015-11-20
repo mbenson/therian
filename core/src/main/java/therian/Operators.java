@@ -53,8 +53,8 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
     /**
      * Validate an {@link Operator} implementation.
      *
-     * @param operator
-     * @param <OPERATOR>
+     * @param <OPERATOR> type
+     * @param operator to check
      * @return {@code operator}
      * @throws OperatorDefinitionException on invalid operator
      */
