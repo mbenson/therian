@@ -21,7 +21,7 @@
   <parent>
     <groupId>com.github.mbenson.therian</groupId>
     <artifactId>therian-parent</artifactId>
-    <version>0.5</version>
+    <version>0.6-SNAPSHOT</version>
   </parent>
   <artifactId>therian-build-processor</artifactId>
   <name>therian-build-processor</name>
