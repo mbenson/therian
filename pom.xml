@@ -27,7 +27,7 @@
 
   <groupId>com.github.mbenson.therian</groupId>
   <artifactId>therian-parent</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5</version>
   <packaging>pom</packaging>
 
   <name>therian-parent</name>
@@ -37,7 +37,7 @@
     <connection>scm:git:git@github.com:mbenson/therian.git</connection>
     <developerConnection>scm:git:git@github.com:mbenson/therian.git</developerConnection>
     <url>git@github.com:mbenson/therian.git</url>
-    <tag>HEAD</tag>
+    <tag>therian-0.5</tag>
   </scm>
 
   <properties>
