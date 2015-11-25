@@ -15,31 +15,27 @@
  */
 package therian.cdi.internal;
 
-import therian.Operator;
-import therian.Operators;
-import therian.Therian;
-import therian.TherianContext;
-import therian.TherianModule;
-import therian.operation.Copy;
-import therian.operator.copy.PropertyCopier;
-import therian.util.Positions;
+import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-import static java.util.Arrays.asList;
-import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import org.apache.commons.lang3.reflect.TypeUtils;
+
+import therian.Therian;
+import therian.TherianModule;
+import therian.operation.Convert;
+import therian.operator.copy.PropertyCopier;
+import therian.util.Positions;
 
 public class MapperHandler implements InvocationHandler {
     private final Map<Method, Meta<?, ?>> mapping;
@@ -48,53 +44,35 @@ public class MapperHandler implements InvocationHandler {
     public MapperHandler(final AnnotatedType<?> type) {
         // just for error handling
         of(type.getMethods().stream()
-            .filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class) && (m.getParameters().size() != 1 || m.getJavaMember().getReturnType() == void.class))
-            .collect(toList()))
-            .filter(l -> !l.isEmpty())
-            .ifPresent(l -> {
+            .filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class)
+                && (m.getParameters().size() != 1 || m.getJavaMember().getReturnType() == void.class))
+            .collect(toList())).filter(l -> !l.isEmpty()).ifPresent(l -> {
                 throw new IllegalArgumentException("@Mapping only supports one parameter and not void signatures");
             });
 
-        this.mapping = type.getMethods().stream()
-            .filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class))
-            .collect(toMap(
-                AnnotatedMethod::getJavaMember,
-                am -> {
-                    final Method member = am.getJavaMember();
-                    final Type from = member.getGenericParameterTypes()[0];
-                    final Class to = member.getReturnType();
+        this.mapping = type.getMethods().stream().filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class))
+            .collect(toMap(AnnotatedMethod::getJavaMember, am -> {
+                final Method member = am.getJavaMember();
+                final Type from = member.getGenericParameterTypes()[0];
+                final Type to = member.getGenericReturnType();
 
-                    final Collection<Operator<?>> operators = new ArrayList<>();
-                    operators.add(new PropertyCopier(
-                        am.getAnnotation(PropertyCopier.Mapping.class),
-                        am.getAnnotation(PropertyCopier.Matching.class),
-                        from, to) {
-                    });
-                    operators.addAll(asList(Operators.standard()));
+                final Therian therian = Therian.standard()
+                    .withAdditionalModules(TherianModule.create()
+                        .withOperators(new PropertyCopier(am.getAnnotation(PropertyCopier.Mapping.class),
+                            am.getAnnotation(PropertyCopier.Matching.class), from, to) {}));
 
-                    final Therian therian = Therian.usingModules(TherianModule.create()
-                        .withOperators(operators.toArray(new Operator[operators.size()])));
-
-                    return new Meta(
-                        therian,
-                        () -> {
-                            try {
-                                return to.newInstance();
-                            } catch (final IllegalAccessException | InstantiationException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        },
-                        (sourceInstance, targetInstance) -> Copy.to(
-                            Positions.readWrite(to, targetInstance),
-                            Positions.readOnly(from, sourceInstance)));
-                }));
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                final Meta<?, ?> result = new Meta(therian, sourceInstance -> Convert.to(TypeUtils.wrap(to),
+                    Positions.<Object> readOnly(from, sourceInstance)));
+                return result;
+            }));
 
         this.toString = getClass().getSimpleName() + "[" + type.getJavaClass().getName() + "]";
     }
 
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-        if (method.getDeclaringClass() == Object.class) {
+        if (Object.class.equals(method.getDeclaringClass())) {
             try {
                 return method.invoke(this, args);
             } catch (final InvocationTargetException ite) {
@@ -102,8 +80,9 @@ public class MapperHandler implements InvocationHandler {
             }
         }
 
-        final Meta meta = mapping.get(method);
-        return meta.copy(args[0]);
+        @SuppressWarnings("unchecked")
+        final Meta<Object, Object> meta = (Meta<Object, Object>) mapping.get(method);
+        return meta.convert(args[0]);
     }
 
     @Override
@@ -112,27 +91,16 @@ public class MapperHandler implements InvocationHandler {
     }
 
     private static final class Meta<A, B> {
-        private final Supplier<B> newInstance;
-        private final BiFunction<A, B, Copy<A, B>> copy;
         private final Therian therian;
+        private final Function<A, Convert<A, B>> convert;
 
-        public Meta(final Therian therian, final Supplier<B> newInstance, final BiFunction<A, B, Copy<A, B>> copy) {
+        public Meta(final Therian therian, final Function<A, Convert<A, B>> convert) {
             this.therian = therian;
-            this.newInstance = newInstance;
-            this.copy = copy;
+            this.convert = convert;
         }
 
-        public B copy(final A in) {
-            final TherianContext context = therian.context();
-            final B out = newInstance.get();
-            final Copy<A, B> operation = copy.apply(in, out);
-
-            final boolean success = context.evalSuccess(operation);
-            if (success) {
-                return out;
-            }
-
-            throw new IllegalStateException("can't map " + in);
+        public B convert(final A in) {
+            return therian.context().eval(convert.apply(in));
         }
     }
 }

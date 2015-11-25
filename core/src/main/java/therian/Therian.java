@@ -28,6 +28,7 @@ import javax.el.ELContextEvent;
 import javax.el.ELContextListener;
 import javax.el.ELResolver;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 
 import uelbox.ELContextWrapper;
@@ -93,6 +94,18 @@ public class Therian {
         }
 
         operatorManager = new OperatorManager(operators);
+    }
+    
+    /**
+     * Obtain a {@link Therian} instance with the modules configured in addition to those of this instance.
+     * @param modules
+     * @return Therian
+     */
+    public Therian withAdditionalModules(TherianModule... modules) {
+        if (ArrayUtils.isEmpty(modules)) {
+            return this;
+        }
+        return new Therian(ArrayUtils.addAll(this.modules, modules));
     }
 
     public TherianContext context() {
