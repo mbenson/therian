@@ -29,10 +29,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.Typed;
 import org.apache.commons.lang3.tuple.Pair;
 
 import therian.OperationException;
 import therian.Operator.DependsOn;
+import therian.BindTypeVariable;
 import therian.OperatorDefinitionException;
 import therian.TherianContext;
 import therian.TherianContext.Hint;
@@ -56,7 +58,7 @@ import uelbox.UEL;
  * #{}
  * </pre>
  *
- * embedding syntax).
+ * embedding syntax). Alternatively, consider using {@link PropertyCopier#getInstance(Typed, Typed, Mapping, Matching)}.
  *
  * @param <SOURCE>
  * @param <TARGET>
@@ -65,12 +67,12 @@ import uelbox.UEL;
 public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARGET> {
 
     /**
-     * Configures a {@link PropertyCopier} subclass for property mapping, using a fluent syntax of
+     * Configures a {@link PropertyCopier} for property mapping, using a fluent syntax of
      * "mapping: value from foo to bar, value from x to y, etc.".
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Target({ElementType.TYPE, ElementType.METHOD })
     public @interface Mapping {
 
         /**
@@ -96,11 +98,11 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
     }
 
     /**
-     * Configures a {@link PropertyCopier} subclass for property matching.
+     * Configures a {@link PropertyCopier} for property matching.
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Target({ElementType.TYPE, ElementType.METHOD })
     public @interface Matching {
 
         /**
@@ -142,6 +144,74 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
     }
 
+    /**
+     * Result from
+     * {@link PropertyCopier#getInstance(Typed, Typed, therian.operator.copy.PropertyCopier.Mapping, therian.operator.copy.PropertyCopier.Matching)}.
+     *
+     * @param <SOURCE>
+     * @param <TARGET>
+     */
+    public static class FromFactory<SOURCE, TARGET> extends PropertyCopier<SOURCE, TARGET> {
+        private final Typed<SOURCE> sourceType;
+        private final Typed<TARGET> targetType;
+
+        private FromFactory(Typed<SOURCE> sourceType, Typed<TARGET> targetType, Mapping mapping, Matching matching) {
+            super(mapping, matching);
+            this.sourceType = sourceType;
+            this.targetType = targetType;
+        }
+
+        @BindTypeVariable
+        public Typed<SOURCE> getSourceType() {
+            return sourceType;
+        }
+
+        @BindTypeVariable
+        public Typed<TARGET> getTargetType() {
+            return targetType;
+        }
+    }
+
+    /**
+     * Create a {@link PropertyCopier} instance at runtime.
+     * 
+     * @param sourceType
+     * @param targetType
+     * @param mapping
+     * @param matching
+     * @return PropertyCopier
+     */
+    public static <SOURCE, TARGET> PropertyCopier<SOURCE, TARGET> getInstance(Typed<SOURCE> sourceType,
+        Typed<TARGET> targetType, Mapping mapping, Matching matching) {
+        return new FromFactory<SOURCE, TARGET>(Validate.notNull(sourceType, "sourceType"), Validate.notNull(targetType,
+            "targetType"), mapping, matching);
+    }
+
+    private static List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> parse(
+        Mapping mapping) {
+        final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> m =
+            new ArrayList<>();
+
+        Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
+
+        final boolean optional = true;
+
+        for (Mapping.Value v : mapping.value()) {
+            final String from = StringUtils.trimToNull(v.from());
+            final String to = StringUtils.trimToNull(v.to());
+
+            Validate.validState(from != null || to != null,
+                "both from and to cannot be blank/empty for a single @Mapping.Value");
+
+            final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, !optional);
+            final RelativePositionFactory.ReadWrite<Object, ?> source = toFactory(from, optional);
+
+            m.add(Pair.<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> of(
+                source, target));
+        }
+        return Collections.unmodifiableList(m);
+    }
+
     private static RelativePositionFactory.ReadWrite<Object, ?> toFactory(String s, boolean optional) {
         if (StringUtils.isBlank(s)) {
             return null;
@@ -155,40 +225,38 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
     private final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings;
     private final Matching matching;
 
-    {
-        final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> m =
-            new ArrayList<>();
-
+    protected PropertyCopier() {
         try {
             @SuppressWarnings("rawtypes")
             final Class<? extends PropertyCopier> c = getClass();
+            matching = c.getAnnotation(Matching.class);
+
             final Mapping mapping = c.getAnnotation(Mapping.class);
             if (mapping == null) {
                 Validate.validState(c.isAnnotationPresent(Matching.class),
                     "%s specifies neither @Mapping nor @Matching", c);
                 mappings = Collections.emptyList();
             } else {
-                Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
-
-                final boolean optional = true;
-
-                for (Mapping.Value v : mapping.value()) {
-                    final String from = StringUtils.trimToNull(v.from());
-                    final String to = StringUtils.trimToNull(v.to());
-
-                    Validate.validState(from != null || to != null,
-                        "both from and to cannot be blank/empty for a single @Mapping.Value");
-
-                    final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, !optional);
-                    final RelativePositionFactory.ReadWrite<Object, ?> source = toFactory(from, optional);
-
-                    m.add(Pair
-                        .<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> of(
-                            source, target));
-                }
-                mappings = Collections.unmodifiableList(m);
+                mappings = parse(mapping);
             }
-            matching = c.getAnnotation(Matching.class);
+        } catch (Exception e) {
+            throw new OperatorDefinitionException(this, e);
+        }
+    }
+
+    private PropertyCopier(Mapping mapping, Matching matching) {
+        try {
+            @SuppressWarnings("rawtypes")
+            final Class<? extends PropertyCopier> c = getClass();
+            this.matching = matching;
+
+            if (mapping == null) {
+                Validate.validState(c.isAnnotationPresent(Matching.class),
+                    "%s specifies neither @Mapping nor @Matching", c);
+                mappings = Collections.emptyList();
+            } else {
+                mappings = parse(mapping);
+            }
         } catch (Exception e) {
             throw new OperatorDefinitionException(this, e);
         }
