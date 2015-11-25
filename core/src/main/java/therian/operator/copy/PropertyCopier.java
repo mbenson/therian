@@ -15,22 +15,9 @@
  */
 package therian.operator.copy;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
-
 import therian.OperationException;
 import therian.Operator.DependsOn;
 import therian.OperatorDefinitionException;
@@ -47,6 +34,19 @@ import therian.position.relative.RelativePositionFactory;
 import therian.util.BeanProperties;
 import therian.util.BeanProperties.ReturnProperties;
 import uelbox.UEL;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Copies based on annotations. Concrete subclasses must specify one or both of {@link Mapping} and {@link Matching} to
@@ -70,12 +70,13 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
+    @Target({ ElementType.TYPE, ElementType.METHOD })
     public @interface Mapping {
 
         /**
          * Specifies mapping for a property value.
          */
+        @Repeatable(Mapping.class)
         public @interface Value {
 
             /**
@@ -155,22 +156,28 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
     private final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings;
     private final Matching matching;
 
-    {
+    PropertyCopier() {
+        this.matching = getClass().getAnnotation(Matching.class);
+        this.mappings = mappings(this, getClass().getAnnotation(Mapping.class), this.matching);
+    }
+
+    protected PropertyCopier(final Mapping mapping, final Matching matching) {
+        this.matching = matching;
+        this.mappings = mappings(this, mapping, this.matching);
+    }
+
+    private static List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings(
+        final PropertyCopier<?, ?> instance, final Mapping mapping, final Matching matching) {
+
         final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> m =
             new ArrayList<>();
 
         try {
-            @SuppressWarnings("rawtypes")
-            final Class<? extends PropertyCopier> c = getClass();
-            final Mapping mapping = c.getAnnotation(Mapping.class);
             if (mapping == null) {
-                Validate.validState(c.isAnnotationPresent(Matching.class),
-                    "%s specifies neither @Mapping nor @Matching", c);
-                mappings = Collections.emptyList();
+                Validate.validState(matching != null, "%s specifies neither @Mapping nor @Matching", instance.getClass());
+                return Collections.emptyList();
             } else {
                 Validate.validState(mapping.value().length > 0, "@Mapping cannot be empty");
-
-                final boolean optional = true;
 
                 for (Mapping.Value v : mapping.value()) {
                     final String from = StringUtils.trimToNull(v.from());
@@ -179,18 +186,17 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
                     Validate.validState(from != null || to != null,
                         "both from and to cannot be blank/empty for a single @Mapping.Value");
 
-                    final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, !optional);
-                    final RelativePositionFactory.ReadWrite<Object, ?> source = toFactory(from, optional);
+                    final RelativePositionFactory.ReadWrite<Object, ?> target = toFactory(to, false);
+                    final RelativePositionFactory.ReadWrite<Object, ?> source = toFactory(from, true);
 
                     m.add(Pair
                         .<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>> of(
                             source, target));
                 }
-                mappings = Collections.unmodifiableList(m);
+                return Collections.unmodifiableList(m);
             }
-            matching = c.getAnnotation(Matching.class);
         } catch (Exception e) {
-            throw new OperatorDefinitionException(this, e);
+            throw new OperatorDefinitionException(instance, e);
         }
     }
 
