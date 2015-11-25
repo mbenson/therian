@@ -41,6 +41,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -155,15 +156,31 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
 
     private final List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings;
     private final Matching matching;
+    private final Type overrideSource;
+    private final Type overrideTarget;
 
     PropertyCopier() {
         this.matching = getClass().getAnnotation(Matching.class);
         this.mappings = mappings(this, getClass().getAnnotation(Mapping.class), this.matching);
+        this.overrideSource = null;
+        this.overrideTarget = null;
     }
 
-    protected PropertyCopier(final Mapping mapping, final Matching matching) {
+    protected PropertyCopier(final Mapping mapping, final Matching matching, final Type source, final Type target) {
         this.matching = matching;
         this.mappings = mappings(this, mapping, this.matching);
+        this.overrideSource = source;
+        this.overrideTarget = target;
+    }
+
+    @Override
+    protected Type getSourceBound() {
+        return overrideSource != null ? overrideSource : super.getSourceBound();
+    }
+
+    @Override
+    protected Type getTargetBound() {
+        return overrideTarget != null ? overrideTarget : super.getTargetBound();
     }
 
     private static List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> mappings(

@@ -15,6 +15,8 @@
  */
 package therian.cdi.internal;
 
+import therian.Operator;
+import therian.Operators;
 import therian.Therian;
 import therian.TherianContext;
 import therian.TherianModule;
@@ -23,16 +25,18 @@ import therian.operator.copy.PropertyCopier;
 import therian.util.Positions;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -51,23 +55,28 @@ public class MapperHandler implements InvocationHandler {
                 throw new IllegalArgumentException("@Mapping only supports one parameter and not void signatures");
             });
 
-        final Therian therian = Therian.usingModules(TherianModule.create());
         this.mapping = type.getMethods().stream()
             .filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class))
             .collect(toMap(
                 AnnotatedMethod::getJavaMember,
                 am -> {
-                    final AnnotatedParameter<?> annotatedParameter = am.getParameters().get(0);
-                    final Method javaMember = am.getJavaMember();
+                    final Method member = am.getJavaMember();
+                    final Type from = member.getGenericParameterTypes()[0];
+                    final Class to = member.getReturnType();
 
-                    final Type from = javaMember.getGenericParameterTypes()[0];
-                    final Class<?> to = javaMember.getReturnType();
+                    final Collection<Operator<?>> operators = new ArrayList<>();
+                    operators.add(new PropertyCopier(
+                        am.getAnnotation(PropertyCopier.Mapping.class),
+                        am.getAnnotation(PropertyCopier.Matching.class),
+                        from, to) {
+                    });
+                    operators.addAll(asList(Operators.standard()));
+
+                    final Therian therian = Therian.usingModules(TherianModule.create()
+                        .withOperators(operators.toArray(new Operator[operators.size()])));
+
                     return new Meta(
                         therian,
-                        new PropertyCopier(
-                            am.getAnnotation(PropertyCopier.Mapping.class),
-                            am.getAnnotation(PropertyCopier.Matching.class)) {
-                        },
                         () -> {
                             try {
                                 return to.newInstance();
@@ -76,8 +85,8 @@ public class MapperHandler implements InvocationHandler {
                             }
                         },
                         (sourceInstance, targetInstance) -> Copy.to(
-                            Positions.readOnly(from, sourceInstance),
-                            Positions.readWrite(to, targetInstance)));
+                            Positions.readWrite(to, targetInstance),
+                            Positions.readOnly(from, sourceInstance)));
                 }));
 
         this.toString = getClass().getSimpleName() + "[" + type.getJavaClass().getName() + "]";
@@ -103,15 +112,12 @@ public class MapperHandler implements InvocationHandler {
     }
 
     private static final class Meta<A, B> {
-        private final PropertyCopier<A, B> propertyCopier;
         private final Supplier<B> newInstance;
         private final BiFunction<A, B, Copy<A, B>> copy;
         private final Therian therian;
 
-        public Meta(final Therian therian, final PropertyCopier<A, B> propertyCopier,
-                    final Supplier<B> newInstance, final BiFunction<A, B, Copy<A, B>> copy) {
+        public Meta(final Therian therian, final Supplier<B> newInstance, final BiFunction<A, B, Copy<A, B>> copy) {
             this.therian = therian;
-            this.propertyCopier = propertyCopier;
             this.newInstance = newInstance;
             this.copy = copy;
         }
@@ -121,7 +127,7 @@ public class MapperHandler implements InvocationHandler {
             final B out = newInstance.get();
             final Copy<A, B> operation = copy.apply(in, out);
 
-            final boolean success = propertyCopier.perform(context, operation);
+            final boolean success = context.evalSuccess(operation);
             if (success) {
                 return out;
             }

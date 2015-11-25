@@ -252,7 +252,7 @@ class OperatorManager {
             opType = info.rawTargetType;
             mark = i;
         }
-        result.put(opType, mark > 0 ? operatorInfos.subList(mark, operatorInfos.size()) : Collections.emptyList());
+        result.put(opType, operatorInfos.subList(mark, operatorInfos.size()));
         return result;
     }
 
