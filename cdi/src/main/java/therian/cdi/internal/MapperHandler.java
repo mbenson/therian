@@ -22,7 +22,6 @@ import static java.util.stream.Collectors.toMap;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,6 +29,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 
 import therian.Therian;
 import therian.TherianModule;
@@ -55,18 +55,19 @@ public class MapperHandler implements InvocationHandler {
         this.mapping = type.getMethods().stream().filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class))
             .collect(toMap(AnnotatedMethod::getJavaMember, am -> {
                 final Method member = am.getJavaMember();
-                final Type from = member.getGenericParameterTypes()[0];
-                final Type to = member.getGenericReturnType();
+                final Typed<Object> source = TypeUtils.wrap(member.getGenericParameterTypes()[0]);
+                final Typed<Object> target = TypeUtils.wrap(member.getGenericReturnType());
 
-                final Therian therian = Therian.standard()
-                    .withAdditionalModules(TherianModule.create()
-                        .withOperators(PropertyCopier.getInstance(TypeUtils.wrap(from), TypeUtils.wrap(to),
-                            am.getAnnotation(PropertyCopier.Mapping.class),
-                            am.getAnnotation(PropertyCopier.Matching.class))));
+                final Therian therian =
+                    Therian.standard()
+                        .withAdditionalModules(TherianModule.create()
+                            .withOperators(PropertyCopier.getInstance(source, target,
+                                am.getAnnotation(PropertyCopier.Mapping.class),
+                                am.getAnnotation(PropertyCopier.Matching.class))));
 
                 @SuppressWarnings({ "unchecked", "rawtypes" })
-                final Meta<?, ?> result = new Meta(therian, sourceInstance -> Convert.to(TypeUtils.wrap(to),
-                    Positions.<Object> readOnly(from, sourceInstance)));
+                final Meta<?, ?> result = new Meta(therian,
+                    sourceInstance -> Convert.to(target, Positions.<Object> readOnly(source, sourceInstance)));
                 return result;
             }));
 
