@@ -50,6 +50,8 @@ public class MapperHandler implements InvocationHandler {
                 throw new IllegalArgumentException("@Mapping only supports one parameter and not void signatures");
             });
 
+        // TODO: use a single Therian instance if there are not redundant conversions specified by interface methods
+
         this.mapping = type.getMethods().stream().filter(m -> m.isAnnotationPresent(PropertyCopier.Mapping.class))
             .collect(toMap(AnnotatedMethod::getJavaMember, am -> {
                 final Method member = am.getJavaMember();
