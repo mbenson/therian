@@ -58,8 +58,9 @@ public class MapperHandler implements InvocationHandler {
 
                 final Therian therian = Therian.standard()
                     .withAdditionalModules(TherianModule.create()
-                        .withOperators(new PropertyCopier(am.getAnnotation(PropertyCopier.Mapping.class),
-                            am.getAnnotation(PropertyCopier.Matching.class), from, to) {}));
+                        .withOperators(PropertyCopier.getInstance(TypeUtils.wrap(from), TypeUtils.wrap(to),
+                            am.getAnnotation(PropertyCopier.Mapping.class),
+                            am.getAnnotation(PropertyCopier.Matching.class))));
 
                 @SuppressWarnings({ "unchecked", "rawtypes" })
                 final Meta<?, ?> result = new Meta(therian, sourceInstance -> Convert.to(TypeUtils.wrap(to),

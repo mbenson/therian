@@ -15,8 +15,17 @@
  */
 package therian.operator.copy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.reflect.Typed;
 import org.junit.Test;
 
 import therian.OperatorDefinitionException;
@@ -26,7 +35,9 @@ import therian.operation.Copy;
 import therian.operator.OperatorTest;
 import therian.operator.convert.DefaultCopyingConverter;
 import therian.operator.convert.NOPConverter;
+import therian.operator.copy.PropertyCopier.Mapping;
 import therian.operator.copy.PropertyCopier.Mapping.Value;
+import therian.operator.copy.PropertyCopier.Matching;
 import therian.position.Position;
 import therian.testfixture.Author;
 import therian.testfixture.Book;
@@ -43,11 +54,11 @@ public class PropertyCopierTest extends OperatorTest {
     public static class InvertNames extends PropertyCopier<Person, Person> {
     }
 
-    @PropertyCopier.Mapping({ @Value(from = "", to = "author") })
+    @PropertyCopier.Mapping({ @Value(to = "author") })
     public static class PersonToBook extends PropertyCopier<Person, Book> {
     }
 
-    @PropertyCopier.Mapping({ @Value(from = "author", to = "") })
+    @PropertyCopier.Mapping({ @Value(from = "author") })
     public static class BookToPerson extends PropertyCopier<Book, Person> {
     }
 
@@ -56,11 +67,73 @@ public class PropertyCopierTest extends OperatorTest {
     public static class IllustratedBookToEmployee extends PropertyCopier<IllustratedBook, Employee> {
     }
 
+    public static class Jerk implements Person {
+        private String lastName;
+        private String firstName;
+        private String middleName;
+
+        public Jerk(String... name) {
+            lastName = name.length > 0 ? name[0] : null;
+            firstName = name.length > 1 ? name[1] : null;
+            if (name.length < 3) {
+                middleName = null;
+            } else {
+                middleName = StringUtils.join(Arrays.asList(name).subList(2, name.length), ' ');
+            }
+        }
+
+        @Override
+        public String getFirstName() {
+            return firstName;
+        }
+
+        @Override
+        public String getMiddleName() {
+            return middleName;
+        }
+
+        @Override
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public void setMiddleName(String middleName) {
+            this.middleName = middleName;
+        }
+
+        
+    }
+
+    @PropertyCopier.Mapping({ @Value(from = "firstName", to = "lastName"), @Value(from = "lastName", to = "firstName") })
+    @PropertyCopier.Matching("middleName")
+    public void holdConfig() {
+    }
+
     @Override
     protected TherianModule module() {
         return TherianModule.create().withOperators(new NOPConverter(), new ConvertingCopier(),
             new DefaultCopyingConverter(), new InvertNames(), new PersonToBook(), new BookToPerson(),
-            new IllustratedBookToEmployee());
+            new IllustratedBookToEmployee(), jerkCopier());
+    }
+
+    private PropertyCopier<Jerk, Jerk> jerkCopier() {
+        final Typed<Jerk> type = TypeUtils.wrap(Jerk.class);
+        Method method;
+        try {
+            method = getClass().getMethod("holdConfig");
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
+        return PropertyCopier.getInstance(type, type, method.getAnnotation(Mapping.class),
+            method.getAnnotation(Matching.class));
     }
 
     @Test
@@ -158,5 +231,16 @@ public class PropertyCopierTest extends OperatorTest {
         final Employee employee = therianContext.eval(Convert.to(Employee.class, Positions.readOnly(book)));
         assertEquals(illustrator.getFirstName(), employee.getFirstName());
         assertEquals(illustrator.getLastName(), employee.getLastName());
+    }
+
+    @Test
+    public void testFactoryMappingMatching() {
+        final Jerk source = new Jerk("Johnny", "Bob", "Goldstein");
+        final Jerk target = new Jerk("Keith", "Morris");
+
+        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(source)));
+        assertEquals(source.getFirstName(), target.getLastName());
+        assertEquals(source.getMiddleName(), target.getMiddleName());
+        assertEquals(source.getLastName(), target.getFirstName());
     }
 }
