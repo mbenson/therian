@@ -60,10 +60,10 @@ public class MapperHandler implements InvocationHandler {
 
                 final Therian therian =
                     Therian.standard()
-                        .withAdditionalModules(TherianModule.create()
+                        .withAdditionalModules(TherianModule.expandingDependencies(TherianModule.create()
                             .withOperators(PropertyCopier.getInstance(source, target,
                                 am.getAnnotation(PropertyCopier.Mapping.class),
-                                am.getAnnotation(PropertyCopier.Matching.class))));
+                                am.getAnnotation(PropertyCopier.Matching.class)))));
 
                 @SuppressWarnings({ "unchecked", "rawtypes" })
                 final Meta<?, ?> result = new Meta(therian,
