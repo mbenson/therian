@@ -15,13 +15,16 @@
  */
 package therian;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.el.ELContextListener;
 import javax.el.ELResolver;
 
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -111,6 +114,18 @@ public class TherianModule {
             .withELResolvers(module.getElResolvers()).withOperators(expandedOperators);
     }
 
+    private static <T> T[] toArray(Iterable<T> iterable, Class<?> componentType) {
+        final Collection<T> coll;
+        if (iterable instanceof Collection) {
+            coll = (Collection<T>) iterable;
+        } else {
+            coll = IteratorUtils.toList(iterable.iterator());
+        }
+        @SuppressWarnings("unchecked")
+        final T[] result = (T[]) Array.newInstance(componentType, coll.size());
+        return coll.toArray(result);
+    }
+
     private ELResolver[] elResolvers;
     private ELContextListener[] elContextListeners;
     private Operator<?>[] operators;
@@ -144,14 +159,26 @@ public class TherianModule {
         return this;
     }
 
+    public TherianModule withELResolvers(Iterable<ELResolver> elResolvers) {
+        return withELResolvers(toArray(elResolvers, ELResolver.class));
+    }
+
     public TherianModule withELContextListeners(ELContextListener... elContextListeners) {
         this.elContextListeners = elContextListeners;
         return this;
     }
 
+    public TherianModule withELContextListeners(Iterable<ELContextListener> elContextListeners) {
+        return withELContextListeners(toArray(elContextListeners, ELContextListener.class));
+    }
+
     public TherianModule withOperators(Operator<?>... operators) {
         this.operators = operators;
         return this;
+    }
+
+    public TherianModule withOperators(Iterable<Operator<?>> operators) {
+        return withOperators(toArray(operators, Operator.class));
     }
 
 }
