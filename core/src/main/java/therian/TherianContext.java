@@ -352,10 +352,13 @@ public class TherianContext extends ELContextWrapper {
     private final Map<OperationRequest<?>, CachedEvaluator<?>> cache = new HashMap<>();
 
     private final SupportChecker supportChecker;
+    @SuppressWarnings("unused")
+    private final Therian parent;
 
-    TherianContext(ELContext wrapped, OperatorManager operatorManager) {
+    TherianContext(ELContext wrapped, Therian parent) {
         super(wrapped);
-        supportChecker = Validate.notNull(operatorManager, "operatorManager").new SupportChecker(this);
+        this.parent = Validate.notNull(parent, "parent");
+        supportChecker = parent.getOperatorManager().new SupportChecker(this);
     }
 
     @Override

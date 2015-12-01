@@ -113,7 +113,7 @@ public class Therian {
                 compositeResolver.add(elResolver);
                 return compositeResolver;
             }
-        }, operatorManager);
+        }, this);
         result.putContext(Therian.class, this);
 
         final ELContextEvent event = new ELContextEvent(result);
@@ -125,4 +125,7 @@ public class Therian {
         return result;
     }
 
+    OperatorManager getOperatorManager() {
+        return operatorManager;
+    }
 }
