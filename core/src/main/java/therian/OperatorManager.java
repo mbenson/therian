@@ -216,7 +216,7 @@ class OperatorManager {
          * {@link Operation}.
          */
         void record(Operation<?> operation, Operator<?> operator) {
-            if (context.getTypedContext(Caching.class, Caching.ALL).implies(Caching.ALL)) {
+            if (context.getTypedContext(Caching.class, Caching.ALL).implies(Caching.THERIAN)) {
                 operatorCache.put(operation.getProfile(), operator);
             }
         }

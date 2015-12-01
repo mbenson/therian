@@ -25,13 +25,14 @@ public enum Caching implements Hint {
       */
     CONTEXT,
 
+    /**
+     * Specifies to cache supporting {@link Operator} per {@link Operation.Profile}, per
+     * {@link Therian} instance.
+     */
+    THERIAN,
+
      /**
-      * Specifies to:
-      * <ul>
-      * <li>cache per requested {@link Operation}, per {@link TherianContext}</li>
-      * <li>cache supporting {@link Operator} per generic operation type, per
-      * {@link Therian}</li>
-      * </ul>
+      * Specifies to use all available caching strategies together.
       */
     ALL;
 //@formatter:on
