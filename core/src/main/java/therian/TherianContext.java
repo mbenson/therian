@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,8 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
-import therian.TherianContext.Hint;
 import therian.el.TherianContextELResolver;
+import therian.hint.Caching;
+import therian.hint.Hint;
 import uelbox.ELContextWrapper;
 
 /**
@@ -52,68 +52,6 @@ public class TherianContext extends ELContextWrapper {
      */
     public interface Callback<T> {
         void handle(T arg);
-    }
-
-    /**
-     * Generalizes a hint targeted to some {@link Operator} that can be set on the context. Note that a Hint should
-     * properly implement {@link #equals(Object)} and {@link #hashCode()}.
-     *
-     * @see TherianContext#doWithHints(Job, Hint...)
-     */
-    public interface Hint {
-
-        /**
-         * Get the hint type to use.
-         *
-         * @return Class
-         */
-        Class<? extends Hint> getType();
-    }
-
-    /**
-     * Caching {@link Hint}. Note that to turn caching off for the entire context, it's more performant to use
-     * {@link TherianContext#putContext(Class, Object)}.
-     */
-    public enum Caching implements Hint {
-        ON, OFF;
-
-        /**
-         * Test whether an object is reusable, i.e. cacheable. By default, everything is considered reusable, so to mark
-         * an item as *not* being reusable one would declare the {@link Reusable} annotation with the desired operator
-         * phases. i.e., if the item is never reusable, it should be declared as:
-         *
-         * <pre>
-         * @Reusable({ })
-         * </pre>
-         *
-         * It is considered nonsensical that the evaluation of a given operation/operator be reusable, without the
-         * corresponding support check being likewise reusable; therefore specifying {@link Phase#EVALUATION} is
-         * understood to imply {@link Phase#SUPPORT_CHECK} whether or not it is explicitly included.
-         *
-         * @param o
-         * @param phase
-         * @return whether
-         * @since 0.2
-         */
-        public static boolean isReusable(Object o, Operator.Phase phase) {
-            for (Class<?> c : ClassUtils.hierarchy(o.getClass())) {
-                if (c.isAnnotationPresent(Reusable.class)) {
-                    for (Phase p : c.getAnnotation(Reusable.class).value()) {
-                        if (p.compareTo(phase) >= 0) {
-                            return true;
-                        }
-                    }
-                    // stop on the nearest ancestor bearing the annotation:
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public Class<? extends Hint> getType() {
-            return Caching.class;
-        }
     }
 
     static class OperationRequest<RESULT> {
@@ -531,12 +469,10 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
-        final boolean caching =
-            getTypedContext(Caching.class, Caching.ON) == Caching.ON
-                && Caching.isReusable(frame.operation, frame.phase);
+        final Caching caching = getTypedContext(Caching.class, Caching.ALL);
 
         try {
-            if (caching) {
+            if (caching.implies(Caching.CONTEXT)) {
                 @SuppressWarnings("rawtypes")
                 final CachedEvaluator cachedEvaluator = cache.get(request);
 
@@ -572,7 +508,7 @@ public class TherianContext extends ELContextWrapper {
                         frame.operation.setSuccessful(true);
                     }
 
-                    if (caching && Caching.isReusable(operator, phase)) {
+                    if (caching.implies(Caching.CONTEXT) && Caching.isReusable(operator, phase)) {
 
                         switch (phase) {
                         case SUPPORT_CHECK:
@@ -593,6 +529,7 @@ public class TherianContext extends ELContextWrapper {
                             break;
                         }
                     }
+                    supportChecker.record(frame.operation, operator);
                     return true;
                 }
             }

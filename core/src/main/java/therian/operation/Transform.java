@@ -29,13 +29,15 @@ import org.apache.commons.lang3.reflect.Typed;
 import therian.BindTypeVariable;
 import therian.Operation;
 import therian.position.Position;
+import therian.util.Positions;
+import therian.util.Types;
 
 /**
  * Abstract transform operation. A "transformer" is an operator over a transform operation. Defining "Transformer" in
  * terms of our object model would constrict the behavior of transformer implementations in detrimental ways.
  */
-public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>> extends
-    Operation<RESULT> {
+public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends Position<TARGET>>
+    extends Operation<RESULT> {
 
     private static Type narrow(Position.Readable<?> pos) {
         final Type type = pos.getType();
@@ -123,9 +125,8 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
     @BindTypeVariable
     public Typed<TARGET> getTargetType() {
         final TARGET_POSITION target = getTargetPosition();
-        final Type targetPositionType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(getClass(), Transform.class),
-                Transform.class.getTypeParameters()[3]);
+        final Type targetPositionType = TypeUtils.unrollVariables(
+            TypeUtils.getTypeArguments(getClass(), Transform.class), Transform.class.getTypeParameters()[3]);
         if (TypeUtils.isAssignable(targetPositionType, Position.Readable.class)) {
             final Type result = narrow((Position.Readable<TARGET>) target);
             if (!TypeUtils.equals(result, target.getType())) {
@@ -170,16 +171,28 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     @Override
     public String toString() {
-        return String.format("%s%s to %s", getSimpleName(), getSourcePosition(), getTargetPosition());
+        return String.format("%s%s to %s", Types.getSimpleName(getClass(), " "), getSourcePosition(),
+            getTargetPosition());
     }
 
-    private String getSimpleName() {
-        final StringBuilder buf = new StringBuilder();
-        Class<?> c = getClass();
-        while (c != null) {
-            buf.insert(0, ' ').insert(0, c.getSimpleName());
-            c = c.getEnclosingClass();
+    @Override
+    protected therian.Operation.Profile createProfile(Type genericType) {
+        return new Profile(genericType, Byte.valueOf(encodeTargetDiscriminator()));
+    }
+
+    /**
+     * Different operators may pick up a given {@link Transform} depending on the readability/writability of
+     * the {@link #targetPosition}; this information can be encoded in two bits.
+     * @return byte
+     */
+    private byte encodeTargetDiscriminator() {
+        byte result = 0;
+        if (Positions.isReadable(targetPosition)) {
+            result |= 1;
         }
-        return buf.toString();
+        if (Positions.isWritable(targetPosition)) {
+            result |= 2;
+        }
+        return result;
     }
 }

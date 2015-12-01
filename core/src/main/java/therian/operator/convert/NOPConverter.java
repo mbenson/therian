@@ -19,8 +19,8 @@ import therian.Operator.Phase;
 import therian.Operators;
 import therian.Reusable;
 import therian.TherianContext;
-import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
+import therian.hint.Hint;
 import therian.operation.Convert;
 
 /**

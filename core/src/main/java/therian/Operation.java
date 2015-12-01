@@ -18,13 +18,18 @@ package therian;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+import therian.hint.Caching;
 import therian.util.Types;
 
 /**
@@ -34,6 +39,48 @@ import therian.util.Types;
  * @param <RESULT> result type
  */
 public abstract class Operation<RESULT> {
+    /**
+     * {@link Operation} profile used for caching.
+     * 
+     * @see Caching#ALL
+     */
+    public static class Profile {
+        private final Type genericType;
+        private final Object[] discriminator;
+        private final int hashCode;
+
+        public Profile(Type genericType, Object... discriminator) {
+            super();
+            this.genericType = Validate.notNull(genericType);
+            this.discriminator = discriminator;
+            hashCode = ArrayUtils.isEmpty(discriminator) ? Objects.hash(genericType)
+                : Arrays.deepHashCode(ArrayUtils.add(discriminator, 0, genericType));
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj instanceof Profile == false) {
+                return false;
+            }
+            final Profile other = (Profile) obj;
+            return Objects.equals(genericType, other.genericType) && Arrays.equals(discriminator, other.discriminator);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s: %s/%s", Types.getSimpleName(getClass()), genericType,
+                Arrays.toString(discriminator));
+        }
+    }
+
     private static final TypeVariable<?> TYPE_VARIABLE_RESULT = Operation.class.getTypeParameters()[0];
 
     private static final Map<Class<?>, Boolean> VALID_INFO = new HashMap<>();
@@ -70,6 +117,7 @@ public abstract class Operation<RESULT> {
 
     private boolean successful;
     private RESULT result;
+    private Profile profile;
 
     /**
      * Get the result. Default implementation throws {@link OperationException} if the operation was unsuccessful.
@@ -107,9 +155,8 @@ public abstract class Operation<RESULT> {
      * @return boolean
      */
     public boolean matches(Operator<?> operator) {
-        final Type expectedType =
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(operator.getClass(), Operator.class),
-                Operator.class.getTypeParameters()[0]);
+        final Type expectedType = TypeUtils.unrollVariables(
+            TypeUtils.getTypeArguments(operator.getClass(), Operator.class), Operator.class.getTypeParameters()[0]);
 
         if (!TypeUtils.isInstance(this, expectedType)) {
             return false;
@@ -134,6 +181,50 @@ public abstract class Operation<RESULT> {
             }
         }
         return true;
+    }
+
+    /**
+     * Create the {@link Profile} for this {@link Operation}.
+     * 
+     * @param genericType
+     * @return Profile
+     */
+    protected Profile createProfile(Type genericType) {
+        return new Profile(genericType);
+    }
+
+    final Profile getProfile() {
+        if (profile == null) {
+            synchronized (this) {
+                if (profile == null) {
+                    profile = createProfile(getGenericType());
+                }
+            }
+        }
+        return profile;
+    }
+
+    /**
+     * Get the "generic type" of this {@link Operation}, which parameterizes the narrowest type with the runtime
+     * bindings of its declared type variables, if any.
+     * 
+     * @return Type
+     * @see Types#resolveAt(Object, TypeVariable)
+     */
+    private final Type getGenericType() {
+        final Class<?> raw = getClass();
+        final TypeVariable<?>[] typeParameters = raw.getTypeParameters();
+        if (ArrayUtils.isEmpty(typeParameters)) {
+            return raw;
+        }
+        final Type[] parameters = new Type[typeParameters.length];
+
+        // use empty type variable map because we're relying on @BindTypeVariable functionality:
+        final Map<TypeVariable<?>, Type> typeVariableMap = Collections.emptyMap();
+        for (int i = 0; i < parameters.length; i++) {
+            parameters[i] = Types.resolveAt(this, typeParameters[i], typeVariableMap);
+        }
+        return TypeUtils.parameterize(raw, parameters);
     }
 
 }
