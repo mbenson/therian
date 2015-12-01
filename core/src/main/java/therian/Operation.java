@@ -29,7 +29,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
-import therian.hint.Caching;
+import therian.behavior.Caching;
 import therian.util.Types;
 
 /**

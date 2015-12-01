@@ -1,4 +1,4 @@
-package therian.hint;
+package therian.behavior;
 
 import org.apache.commons.lang3.ClassUtils;
 
@@ -10,11 +10,10 @@ import therian.TherianContext;
 import therian.Operator.Phase;
 
 /**
- * Caching {@link Hint}. Note that to turn caching off for the entire context, it's more performant to use
- * {@link TherianContext#putContext(Class, Object)}.
+ * Caching {@link Behavior}.
  */
 //@formatter:off
-public enum Caching implements Hint {
+public enum Caching implements Behavior {
      /**
       * Specifies no caching.
       */
@@ -84,7 +83,7 @@ public enum Caching implements Hint {
     }
 
     @Override
-    public Class<? extends Hint> getType() {
+    public Class<? extends Behavior> getType() {
         return Caching.class;
     }
 }

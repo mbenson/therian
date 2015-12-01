@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import therian.Operator.DependsOn;
-import therian.hint.Caching;
+import therian.behavior.Caching;
 import therian.util.Types;
 
 /**
@@ -216,12 +216,13 @@ class OperatorManager {
          * {@link Operation}.
          */
         void record(Operation<?> operation, Operator<?> operator) {
-            if (context.getTypedContext(Caching.class, Caching.ALL).implies(Caching.THERIAN)) {
+            if (parent.getBehavior(Caching.class, Caching.ALL).implies(Caching.THERIAN)) {
                 operatorCache.put(operation.getProfile(), operator);
             }
         }
     }
 
+    private final Therian parent;
     private final List<OperatorInfo> operatorInfos;
     private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
 
@@ -230,7 +231,8 @@ class OperatorManager {
      */
     private final Map<Operation.Profile, Operator<?>> operatorCache = new HashMap<>();
 
-    OperatorManager(Set<Operator<?>> operators) {
+    OperatorManager(Therian parent, Set<Operator<?>> operators) {
+        this.parent = Validate.notNull(parent, "parent");
         validate(operators);
         operatorInfos = Collections.unmodifiableList(buildOperatorInfos(operators));
         subgroups = Collections.unmodifiableMap(buildOperatorInfoSubgroups(operatorInfos));

@@ -36,9 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
+import therian.behavior.Caching;
 import therian.el.TherianContextELResolver;
-import therian.hint.Caching;
-import therian.hint.Hint;
 import uelbox.ELContextWrapper;
 
 /**
@@ -290,7 +289,6 @@ public class TherianContext extends ELContextWrapper {
     private final Map<OperationRequest<?>, CachedEvaluator<?>> cache = new HashMap<>();
 
     private final SupportChecker supportChecker;
-    @SuppressWarnings("unused")
     private final Therian parent;
 
     TherianContext(ELContext wrapped, Therian parent) {
@@ -472,7 +470,7 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
-        final Caching caching = getTypedContext(Caching.class, Caching.ALL);
+        final Caching caching = parent.getBehavior(Caching.class, Caching.ALL);
 
         try {
             if (caching.implies(Caching.CONTEXT)) {

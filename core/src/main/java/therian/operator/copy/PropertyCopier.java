@@ -34,8 +34,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import therian.OperationException;
 import therian.Operator.DependsOn;
-import therian.hint.Hint;
 import therian.BindTypeVariable;
+import therian.Hint;
 import therian.OperatorDefinitionException;
 import therian.TherianContext;
 import therian.operation.Copy;
