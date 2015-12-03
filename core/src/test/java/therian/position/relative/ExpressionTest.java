@@ -147,6 +147,6 @@ public class ExpressionTest {
 
     @Test
     public void testOptional() {
-        assertNull(Expression.optional("author.firstName").of(Positions.readOnly(Book.class, null)).getValue());
+        assertNull(Expression.optional("author.firstName").of(Positions.readOnly(Book.class, (Book) null)).getValue());
     }
 }

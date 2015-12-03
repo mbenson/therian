@@ -46,7 +46,7 @@ public class NOPConverterTest extends OperatorTest {
             therianContext.eval(Convert.to(Long.class, Positions.readOnly(Long.valueOf(100L)))));
         assertEquals(Boolean.TRUE, therianContext.eval(Convert.to(Boolean.class, Positions.readOnly(Boolean.TRUE))));
 
-        assertNull(therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(String.class, null))));
+        assertNull(therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(String.class, (String) null))));
         assertEquals("", therianContext.eval(Convert.to(charSequenceType, Positions.readOnly(""))));
         assertEquals("", therianContext.eval(Convert.to(String.class, Positions.readOnly(""))));
         assertSame(MetasyntacticVariable.FOO,
@@ -61,7 +61,7 @@ public class NOPConverterTest extends OperatorTest {
 
     @Test
     public void testNullValueUnsupportedHint() {
-        assertFalse(therianContext.supports(Convert.to(charSequenceType, Positions.readOnly(String.class, null)),
+        assertFalse(therianContext.supports(Convert.to(charSequenceType, Positions.readOnly(String.class, (String) null)),
             NOPConverter.NullBehavior.UNSUPPORTED));
     }
 }

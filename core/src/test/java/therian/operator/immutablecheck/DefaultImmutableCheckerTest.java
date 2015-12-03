@@ -51,7 +51,7 @@ public class DefaultImmutableCheckerTest extends OperatorTest {
 
     @Test
     public void testNull() {
-        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Object.class, null))).booleanValue());
+        assertTrue(therianContext.eval(ImmutableCheck.of(Positions.readOnly(Object.class, (Object) null))).booleanValue());
     }
 
     @Test

@@ -78,6 +78,6 @@ public class PropertyTest {
 
     @Test
     public void testOptional() {
-        assertNull(Property.optional("author").of(Positions.readOnly(Book.class, null)).getValue());
+        assertNull(Property.optional("author").of(Positions.readOnly(Book.class, (String) null)).getValue());
     }
 }

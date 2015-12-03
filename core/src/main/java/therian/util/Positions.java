@@ -16,6 +16,8 @@
 package therian.util;
 
 import java.lang.reflect.Type;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
@@ -36,12 +38,12 @@ public class Positions {
 
     private static class RO<T> extends AbstractPosition.Readable<T> {
         private final Type type;
-        private final T value;
+        private final Supplier<T> supplier;
         private final boolean isArray;
 
-        RO(Type type, T value) {
+        RO(Type type, Supplier<T> supplier) {
             this.type = type;
-            this.value = value;
+            this.supplier = supplier;
             this.isArray = TypeUtils.isArrayType(type);
         }
 
@@ -52,22 +54,24 @@ public class Positions {
 
         @Override
         public T getValue() {
-            return value;
+            return supplier.get();
         }
 
         @Override
         public String toString() {
             return String.format("Read-Only Position<%s>(%s)", Types.toString(type),
-                isArray ? ArrayUtils.toString(value, "null") : value);
+                isArray ? ArrayUtils.toString(supplier, "null") : supplier.get());
         }
 
     }
 
     private static class W<T> extends AbstractPosition.Writable<T> {
         private final Type type;
+        private final Consumer<T> consumer;
 
-        W(Type type) {
+        W(Type type, Consumer<T> consumer) {
             this.type = type;
+            this.consumer = consumer;
         }
 
         @Override
@@ -77,6 +81,7 @@ public class Positions {
 
         @Override
         public void setValue(T value) {
+            consumer.accept(value);
         }
 
         @Override
@@ -172,9 +177,19 @@ public class Positions {
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final Type type, final T value) {
-        Validate.notNull(type, "type");
         Validate.isTrue(TypeUtils.isInstance(value, type), "%s is not an instance of %s", value, Types.toString(type));
-        return new RO<>(type, value);
+        return readOnly(type, () -> value);
+    }
+
+    /**
+     * Get a read-only position of type {@code type}, obtaining its value from {@code supplier}.
+     *
+     * @param type not {@code null}
+     * @param supplier not {@code null}
+     * @return Position.Readable
+     */
+    public static <T> Position.Readable<T> readOnly(final Type type, final Supplier<T> supplier) {
+        return new RO<>(Validate.notNull(type, "type"), Validate.notNull(supplier, "supplier"));
     }
 
     /**
@@ -189,14 +204,25 @@ public class Positions {
     }
 
     /**
-     * Get a read-only position of type {@code type#value} and value {@code value}.
+     * Get a read-only position of type {@code typed.type} and value {@code value}.
      *
      * @param typed not {@code null}
      * @param value
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final Typed<T> typed, final T value) {
-        return readOnly(Validate.notNull(typed, "type").getType(), value);
+        return Positions.<T> readOnly(typed, (Supplier<T>) () -> value);
+    }
+
+    /**
+     * Get a read-only position of type {@code typed.type}, obtaining its value from {@code supplier}.
+     *
+     * @param typed not {@code null}
+     * @param supplier not {@code null}
+     * @return Position.Readable
+     */
+    public static <T> Position.Readable<T> readOnly(final Typed<T> typed, final Supplier<T> supplier) {
+        return readOnly(Validate.notNull(typed, "type").getType(), supplier);
     }
 
     /**
@@ -275,8 +301,20 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Type type) {
-        Validate.notNull(type, "type");
-        return new W<>(type);
+        return writable(type, t -> {
+        });
+    }
+
+    /**
+     * Get a writable position of type {@code type}. No checking can be done to ensure that {@code type} conforms to
+     * {@code T}.
+     *
+     * @param type not {@code null}
+     * @param consumer not {@code null}
+     * @return Position.Writable
+     */
+    public static <T> Position.Writable<T> writable(final Type type, Consumer<T> consumer) {
+        return new W<T>(Validate.notNull(type, "type"), Validate.notNull(consumer, "consumer"));
     }
 
     /**
@@ -286,7 +324,19 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Typed<T> typed) {
-        return writable(Validate.notNull(typed, "type").getType());
+        return writable(typed, t -> {
+        });
+    }
+
+    /**
+     * Get a writable position of type {@code type#value}.
+     *
+     * @param typed not {@code null}
+     * @param consumer not {@code null}
+     * @return Position.Writable
+     */
+    public static <T> Position.Writable<T> writable(final Typed<T> typed, Consumer<T> consumer) {
+        return writable(Validate.notNull(typed, "type").getType(), consumer);
     }
 
     /**
@@ -296,7 +346,7 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Class<T> type) {
-        return Positions.<T> readWrite((Type) type);
+        return writable((Type) type);
     }
 
     /**

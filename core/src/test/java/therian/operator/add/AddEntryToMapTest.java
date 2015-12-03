@@ -107,6 +107,6 @@ public class AddEntryToMapTest extends OperatorTest {
     public void testAddNullEntry() {
         final Map<String, MetasyntacticVariable> m = new HashMap<>();
         therianContext.eval(Add.to(Positions.readWrite(new TypeLiteral<Map<String, MetasyntacticVariable>>() {}, m),
-            Positions.readOnly(new TypeLiteral<Map.Entry<String, MetasyntacticVariable>>() {}, null)));
+            Positions.readOnly(new TypeLiteral<Map.Entry<String, MetasyntacticVariable>>() {}, (Map.Entry<String, MetasyntacticVariable>) null)));
     }
 }

@@ -279,7 +279,7 @@ public class ContainerCopierTest extends OperatorTest {
         // value
         assertFalse(
             "Cannot use ContainerCopier to copy to read-only null target",
-            therianContext.supports(Copy.to(Positions.readOnly(MetasyntacticVariable[].class, null),
+            therianContext.supports(Copy.to(Positions.readOnly(MetasyntacticVariable[].class, (MetasyntacticVariable[]) null),
                 Positions.readOnly(MetasyntacticVariable.values()))));
     }
 }

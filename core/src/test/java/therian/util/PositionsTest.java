@@ -41,7 +41,7 @@ public class PositionsTest {
 
     @Test
     public void testNullValueWithType() {
-        final Position.Readable<String> pos = Positions.readOnly(String.class, null);
+        final Position.Readable<String> pos = Positions.readOnly(String.class, (String) null);
         assertEquals(String.class, pos.getType());
         assertNull(pos.getValue());
     }
