@@ -36,7 +36,6 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import therian.Operator.DependsOn;
 import therian.behavior.Caching;
@@ -90,8 +89,6 @@ class OperatorManager {
             return operator;
         }
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(OperatorManager.class);
 
     class SupportChecker {
 
@@ -225,6 +222,7 @@ class OperatorManager {
     private final Therian parent;
     private final List<OperatorInfo> operatorInfos;
     private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
+    private final Logger logger;
 
     /**
      * See {@link Caching#ALL}
@@ -236,7 +234,8 @@ class OperatorManager {
         validate(operators);
         operatorInfos = Collections.unmodifiableList(buildOperatorInfos(operators));
         subgroups = Collections.unmodifiableMap(buildOperatorInfoSubgroups(operatorInfos));
-        LOG.trace("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
+        logger = parent.getLogger(getClass());
+        logger.debug("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
     }
 
     private static void validate(Set<Operator<?>> operators) {

@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
@@ -236,7 +235,6 @@ public class TherianContext extends ELContextWrapper {
         boolean evaluate(Operation<T> operation);
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
 
     /**
@@ -290,11 +288,13 @@ public class TherianContext extends ELContextWrapper {
 
     private final SupportChecker supportChecker;
     private final Therian parent;
+    private final Logger logger;
 
     TherianContext(ELContext wrapped, Therian parent) {
         super(wrapped);
         this.parent = Validate.notNull(parent, "parent");
         supportChecker = parent.getOperatorManager().new SupportChecker(this);
+        logger = parent.getLogger(getClass());
     }
 
     @Override
@@ -461,8 +461,8 @@ public class TherianContext extends ELContextWrapper {
     private synchronized <RESULT> boolean handle(Frame<RESULT> frame) throws Frame.RecursionException {
         final OperationRequest<?> request = push(frame);
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("{} requested", frame.logString());
+        if (logger.isTraceEnabled()) {
+            logger.trace("{} requested", frame.logString());
         }
 
         final TherianContext originalContext = getCurrentInstance();
@@ -502,8 +502,8 @@ public class TherianContext extends ELContextWrapper {
             final Operator.Phase phase = frame.phase;
             for (final Operator<?> operator : supportingOperators) {
                 if (phase == Phase.SUPPORT_CHECK || phase == Phase.EVALUATION && evalRaw(frame.operation, operator)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("{} handled by operator {}", frame.logString(), operator);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("{} handled by operator {}", frame.logString(), operator);
                     }
                     if (phase == Phase.EVALUATION) {
                         frame.operation.setSuccessful(true);

@@ -45,7 +45,7 @@
     <maven.compile.source>1.8</maven.compile.source>
     <maven.compile.target>1.8</maven.compile.target>
     <juel.version>2.2.7</juel.version>
-    <slf4j.version>1.7.12</slf4j.version>
+    <slf4j.version>1.7.13</slf4j.version>
     <hamcrest.version>1.3</hamcrest.version>
   </properties>
 
@@ -91,8 +91,13 @@
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
+        <artifactId>slf4j-ext</artifactId>
         <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>uk.org.lidalia</groupId>
+        <artifactId>slf4j-test</artifactId>
+        <version>1.1.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>

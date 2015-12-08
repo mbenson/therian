@@ -32,8 +32,11 @@ import javax.el.ELContextListener;
 import javax.el.ELResolver;
 
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import therian.behavior.Behavior;
+import therian.behavior.LoggingMode;
 import uelbox.ELContextWrapper;
 import uelbox.IterableELResolver;
 import uelbox.SimpleELContext;
@@ -142,5 +145,10 @@ public class Therian {
 
     OperatorManager getOperatorManager() {
         return operatorManager;
+    }
+
+    Logger getLogger(Class<?> cls) {
+        final Logger toWrap = LoggerFactory.getLogger(cls);
+        return new LoggingMode.StatefulLogger(this, toWrap, cls.getName());
     }
 }
