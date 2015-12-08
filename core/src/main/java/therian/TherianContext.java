@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -52,18 +53,40 @@ public class TherianContext extends ELContextWrapper {
         void handle(T arg);
     }
 
-    static class OperationRequest<RESULT> {
-        final Operation<RESULT> operation;
-        final Set<Hint> effectiveHints;
-        final String format;
+    /**
+     * Represents a requested {@link Operation}.
+     *
+     * @param <RESULT>
+     */
+    public static class OperationRequest<RESULT> {
+        /**
+         * Requested {@link Operation}.
+         */
+        public final Operation<RESULT> operation;
 
-        OperationRequest(Operation<RESULT> operation, Set<Hint> effectiveHints) {
+        /**
+         * Effective {@link Hint}s.
+         */
+        public final Set<Hint> effectiveHints;
+
+        /**
+         * Evaluation {@link Phase}.
+         */
+        public final Operator.Phase phase;
+
+        private final String format;
+
+        private OperationRequest(Operation<RESULT> operation, Set<Hint> effectiveHints, Phase phase) {
             super();
             this.operation = operation;
             this.effectiveHints = effectiveHints;
-            this.format = effectiveHints.isEmpty() ? "%s: %s" : "%s: %s %s";
+            this.phase = phase;
+            this.format = effectiveHints.isEmpty() ? "%s: %s %s" : "%s: %s %s %s";
         }
 
+        /*
+         * Note that equals/hashCode include only operation and hints.
+         */
         @Override
         public boolean equals(Object obj) {
             if (obj == this) {
@@ -77,6 +100,9 @@ public class TherianContext extends ELContextWrapper {
                 .isEquals();
         }
 
+        /*
+         * Note that equals/hashCode include only operation and hints.
+         */
         @Override
         public int hashCode() {
             return Objects.hash(operation, effectiveHints);
@@ -84,7 +110,7 @@ public class TherianContext extends ELContextWrapper {
 
         @Override
         public String toString() {
-            return String.format(format, OperationRequest.class.getSimpleName(), operation, effectiveHints);
+            return String.format(format, OperationRequest.class.getSimpleName(), operation, phase, effectiveHints);
         }
     }
 
@@ -196,7 +222,7 @@ public class TherianContext extends ELContextWrapper {
 
         private synchronized OperationRequest<RESULT> getKey() {
             if (key == null) {
-                key = new OperationRequest<>(operation, effectiveHints());
+                key = new OperationRequest<>(operation, effectiveHints(), phase);
             }
             return key;
         }
@@ -227,8 +253,9 @@ public class TherianContext extends ELContextWrapper {
         }
 
         String logString() {
-            return lead + getKey() + ' ' + phase;
+            return lead + getKey();
         }
+
     }
 
     private interface CachedEvaluator<T> {
@@ -236,6 +263,28 @@ public class TherianContext extends ELContextWrapper {
     }
 
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
+
+    /**
+     * Get current thread-bound instance.
+     *
+     * @return {@link TherianContext} or {@code null}
+     */
+    private static TherianContext getCurrentInstance() {
+        return CURRENT_INSTANCE.get();
+    }
+
+    /**
+     * Get some usable {@link TherianContext} instance.
+     *
+     * @return current thread-bound instance or {@code Therian.standard().context()}
+     */
+    public static TherianContext getInstance() {
+        final TherianContext current = getCurrentInstance();
+        if (current != null) {
+            return current;
+        }
+        return Therian.standard().context();
+    }
 
     /**
      * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
@@ -303,25 +352,13 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
-     * Get current thread-bound instance.
-     *
-     * @return {@link TherianContext} or {@code null}
+     * Get a view of the {@link Operation}s currently being evaluated. In the manner of a stack, the first element is
+     * the nearest and the last element is the farthest.
+     * 
+     * @return {@link Stream} of {@link OperationRequest}
      */
-    private static TherianContext getCurrentInstance() {
-        return CURRENT_INSTANCE.get();
-    }
-
-    /**
-     * Get some usable {@link TherianContext} instance.
-     *
-     * @return current thread-bound instance or {@code Therian.standard().context()}
-     */
-    public static TherianContext getInstance() {
-        final TherianContext current = getCurrentInstance();
-        if (current != null) {
-            return current;
-        }
-        return Therian.standard().context();
+    public Stream<OperationRequest<?>> getRequestStack() {
+        return stack.stream().map(Frame::getKey);
     }
 
     /**
