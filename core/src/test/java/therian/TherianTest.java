@@ -17,17 +17,7 @@ package therian;
 
 import org.junit.Test;
 
-import therian.Therian;
-import therian.TherianModule;
-import therian.operator.OperatorTest;
-import therian.operator.convert.NOPConverter;
-
-public class TherianTest extends OperatorTest {
-
-    @Override
-    protected TherianModule module() {
-        return TherianModule.create().withOperators(new NOPConverter());
-    }
+public class TherianTest {
 
     @Test(expected = NullPointerException.class)
     public void testConvertUsingNullModules() {
