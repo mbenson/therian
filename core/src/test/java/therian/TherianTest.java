@@ -30,7 +30,7 @@ public class TherianTest extends OperatorTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void tesConvertUsingNullModules() {
+    public void testConvertUsingNullModules() {
         Therian.usingModules((TherianModule[]) null);
     }
 
