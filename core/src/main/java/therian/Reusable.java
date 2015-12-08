@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import therian.Operator.Phase;
-import therian.TherianContext.Caching;
+import therian.behavior.Caching;
 
 /**
  * Declares the reusability of a given component.

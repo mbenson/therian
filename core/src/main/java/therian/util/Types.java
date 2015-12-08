@@ -35,6 +35,36 @@ public class Types {
     private static final int ACCESS_TEST = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
 
     /**
+     * Get the simple name of a possibly nested {@link Class}, using {@code &quot;.&quot;} as the separator.
+     * 
+     * @param type
+     * @return String
+     */
+    public static String getSimpleName(Class<?> type) {
+        return getSimpleName(type, ".");
+    }
+
+    /**
+     * Get the simple name of a possibly nested {@link Class}.
+     * 
+     * @param type
+     * @param separator
+     * @return String
+     */
+    public static String getSimpleName(Class<?> type, String separator) {
+        final StringBuilder buf = new StringBuilder();
+        Class<?> c = type;
+        while (c != null) {
+            if (buf.length() > 0 && separator != null) {
+                buf.insert(0, separator);
+            }
+            buf.insert(0, c.getSimpleName());
+            c = c.getEnclosingClass();
+        }
+        return buf.toString();
+    }
+
+    /**
      * "Refine" a declared type:
      * <ul>
      * <li>If {@code type} is a {@link TypeVariable}, return its normalized upper bound.</li>
@@ -343,11 +373,10 @@ public class Types {
             Validate.isTrue(m.getParameterTypes().length == 0, "%s must accept 0 parameters", ms);
             Validate.isTrue(Typed.class.isAssignableFrom(m.getReturnType()), "%s must return %s", ms,
                 Typed.class.getName());
-            final Type param =
-                TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class).get(
-                    Typed.class.getTypeParameters()[0]);
-            Validate.isTrue(param instanceof TypeVariable<?>
-                && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
+            final Type param = TypeUtils.getTypeArguments(m.getGenericReturnType(), Typed.class)
+                .get(Typed.class.getTypeParameters()[0]);
+            Validate.isTrue(
+                param instanceof TypeVariable<?> && ((TypeVariable<?>) param).getGenericDeclaration().equals(type),
                 "%s should bind a class type parameter to %s.<%s>", ms, Typed.class.getName(),
                 Typed.class.getTypeParameters()[0].getName());
             intoMap.put((TypeVariable<?>) param, m);

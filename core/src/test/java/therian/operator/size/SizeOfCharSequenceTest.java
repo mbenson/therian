@@ -33,7 +33,7 @@ public class SizeOfCharSequenceTest extends OperatorTest {
 
     @Test
     public void test() {
-        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(String.class, null))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(String.class, (String) null))).intValue());
         assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(""))).intValue());
         assertEquals(3, therianContext.eval(Size.of(Positions.readOnly("foo"))).intValue());
         assertEquals(3, therianContext.eval(Size.of(Positions.readOnly(new StringBuilder("bar")))).intValue());

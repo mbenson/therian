@@ -43,7 +43,7 @@ public class ELCoercionConverterTest extends OperatorTest {
 
     @Test
     public void testCoerciontoEnum() {
-        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(Object.class, null))));
+        assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(Object.class, (Object) null))));
         assertNull(therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly(""))));
         assertSame(MetasyntacticVariable.FOO,
             therianContext.eval(Convert.to(MetasyntacticVariable.class, Positions.readOnly("FOO"))));
@@ -52,7 +52,7 @@ public class ELCoercionConverterTest extends OperatorTest {
     @Test
     public void testCoercionToBoolean() {
         assertFalse(therianContext.eval(
-            Convert.<Object, Boolean> to(Boolean.class, Positions.readOnly(Object.class, null))).booleanValue());
+            Convert.<Object, Boolean> to(Boolean.class, Positions.readOnly(Object.class, (Object) null))).booleanValue());
         assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("")))
             .booleanValue());
         assertFalse(therianContext.eval(Convert.<String, Boolean> to(Boolean.class, Positions.readOnly("false")))

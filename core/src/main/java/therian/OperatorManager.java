@@ -36,9 +36,9 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import therian.Operator.DependsOn;
+import therian.behavior.Caching;
 import therian.util.Types;
 
 /**
@@ -84,9 +84,11 @@ class OperatorManager {
         public String toString() {
             return operator.toString();
         }
-    }
 
-    private static final Logger LOG = LoggerFactory.getLogger(OperatorManager.class);
+        private Operator getOperator() {
+            return operator;
+        }
+    }
 
     class SupportChecker {
 
@@ -161,7 +163,8 @@ class OperatorManager {
                 public Iterator<Operator<?>> iterator() {
                     return new Iterator<Operator<?>>() {
 
-                        Iterator<OperatorInfo> currentInfo;
+                        @SuppressWarnings("rawtypes")
+                        Iterator<Operator> currentInfo = cachedOperator(operation);
 
                         @Override
                         public boolean hasNext() {
@@ -169,7 +172,8 @@ class OperatorManager {
                                 if (hierarchy.hasNext()) {
                                     final Class<?> c = hierarchy.next();
                                     if (subgroups.containsKey(c)) {
-                                        currentInfo = subgroups.get(c).stream().filter(filter).iterator();
+                                        currentInfo = subgroups.get(c).stream().filter(filter)
+                                            .map(OperatorInfo::getOperator).iterator();
                                     }
                                     continue;
                                 }
@@ -181,7 +185,7 @@ class OperatorManager {
                         @Override
                         public Operator<?> next() {
                             if (hasNext()) {
-                                return currentInfo.next().operator;
+                                return currentInfo.next();
                             }
                             throw new NoSuchElementException();
                         }
@@ -194,16 +198,44 @@ class OperatorManager {
                 }
             };
         }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Iterator<Operator> cachedOperator(Operation<?> operation) {
+            final Operator operator = operatorCache.get(operation.getProfile());
+            if (operator != null && operator.supports(context, operation)) {
+                return Collections.<Operator> singleton(operator).iterator();
+            }
+            return null;
+        }
+
+        /**
+         * Notify the {@link OperatorManager} that the specified {@link Operator} was recorded as having been used for
+         * {@link Operation}.
+         */
+        void record(Operation<?> operation, Operator<?> operator) {
+            if (parent.getBehavior(Caching.class, Caching.ALL).implies(Caching.THERIAN)) {
+                operatorCache.put(operation.getProfile(), operator);
+            }
+        }
     }
 
+    private final Therian parent;
     private final List<OperatorInfo> operatorInfos;
     private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
+    private final Logger logger;
 
-    OperatorManager(Set<Operator<?>> operators) {
+    /**
+     * See {@link Caching#ALL}
+     */
+    private final Map<Operation.Profile, Operator<?>> operatorCache = new HashMap<>();
+
+    OperatorManager(Therian parent, Set<Operator<?>> operators) {
+        this.parent = Validate.notNull(parent, "parent");
         validate(operators);
         operatorInfos = Collections.unmodifiableList(buildOperatorInfos(operators));
         subgroups = Collections.unmodifiableMap(buildOperatorInfoSubgroups(operatorInfos));
-        LOG.trace("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
+        logger = parent.getLogger(getClass());
+        logger.debug("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
     }
 
     private static void validate(Set<Operator<?>> operators) {
@@ -235,7 +267,8 @@ class OperatorManager {
         return result;
     }
 
-    private static Map<Class<?>, Collection<OperatorInfo>> buildOperatorInfoSubgroups(List<OperatorInfo> operatorInfos) {
+    private static Map<Class<?>, Collection<OperatorInfo>> buildOperatorInfoSubgroups(
+        List<OperatorInfo> operatorInfos) {
         final Map<Class<?>, Collection<OperatorInfo>> result = new HashMap<>();
 
         Class<?> opType = null;

@@ -19,7 +19,6 @@ import java.util.Enumeration;
 
 import therian.Operator.DependsOn;
 import therian.TherianContext;
-import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 import therian.operator.getelementtype.GetEnumerationElementType;
@@ -39,11 +38,9 @@ public class IterableToEnumeration extends AssignableElementConverter<Iterable<?
 
     @Override
     public boolean perform(TherianContext context, final Convert<? extends Iterable<?>, ? super Enumeration> convert) {
-        Hint[] hints = {};
         return context
             .evalSuccess(Positions.writeValue(convert.getTargetPosition()),
-                Convert.to(Enumeration.class, Positions.readOnly(convert.getSourcePosition().getValue().iterator())),
-                hints);
+                Convert.to(Enumeration.class, Positions.readOnly(convert.getSourcePosition().getValue().iterator())));
     }
 
 }

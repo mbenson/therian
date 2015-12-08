@@ -74,13 +74,13 @@ public class BeanCopierTest extends OperatorTest {
     public void testNullSource() {
         final Address target = new Address();
         assertEquals(emptyAddress, target);
-        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(Address.class, null)));
+        therianContext.eval(Copy.to(Positions.readOnly(target), Positions.readOnly(Address.class, (Address) null)));
         assertEquals(emptyAddress, target);
     }
 
     @Test
     public void testNullSourceSetNulls() {
-        therianContext.eval(Copy.to(Positions.readOnly(fullAddress), Positions.readOnly(Address.class, null)),
+        therianContext.eval(Copy.to(Positions.readOnly(fullAddress), Positions.readOnly(Address.class, (Address) null)),
             NullBehavior.COPY_NULLS);
 
         assertNull(fullAddress.getAddressline1());
@@ -95,7 +95,7 @@ public class BeanCopierTest extends OperatorTest {
 
     @Test(expected = OperationException.class)
     public void testNullSourceUnsupportedHint() {
-        therianContext.eval(Copy.to(Positions.readOnly(new Address()), Positions.readOnly(Address.class, null)),
+        therianContext.eval(Copy.to(Positions.readOnly(new Address()), Positions.readOnly(Address.class, (Address) null)),
             NullBehavior.UNSUPPORTED);
     }
 

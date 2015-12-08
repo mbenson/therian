@@ -19,7 +19,7 @@ public class DefaultSizeOperatorTest extends OperatorTest {
 
     @Test
     public void test() {
-        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(Object.class, null))).intValue());
+        assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(Object.class, (Object) null))).intValue());
         assertEquals(0, therianContext.eval(Size.of(Positions.readOnly(new String[0]))).intValue());
         assertEquals(MetasyntacticVariable.values().length,
             therianContext.eval(Size.of(Positions.readOnly(MetasyntacticVariable.values()))).intValue());

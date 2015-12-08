@@ -17,8 +17,11 @@ package therian;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -30,7 +33,11 @@ import javax.el.ELResolver;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import therian.behavior.Behavior;
+import therian.behavior.LoggingMode;
 import uelbox.ELContextWrapper;
 import uelbox.IterableELResolver;
 import uelbox.SimpleELContext;
@@ -39,8 +46,8 @@ import uelbox.SimpleELContext;
  * Therian entry point.
  */
 public class Therian {
-    private static final TherianModule DEFAULT_MODULE = TherianModule.create().withOperators(Operators.standard())
-        .withELResolvers(new IterableELResolver());
+    private static final TherianModule DEFAULT_MODULE =
+        TherianModule.create().withOperators(Operators.standard()).withELResolvers(new IterableELResolver());
 
     private static final Therian STANDARD = Therian.usingModules(DEFAULT_MODULE);
     private static Therian usingDiscoveredModules;
@@ -77,9 +84,9 @@ public class Therian {
     }
 
     private final TherianModule[] modules;
-    private final List<ELResolver> elResolvers = new ArrayList<>();
-
     private final OperatorManager operatorManager;
+    private final List<ELResolver> elResolvers = new ArrayList<>();
+    private final Map<Class<? extends Behavior>, Behavior> behaviorMap = new HashMap<>();
 
     private Therian(TherianModule... modules) {
         this.modules = Validate.noNullElements(modules, "modules");
@@ -92,8 +99,15 @@ public class Therian {
             Collections.addAll(elResolvers, module.getElResolvers());
             moduleNumber++;
         }
+        operatorManager = new OperatorManager(this, operators);
+    }
 
-        operatorManager = new OperatorManager(operators);
+    public Therian withBehaviors(Behavior... behaviors) {
+        for (Behavior behavior : behaviors) {
+            Validate.isInstanceOf(behavior.getType(), behavior);
+            behaviorMap.put(behavior.getType(), behavior);
+        }
+        return this;
     }
     
     /**
@@ -126,7 +140,7 @@ public class Therian {
                 compositeResolver.add(elResolver);
                 return compositeResolver;
             }
-        }, operatorManager);
+        }, this);
         result.putContext(Therian.class, this);
 
         final ELContextEvent event = new ELContextEvent(result);
@@ -138,4 +152,16 @@ public class Therian {
         return result;
     }
 
+    public <B extends Behavior> B getBehavior(Class<B> type, B defaultValue) {
+        return Optional.ofNullable(behaviorMap.get(type)).map(type::cast).orElse(defaultValue);
+    }
+
+    OperatorManager getOperatorManager() {
+        return operatorManager;
+    }
+
+    Logger getLogger(Class<?> cls) {
+        final Logger toWrap = LoggerFactory.getLogger(cls);
+        return new LoggingMode.StatefulLogger(this, toWrap, cls.getName());
+    }
 }

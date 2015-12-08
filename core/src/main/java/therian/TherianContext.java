@@ -24,20 +24,19 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import therian.Operator.Phase;
 import therian.OperatorManager.SupportChecker;
-import therian.TherianContext.Hint;
+import therian.behavior.Caching;
 import therian.el.TherianContextELResolver;
 import uelbox.ELContextWrapper;
 
@@ -55,79 +54,39 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
-     * Generalizes a hint targeted to some {@link Operator} that can be set on the context. Note that a Hint should
-     * properly implement {@link #equals(Object)} and {@link #hashCode()}.
+     * Represents a requested {@link Operation}.
      *
-     * @see TherianContext#doWithHints(Job, Hint...)
+     * @param <RESULT>
      */
-    public interface Hint {
+    public static class OperationRequest<RESULT> {
+        /**
+         * Requested {@link Operation}.
+         */
+        public final Operation<RESULT> operation;
 
         /**
-         * Get the hint type to use.
-         *
-         * @return Class
+         * Effective {@link Hint}s.
          */
-        Class<? extends Hint> getType();
-    }
-
-    /**
-     * Caching {@link Hint}. Note that to turn caching off for the entire context, it's more performant to use
-     * {@link TherianContext#putContext(Class, Object)}.
-     */
-    public enum Caching implements Hint {
-        ON, OFF;
+        public final Set<Hint> effectiveHints;
 
         /**
-         * Test whether an object is reusable, i.e. cacheable. By default, everything is considered reusable, so to mark
-         * an item as *not* being reusable one would declare the {@link Reusable} annotation with the desired operator
-         * phases. i.e., if the item is never reusable, it should be declared as:
-         *
-         * <pre>
-         * @Reusable({ })
-         * </pre>
-         *
-         * It is considered nonsensical that the evaluation of a given operation/operator be reusable, without the
-         * corresponding support check being likewise reusable; therefore specifying {@link Phase#EVALUATION} is
-         * understood to imply {@link Phase#SUPPORT_CHECK} whether or not it is explicitly included.
-         *
-         * @param o
-         * @param phase
-         * @return whether
-         * @since 0.2
+         * Evaluation {@link Phase}.
          */
-        public static boolean isReusable(Object o, Operator.Phase phase) {
-            for (Class<?> c : ClassUtils.hierarchy(o.getClass())) {
-                if (c.isAnnotationPresent(Reusable.class)) {
-                    for (Phase p : c.getAnnotation(Reusable.class).value()) {
-                        if (p.compareTo(phase) >= 0) {
-                            return true;
-                        }
-                    }
-                    // stop on the nearest ancestor bearing the annotation:
-                    return false;
-                }
-            }
-            return true;
-        }
+        public final Operator.Phase phase;
 
-        @Override
-        public Class<? extends Hint> getType() {
-            return Caching.class;
-        }
-    }
+        private final String format;
 
-    static class OperationRequest<RESULT> {
-        final Operation<RESULT> operation;
-        final Set<Hint> effectiveHints;
-        final String format;
-
-        OperationRequest(Operation<RESULT> operation, Set<Hint> effectiveHints) {
+        private OperationRequest(Operation<RESULT> operation, Set<Hint> effectiveHints, Phase phase) {
             super();
             this.operation = operation;
             this.effectiveHints = effectiveHints;
-            this.format = effectiveHints.isEmpty() ? "%s: %s" : "%s: %s %s";
+            this.phase = phase;
+            this.format = effectiveHints.isEmpty() ? "%s: %s %s" : "%s: %s %s %s";
         }
 
+        /*
+         * Note that equals/hashCode include only operation and hints.
+         */
         @Override
         public boolean equals(Object obj) {
             if (obj == this) {
@@ -141,6 +100,9 @@ public class TherianContext extends ELContextWrapper {
                 .isEquals();
         }
 
+        /*
+         * Note that equals/hashCode include only operation and hints.
+         */
         @Override
         public int hashCode() {
             return Objects.hash(operation, effectiveHints);
@@ -148,7 +110,7 @@ public class TherianContext extends ELContextWrapper {
 
         @Override
         public String toString() {
-            return String.format(format, OperationRequest.class.getSimpleName(), operation, effectiveHints);
+            return String.format(format, OperationRequest.class.getSimpleName(), operation, phase, effectiveHints);
         }
     }
 
@@ -260,7 +222,7 @@ public class TherianContext extends ELContextWrapper {
 
         private synchronized OperationRequest<RESULT> getKey() {
             if (key == null) {
-                key = new OperationRequest<>(operation, effectiveHints());
+                key = new OperationRequest<>(operation, effectiveHints(), phase);
             }
             return key;
         }
@@ -291,16 +253,38 @@ public class TherianContext extends ELContextWrapper {
         }
 
         String logString() {
-            return lead + getKey() + ' ' + phase;
+            return lead + getKey();
         }
+
     }
 
     private interface CachedEvaluator<T> {
         boolean evaluate(Operation<T> operation);
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(TherianContext.class);
     private static final ThreadLocal<TherianContext> CURRENT_INSTANCE = new ThreadLocal<>();
+
+    /**
+     * Get current thread-bound instance.
+     *
+     * @return {@link TherianContext} or {@code null}
+     */
+    private static TherianContext getCurrentInstance() {
+        return CURRENT_INSTANCE.get();
+    }
+
+    /**
+     * Get some usable {@link TherianContext} instance.
+     *
+     * @return current thread-bound instance or {@code Therian.standard().context()}
+     */
+    public static TherianContext getInstance() {
+        final TherianContext current = getCurrentInstance();
+        if (current != null) {
+            return current;
+        }
+        return Therian.standard().context();
+    }
 
     /**
      * Nested {@link ELContextWrapper} that wraps what this {@link TherianContext} wraps, which can be used with
@@ -352,10 +336,14 @@ public class TherianContext extends ELContextWrapper {
     private final Map<OperationRequest<?>, CachedEvaluator<?>> cache = new HashMap<>();
 
     private final SupportChecker supportChecker;
+    private final Therian parent;
+    private final Logger logger;
 
-    TherianContext(ELContext wrapped, OperatorManager operatorManager) {
+    TherianContext(ELContext wrapped, Therian parent) {
         super(wrapped);
-        supportChecker = Validate.notNull(operatorManager, "operatorManager").new SupportChecker(this);
+        this.parent = Validate.notNull(parent, "parent");
+        supportChecker = parent.getOperatorManager().new SupportChecker(this);
+        logger = parent.getLogger(getClass());
     }
 
     @Override
@@ -364,25 +352,13 @@ public class TherianContext extends ELContextWrapper {
     }
 
     /**
-     * Get current thread-bound instance.
-     *
-     * @return {@link TherianContext} or {@code null}
+     * Get a view of the {@link Operation}s currently being evaluated. In the manner of a stack, the first element is
+     * the nearest and the last element is the farthest.
+     * 
+     * @return {@link Stream} of {@link OperationRequest}
      */
-    private static TherianContext getCurrentInstance() {
-        return CURRENT_INSTANCE.get();
-    }
-
-    /**
-     * Get some usable {@link TherianContext} instance.
-     *
-     * @return current thread-bound instance or {@code Therian.standard().context()}
-     */
-    public static TherianContext getInstance() {
-        final TherianContext current = getCurrentInstance();
-        if (current != null) {
-            return current;
-        }
-        return Therian.standard().context();
+    public Stream<OperationRequest<?>> getRequestStack() {
+        return stack.stream().map(Frame::getKey);
     }
 
     /**
@@ -522,8 +498,8 @@ public class TherianContext extends ELContextWrapper {
     private synchronized <RESULT> boolean handle(Frame<RESULT> frame) throws Frame.RecursionException {
         final OperationRequest<?> request = push(frame);
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("{} requested", frame.logString());
+        if (logger.isTraceEnabled()) {
+            logger.trace("{} requested", frame.logString());
         }
 
         final TherianContext originalContext = getCurrentInstance();
@@ -531,12 +507,10 @@ public class TherianContext extends ELContextWrapper {
             CURRENT_INSTANCE.set(this);
         }
 
-        final boolean caching =
-            getTypedContext(Caching.class, Caching.ON) == Caching.ON
-                && Caching.isReusable(frame.operation, frame.phase);
+        final Caching caching = parent.getBehavior(Caching.class, Caching.ALL);
 
         try {
-            if (caching) {
+            if (caching.implies(Caching.CONTEXT)) {
                 @SuppressWarnings("rawtypes")
                 final CachedEvaluator cachedEvaluator = cache.get(request);
 
@@ -565,14 +539,14 @@ public class TherianContext extends ELContextWrapper {
             final Operator.Phase phase = frame.phase;
             for (final Operator<?> operator : supportingOperators) {
                 if (phase == Phase.SUPPORT_CHECK || phase == Phase.EVALUATION && evalRaw(frame.operation, operator)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("{} handled by operator {}", frame.logString(), operator);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("{} handled by operator {}", frame.logString(), operator);
                     }
                     if (phase == Phase.EVALUATION) {
                         frame.operation.setSuccessful(true);
                     }
 
-                    if (caching && Caching.isReusable(operator, phase)) {
+                    if (caching.implies(Caching.CONTEXT) && Caching.isReusable(operator, phase)) {
 
                         switch (phase) {
                         case SUPPORT_CHECK:
@@ -593,6 +567,7 @@ public class TherianContext extends ELContextWrapper {
                             break;
                         }
                     }
+                    supportChecker.record(frame.operation, operator);
                     return true;
                 }
             }

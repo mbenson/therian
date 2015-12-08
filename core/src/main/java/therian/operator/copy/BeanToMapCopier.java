@@ -57,7 +57,6 @@ public class BeanToMapCopier extends Copier<Object, Map> {
 
         final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
 
-        @SuppressWarnings("unchecked")
         final Stream<Copy<?, ?>> copyEntries =
             getProperties(context, copy.getSourcePosition()).<Copy<?, ?>> map(
                 propertyName -> {

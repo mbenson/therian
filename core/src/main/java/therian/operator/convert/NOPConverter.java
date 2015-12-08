@@ -16,10 +16,10 @@
 package therian.operator.convert;
 
 import therian.Operator.Phase;
+import therian.Hint;
 import therian.Operators;
 import therian.Reusable;
 import therian.TherianContext;
-import therian.TherianContext.Hint;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Convert;
 
