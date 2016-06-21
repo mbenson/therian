@@ -171,7 +171,7 @@ public abstract class Transform<SOURCE, TARGET, RESULT, TARGET_POSITION extends 
 
     @Override
     public String toString() {
-        return String.format("%s%s to %s", Types.getSimpleName(getClass(), " "), getSourcePosition(),
+        return String.format("%s %s to %s", Types.getSimpleName(getClass(), " "), getSourcePosition(),
             getTargetPosition());
     }
 
