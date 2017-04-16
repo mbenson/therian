@@ -136,6 +136,8 @@ public class ExpressionTest {
                 .of(libraryPosition);
         assertEquals(String.class, address0Line1.getType());
         assertEquals(book1.getAuthor().getAddresses().get(0).getAddressline1(), address0Line1.getValue());
+        address0Line1.setValue("666 Lordi Street");
+        assertEquals("666 Lordi Street", book1.getAuthor().getAddresses().get(0).getAddressline1());
     }
 
     @Test

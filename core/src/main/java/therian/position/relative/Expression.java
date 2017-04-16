@@ -118,7 +118,7 @@ public class Expression {
             this.optional = optional;
         }
 
-        public String getPropertyName() {
+        public String getExpression() {
             return expr;
         }
 
@@ -257,6 +257,22 @@ public class Expression {
                     } catch (PropertyNotFoundException e) {
                         if (optional) {
                             return null;
+                        }
+                        throw e;
+                    }
+                }
+
+                @Override
+                public void setValue(TYPE value) {
+                    final TherianContext context = TherianContext.getInstance();
+                    final ValueExpression valueExpression =
+                        getExpression(new BaseContext(context, parentPosition.getValue()));
+
+                    try {
+                        valueExpression.setValue(context, value);
+                    } catch (PropertyNotFoundException e) {
+                        if (optional) {
+                            return;
                         }
                         throw e;
                     }
