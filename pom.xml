@@ -290,6 +290,7 @@
   <modules>
     <module>build-processor</module>
     <module>core</module>
+    <module>cdi</module>
   </modules>
 
 </project>

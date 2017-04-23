@@ -17,6 +17,7 @@ package therian.operator.copy;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -78,6 +79,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         /**
          * Specifies mapping for a property value.
          */
+        @Repeatable(Mapping.class)
         public @interface Value {
 
             /**
