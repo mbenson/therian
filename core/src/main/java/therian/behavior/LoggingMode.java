@@ -13,7 +13,7 @@ import therian.Therian;
  */
 //@formatter:off
 public enum LoggingMode implements Behavior {
-     NORMAL, PANIC;
+    NORMAL, PANIC;
 //@formatter:on
 
     public static class StatefulLogger extends LoggerWrapper {
@@ -233,5 +233,4 @@ public enum LoggingMode implements Behavior {
     public Class<? extends Behavior> getType() {
         return LoggingMode.class;
     }
-
 }
