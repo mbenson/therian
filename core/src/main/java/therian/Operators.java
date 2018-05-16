@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -69,6 +70,10 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
     }
 
     private final ListOrderedMap<Operator<?>, Type> contents = ListOrderedMap.listOrderedMap(new IdentityHashMap<>());
+
+    public Operators(Operator<?>... operators) {
+        this(Arrays.asList(operators));
+    }
 
     public Operators(Collection<? extends Operator<?>> c) {
         super();
@@ -158,7 +163,7 @@ public class Operators extends AbstractMap<Operator<?>, Type> {
     }
 
     @Override
-    public Set<java.util.Map.Entry<Operator<?>, Type>> entrySet() {
+    public Set<Map.Entry<Operator<?>, Type>> entrySet() {
         return contents.entrySet();
     }
 }
