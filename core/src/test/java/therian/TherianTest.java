@@ -15,9 +15,8 @@
  */
 package therian;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -40,17 +39,17 @@ public class TherianTest {
         final TestLogger testLogger = TestLoggerFactory.getTestLogger(getClass());
 
         logger.trace("foo");
-        assertThat(testLogger.getLoggingEvents(), IsIterableContainingInOrder.contains(LoggingEvent.trace("foo")));
+
+        assertThat(testLogger.getLoggingEvents()).containsExactly(LoggingEvent.trace("foo"));
 
         testLogger.clear();
         therian.withBehaviors(LoggingMode.NORMAL);
         logger.trace("foo");
-        assertThat(testLogger.getLoggingEvents(), IsIterableContainingInOrder.contains(LoggingEvent.trace("foo")));
+        assertThat(testLogger.getLoggingEvents()).containsExactly(LoggingEvent.trace("foo"));
 
         testLogger.clear();
         therian.withBehaviors(LoggingMode.PANIC);
         logger.trace("foo");
-        assertThat(testLogger.getLoggingEvents(), IsIterableContainingInOrder.contains(LoggingEvent.debug("foo")));
+        assertThat(testLogger.getLoggingEvents()).containsExactly(LoggingEvent.debug("foo"));
     }
-
 }

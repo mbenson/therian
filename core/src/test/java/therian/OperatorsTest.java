@@ -1,27 +1,23 @@
 /*
- *  Copyright the original author or authors.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright the original author or authors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package therian;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Test;
 
 import therian.operator.convert.CopyingConverter;
@@ -30,9 +26,12 @@ import therian.operator.convert.EnumToNumberConverter;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 public class OperatorsTest {
+
+    //@formatter:off
     public enum Success {
         SUCCESS, FAILURE;
     }
+    //@formatter:on
 
     public static abstract class Surgery extends Operation<Success> {
     }
@@ -58,15 +57,12 @@ public class OperatorsTest {
     }
 
     public static class TonsilSurgeon extends Surgeon<Tonsillectomy> {
-
     }
 
     public static class AppendixSurgeon extends Surgeon<Appendectomy> {
-
     }
 
     public static class MasterSurgeon extends Surgeon<Surgery> {
-
     }
 
     public static class SuccessOperator implements Operator<Operation<Success>> {
@@ -96,18 +92,15 @@ public class OperatorsTest {
     public void testSimpleSort() {
         final Operator<?> cnv1 = new EnumToNumberConverter();
         final Operator<?> cnv2 = new ELCoercionConverter();
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(cnv1, cnv2)).keySet(),
-            IsIterableContainingInOrder.<Operator<?>> contains(cnv1, cnv2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(cnv2, cnv1)).keySet(),
-            IsIterableContainingInOrder.<Operator<?>> contains(cnv1, cnv2));
+
+        assertThat(new Operators(cnv1, cnv2).keySet()).containsExactly(cnv1, cnv2);
+        assertThat(new Operators(cnv2, cnv1).keySet()).containsExactly(cnv1, cnv2);
 
         final Operator<?> chk1 = new DefaultImmutableChecker();
         final Operator<?> chk2 = new DefaultImmutableChecker();
 
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(chk1, chk2)).keySet(),
-            IsIterableContainingInOrder.<Operator<?>> contains(chk1, chk2));
-        assertThat((Iterable<? extends Operator<?>>) new Operators(Arrays.<Operator<?>> asList(chk2, chk1)).keySet(),
-            IsIterableContainingInOrder.<Operator<?>> contains(chk2, chk1));
+        assertThat(new Operators(chk1, chk2).keySet()).containsExactly(chk1, chk2);
+        assertThat(new Operators(chk2, chk1).keySet()).containsExactly(chk2, chk1);
     }
 
     @Test
@@ -120,11 +113,10 @@ public class OperatorsTest {
         expected.add(new ELCoercionConverter());
         expected.add(new DefaultImmutableChecker());
 
-        final ArrayList<Operator<?>> input = new ArrayList<>(expected);
+        final List<Operator<?>> input = new ArrayList<>(expected);
         Collections.shuffle(input);
 
-        assertThat((Iterable<? extends Operator<?>>) new Operators(input).keySet(),
-            IsIterableContainingInOrder.contains(expected.toArray(new Operator[expected.size()])));
+        assertThat(new Operators(input).keySet()).containsExactlyInAnyOrder(expected.stream().toArray(Operator[]::new));
     }
 
     @Test
@@ -132,10 +124,7 @@ public class OperatorsTest {
         final Operator<?> cnv1 = new ELCoercionConverter();
         final Operator<?> cnv2 = CopyingConverter.IMPLEMENTING_COLLECTION;
 
-        final Operators operators = new Operators(Arrays.<Operator<?>> asList(cnv1, cnv2));
-
-        assertThat((Iterable<? extends Operator<?>>) operators.keySet(),
-            IsIterableContainingInOrder.<Operator<?>> contains(cnv2, cnv1));
+        assertThat(new Operators(cnv1, cnv2).keySet()).containsExactly(cnv2, cnv1);
     }
 
     @Test
