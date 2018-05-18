@@ -99,11 +99,11 @@ public class Property {
         private final String propertyName;
         private final boolean optional;
 
-        public PositionFactory(final String propertyName) {
+        private PositionFactory(final String propertyName) {
             this(propertyName, false);
         }
 
-        public PositionFactory(final String propertyName, boolean optional) {
+        private PositionFactory(final String propertyName, boolean optional) {
             this.propertyName = Validate.notEmpty(propertyName, "propertyName");
             this.optional = optional;
         }
