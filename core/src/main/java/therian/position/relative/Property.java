@@ -25,6 +25,8 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -48,6 +50,7 @@ import therian.util.Types;
 public class Property {
 
     private static final Logger LOG = LogManager.getLogManager().getLogger(Property.class.getName());
+    private static final String THERIAN_PROPERTY_METHOD_WEAVER = "therian-property-method-weaver";
 
     private enum FeatureExtractionStrategy {
         GENERIC_TYPE_ATTRIBUTE {
@@ -72,7 +75,6 @@ public class Property {
                         final int arg = pd instanceof IndexedPropertyDescriptor ? 1 : 0;
                         return writeMethod.getGenericParameterTypes()[arg];
                     }
-
                 }
                 return null;
             }
@@ -92,17 +94,17 @@ public class Property {
         }
     }
 
-    public static class PositionFactory<TYPE> extends RelativePositionFactory.ReadWrite<Object, TYPE> {
+    public static class PositionFactory<PARENT, TYPE> extends RelativePositionFactory.ReadWrite<PARENT, TYPE> {
 
         private final String propertyName;
         private final boolean optional;
 
-        private PositionFactory(final String propertyName) {
+        public PositionFactory(final String propertyName) {
             this(propertyName, false);
         }
 
-        private PositionFactory(final String propertyName, boolean optional) {
-            this.propertyName = propertyName;
+        public PositionFactory(final String propertyName, boolean optional) {
+            this.propertyName = Validate.notEmpty(propertyName, "propertyName");
             this.optional = optional;
         }
 
@@ -111,7 +113,7 @@ public class Property {
         }
 
         @Override
-        public <P> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
+        public <P extends PARENT> RelativePosition.ReadWrite<P, TYPE> of(Position.Readable<P> parentPosition) {
             class Result extends RelativePositionImpl<P, String> implements RelativePosition.ReadWrite<P, TYPE> {
 
                 protected Result(therian.position.Position.Readable<P> parentPosition, String name) {
@@ -198,17 +200,68 @@ public class Property {
             if (obj == this) {
                 return true;
             }
-            return obj instanceof PositionFactory && propertyName.equals(((PositionFactory<?>) obj).propertyName);
+            return obj instanceof PositionFactory && propertyName.equals(((PositionFactory<?, ?>) obj).propertyName)
+                && optional == ((PositionFactory<?, ?>) obj).optional;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(propertyName);
+            return Objects.hash(propertyName, optional);
         }
 
         @Override
         public String toString() {
-            return String.format("Property %s", propertyName);
+            return String.format("%sProperty %s", optional ? "Optional " : "", propertyName);
+        }
+    }
+
+    /**
+     * Wraps a (lambda) reference to a property accessor(/getter) method. Intended not for direct use but rather with
+     * {@link Property#at(Function)} and {@link Property#optional(Function)}. Wrapping accessor references in this type
+     * means that they can survive being passed through other methods before reaching {@link Property}'s
+     * {@link PositionFactory} methods.
+     *
+     * @param <P>
+     * @param <T>
+     */
+    public static class Accessor<P, T> implements Function<P, T> {
+        private final String propertyName;
+        private final Function<? super P, ? extends T> wrapped;
+
+        public Accessor(String propertyName, Function<P, T> wrapped) {
+            super();
+            this.propertyName = Validate.notBlank(propertyName, "propertyName was blank");
+            this.wrapped = Validate.notNull(wrapped, "wrapped");
+        }
+
+        @Override
+        public T apply(P parent) {
+            return wrapped.apply(parent);
+        }
+    }
+
+    /**
+     * Wraps a (lambda) reference to a property mutator(/setter) method. Intended not for direct use but rather with
+     * {@link Property#at(BiConsumer)} and {@link Property#optional(BiConsumer)}. Wrapping mutator references in this
+     * type means that they can survive being passed through other methods before reaching {@link Property}'s
+     * {@link PositionFactory} methods.
+     *
+     * @param <P>
+     * @param <T>
+     */
+    public static class Mutator<P, T> implements BiConsumer<P, T> {
+        private final String propertyName;
+        private final BiConsumer<? super P, ? super T> wrapped;
+        
+        public Mutator(String propertyName, BiConsumer<? super P, ? super T> wrapped) {
+            super();
+            this.propertyName = Validate.notBlank(propertyName, "propertyName was blank");
+            this.wrapped = Validate.notNull(wrapped, "wrapped");
+        }
+
+        @Override
+        public void accept(P t, T u) {
+            wrapped.accept(t, u);
         }
     }
 
@@ -218,8 +271,8 @@ public class Property {
      * @param propertyName
      * @return {@link PositionFactory}
      */
-    public static <T> PositionFactory<T> at(String propertyName) {
-        return new PositionFactory<>(Validate.notEmpty(propertyName, "propertyName"));
+    public static <T> PositionFactory<Object, T> at(String propertyName) {
+        return new PositionFactory<>(propertyName);
     }
 
     /**
@@ -229,8 +282,80 @@ public class Property {
      * @param propertyName
      * @return {@link PositionFactory}
      */
-    public static <T> PositionFactory<T> optional(String propertyName) {
+    public static <T> PositionFactory<Object, T> optional(String propertyName) {
         final boolean optional = true;
-        return new PositionFactory<>(Validate.notEmpty(propertyName, "propertyName"), optional);
+        return new PositionFactory<>(propertyName, optional);
+    }
+
+    /**
+     * Create a {@link Property.PositionFactory} for the property specified by {@code accessor}, whose original source
+     * form is expected to have been a method reference for a valid Java bean accessor method, in which case it is
+     * required that the calling class be processed with the {@code therian-property-method-weaver} for Apache Commons
+     * Weaver, which wraps the reference in an {@link Accessor} object. Alternatively the {@link Accessor} can be
+     * explicitly instantiated.
+     *
+     * @param accessor
+     * @return {@link PositionFactory}
+     * @throws IllegalArgumentException if {@code accessor} is not an {@link Accessor} instance at runtime.
+     */
+    public static <P, T> PositionFactory<P, T> at(Function<? super P, ? extends T> accessor) {
+        Validate.isInstanceOf(Accessor.class, accessor, "Cannot detect property from %s; missing %s?", accessor,
+            THERIAN_PROPERTY_METHOD_WEAVER);
+        return new PositionFactory<>(((Accessor<? super P, ? extends T>) accessor).propertyName);
+    }
+
+    /**
+     * Create a {@link Property.PositionFactory} for the property specified by {@code mutator}, whose original source
+     * form is expected to have been a method reference for a valid Java bean mutator method, in which case it is
+     * required that the calling class be processed with the {@code therian-property-method-weaver} for Apache Commons
+     * Weaver, which wraps the reference in a {@link Mutator} object. Alternatively the {@link Mutator} can be
+     * explicitly instantiated.
+     *
+     * @param accessor
+     * @return {@link PositionFactory}
+     * @throws IllegalArgumentException if {@code accessor} is not an {@link Accessor} instance at runtime.
+     */
+    public static <P, T> PositionFactory<P, T> at(BiConsumer<? super P, ? super T> mutator) {
+        Validate.isInstanceOf(Mutator.class, mutator, "Cannot detect property from %s; missing %s?", mutator,
+            THERIAN_PROPERTY_METHOD_WEAVER);
+        return new PositionFactory<>(((Mutator<? super P, ? super T>) mutator).propertyName);
+    }
+
+    /**
+     * Create a {@link Property.PositionFactory} for the optional property specified by {@code accessor}, whose original
+     * source form is expected to have been a method reference for a valid Java bean accessor method, in which case it
+     * is required that the calling class be processed with the {@code therian-property-method-weaver} for Apache
+     * Commons Weaver, which translates the method call. Alternatively the {@link Accessor} class can be explicitly
+     * instantiated. A position created from such a factory will silently return {@code null} as its value if its
+     * parent's value is {@code null}.
+     *
+     * @param accessor
+     * @return {@link PositionFactory}
+     * @throws IllegalArgumentException if {@code accessor} is not an {@link Accessor} instance.
+     */
+    public static <P, T> PositionFactory<P, T> optional(Function<? super P, ? extends T> accessor) {
+        Validate.isInstanceOf(Accessor.class, accessor, "Cannot detect property from %s; missing %s?", accessor,
+            THERIAN_PROPERTY_METHOD_WEAVER);
+        final boolean optional = true;
+        return new PositionFactory<>(((Accessor<? super P, ? extends T>) accessor).propertyName, optional);
+    }
+
+    /**
+     * Create a {@link Property.PositionFactory} for the optional property specified by {@code mutator}, whose original
+     * source form is expected to have been a method reference for a valid Java bean mutator method, in which case it is
+     * required that the calling class be processed with the {@code therian-property-method-weaver} for Apache Commons
+     * Weaver, which wraps the reference in a {@link Mutator} object. Alternatively the {@link Mutator} can be
+     * explicitly instantiated. A position created from such a factory will silently return {@code null} as its value if
+     * its parent's value is {@code null}.
+     *
+     * @param accessor
+     * @return {@link PositionFactory}
+     * @throws IllegalArgumentException if {@code accessor} is not an {@link Accessor} instance at runtime.
+     */
+    public static <P, T> PositionFactory<P, T> optional(BiConsumer<? super P, ? super T> mutator) {
+        Validate.isInstanceOf(Mutator.class, mutator, "Cannot detect property from %s; missing %s?", mutator,
+            THERIAN_PROPERTY_METHOD_WEAVER);
+        final boolean optional = true;
+        return new PositionFactory<>(((Mutator<? super P, ? super T>) mutator).propertyName, optional);
     }
 }

@@ -71,6 +71,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.github.mbenson.therian</groupId>
+        <artifactId>therian-property-accessor-weaver</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.github.mbenson</groupId>
         <artifactId>uelbox</artifactId>
         <version>0.3</version>
@@ -283,6 +288,7 @@
   <modules>
     <module>build-processor</module>
     <module>core</module>
+    <module>property-method-weaver</module>
   </modules>
 
 </project>
