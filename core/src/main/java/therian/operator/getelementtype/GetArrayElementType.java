@@ -35,5 +35,4 @@ public class GetArrayElementType extends OperatorBase<GetElementType<Object>> {
     public boolean supports(TherianContext context, GetElementType<Object> op) {
         return TypeUtils.isArrayType(op.getTypedItem().getType());
     }
-
 }

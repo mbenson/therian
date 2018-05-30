@@ -9,5 +9,4 @@ public abstract class OptimisticOperatorBase<T extends Operation<?>> extends Ope
     public final boolean supports(TherianContext context, T operation) {
         return true;
     }
-
 }

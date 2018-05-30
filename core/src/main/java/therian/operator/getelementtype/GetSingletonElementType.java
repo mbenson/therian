@@ -41,5 +41,4 @@ public class GetSingletonElementType extends OperatorBase<GetElementType<?>> {
     public boolean supports(TherianContext context, GetElementType<?> operation) {
         return !TypeUtils.isArrayType(operation.getTypedItem().getType());
     }
-
 }
