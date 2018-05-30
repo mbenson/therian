@@ -15,28 +15,13 @@
  */
 package therian.operator.getelementtype;
 
-import java.lang.reflect.Type;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.reflect.TypeUtils;
-
-import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
-import therian.operation.GetElementType;
-import therian.operator.OptimisticOperatorBase;
 
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class GetIterableElementType extends OptimisticOperatorBase<GetElementType<Iterable>> {
+public class GetIterableElementType extends GetGenericElementType<Iterable> {
 
-    @Override
-    public boolean perform(TherianContext context, GetElementType<Iterable> op) {
-        final Type result =
-            ObjectUtils.defaultIfNull(TypeUtils.unrollVariables(
-                TypeUtils.getTypeArguments(op.getTypedItem().getType(), Iterable.class),
-                Iterable.class.getTypeParameters()[0]), Object.class);
-        op.setResult(result);
-        return true;
+    public GetIterableElementType() {
+        super(Iterable.class.getTypeParameters()[0]);
     }
-
 }

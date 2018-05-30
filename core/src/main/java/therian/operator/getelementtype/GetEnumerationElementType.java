@@ -17,23 +17,13 @@ package therian.operator.getelementtype;
 
 import java.util.Enumeration;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
-
-import therian.TherianContext;
 import therian.buildweaver.StandardOperator;
-import therian.operation.GetElementType;
-import therian.operator.OptimisticOperatorBase;
 
 @SuppressWarnings("rawtypes")
 @StandardOperator
-public class GetEnumerationElementType extends OptimisticOperatorBase<GetElementType<Enumeration>> {
+public class GetEnumerationElementType extends GetGenericElementType<Enumeration> {
 
-    @Override
-    public boolean perform(TherianContext context, GetElementType<Enumeration> op) {
-        op.setResult(TypeUtils.unrollVariables(
-            TypeUtils.getTypeArguments(op.getTypedItem().getType(), Enumeration.class),
-            Enumeration.class.getTypeParameters()[0]));
-        return true;
+    public GetEnumerationElementType() {
+        super(Enumeration.class.getTypeParameters()[0]);
     }
-
 }
