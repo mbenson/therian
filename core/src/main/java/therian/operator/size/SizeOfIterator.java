@@ -48,5 +48,4 @@ public class SizeOfIterator implements Operator<Size<Iterator<?>>> {
     public boolean supports(TherianContext context, Size<Iterator<?>> operation) {
         return TypeUtils.isAssignable(operation.getPosition().getType(), Iterator.class);
     }
-
 }

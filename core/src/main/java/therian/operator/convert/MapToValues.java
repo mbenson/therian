@@ -42,5 +42,4 @@ public class MapToValues extends AssignableElementConverter<Map<?, ?>, Collectio
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().values());
         return true;
     }
-
 }

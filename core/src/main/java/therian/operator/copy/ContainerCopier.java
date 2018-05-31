@@ -75,6 +75,16 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         public abstract Typed<TARGET> getTargetType();
     }
 
+    public static <TARGET> ContainerCopier.Dynamic<TARGET> to(final Typed<TARGET> targetType) {
+        return new ContainerCopier.Dynamic<TARGET>() {
+
+            @Override
+            public Typed<TARGET> getTargetType() {
+                return targetType;
+            }
+        };
+    }
+
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public boolean perform(final TherianContext context, final Copy<?, ? extends TARGET> copy) {
@@ -129,16 +139,14 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (context.evalSuccess(addAll)) {
             return true;
         }
-
         // can't add new elements. last try: convert an array of the proper size to the target type and set value
         if (!Positions.isWritable(copy.getTargetPosition())) {
             return false;
         }
         final List<Object> allElements = new ArrayList<>();
         // add original elements
-        for (Object t : targetIterable) {
-            allElements.add(t);
-        }
+        targetIterable.forEach(allElements::add);
+
         // add target elements converted from source objects
         for (int i = 0, sz = Array.getLength(targetElements.getValue()); i < sz; i++) {
             allElements.add(Array.get(targetElements.getValue(), i));
@@ -161,12 +169,10 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
         if (!context.supports(getSourceElementType)) {
             return false;
         }
-
         final GetElementType<?> getTargetElementType = GetElementType.of(copy.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
         }
-
         final Iterable sourceIterable = context.evalIfSupported(Convert.to(Iterable.class, copy.getSourcePosition()));
         if (sourceIterable == null) {
             return false;
@@ -238,11 +244,9 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
                 return false;
             }
         }
-
         if (context.supports(AddAll.to(copy.getTargetPosition(), targetElements))) {
             return true;
         }
-
         // can't add new elements. last try: can we convert an array of the proper size to the target type and set
         // value?
         if (!Positions.isWritable(copy.getTargetPosition())) {
@@ -265,15 +269,5 @@ public abstract class ContainerCopier<TARGET> extends Copier<Object, TARGET> {
     @Override
     protected boolean isRejectImmutable() {
         return false;
-    }
-
-    public static <TARGET> ContainerCopier.Dynamic<TARGET> to(final Typed<TARGET> targetType) {
-        return new ContainerCopier.Dynamic<TARGET>() {
-
-            @Override
-            public Typed<TARGET> getTargetType() {
-                return targetType;
-            }
-        };
     }
 }

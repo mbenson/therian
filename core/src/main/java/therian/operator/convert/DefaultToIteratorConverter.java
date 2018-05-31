@@ -60,7 +60,6 @@ public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
         if (!context.supports(getTargetElementType)) {
             return false;
         }
-
         final Type targetElementType = context.eval(getTargetElementType);
         final GetElementType<?> getSourceElementType = GetElementType.of(convert.getSourcePosition());
         if (!context.supports(getSourceElementType)) {
@@ -69,5 +68,4 @@ public class DefaultToIteratorConverter extends Converter<Object, Iterator> {
         final Type sourceElementType = context.eval(getSourceElementType);
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
-
 }

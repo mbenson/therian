@@ -62,7 +62,6 @@ public class GenericAddAllOperator extends OperatorBase<AddAll<?, ?>> {
         if (!context.supports(toIterable)) {
             return false;
         }
-
         final Type sourceElementType = context.eval(getSourceElementType);
         final Position.ReadWrite<Object> sourceElement = Positions.readWrite(sourceElementType);
 
@@ -74,5 +73,4 @@ public class GenericAddAllOperator extends OperatorBase<AddAll<?, ?>> {
         }
         return true;
     }
-
 }

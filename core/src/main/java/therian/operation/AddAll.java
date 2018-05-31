@@ -28,6 +28,17 @@ import therian.position.Position;
  */
 public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
 
+    /**
+     * Fluent factory method.
+     * @param targetPosition
+     * @param sourcePosition
+     * @return {@link AddAll}
+     */
+    public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
+        Position.Readable<SOURCE> sourcePosition) {
+        return new AddAll<>(sourcePosition, targetPosition);
+    }
+
     protected AddAll(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
     }
@@ -38,12 +49,6 @@ public class AddAll<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, P
 
     @Override
     public String toString() {
-        return String.format("Add all %s to %s", getClass().getSimpleName(), getSourcePosition(), getTargetPosition());
+        return String.format("Add all %s to %s", getSourcePosition(), getTargetPosition());
     }
-
-    public static <SOURCE, TARGET> AddAll<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
-        Position.Readable<SOURCE> sourcePosition) {
-        return new AddAll<>(sourcePosition, targetPosition);
-    }
-
 }

@@ -30,5 +30,4 @@ public class SizeOfCharSequence extends OptimisticOperatorBase<Size<CharSequence
         operation.setResult(StringUtils.length(operation.getPosition().getValue()));
         return true;
     }
-
 }

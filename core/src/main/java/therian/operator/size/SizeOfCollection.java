@@ -33,9 +33,8 @@ public class SizeOfCollection extends OptimisticOperatorBase<Size<Collection<?>>
 
     @Override
     public boolean perform(TherianContext context, Size<Collection<?>> operation) {
-        Collection<?> value = operation.getPosition().getValue();
+        final Collection<?> value = operation.getPosition().getValue();
         operation.setResult(value == null ? 0 : value.size());
         return true;
     }
-
 }

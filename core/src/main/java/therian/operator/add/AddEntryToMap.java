@@ -30,7 +30,7 @@ import therian.operator.OperatorBase;
 import therian.operator.immutablecheck.DefaultImmutableChecker;
 
 /**
- *
+ * Implement {@link Add} of {@link Map.Entry} to {@link Map}.
  */
 @SuppressWarnings("rawtypes")
 @StandardOperator
@@ -49,7 +49,7 @@ public class AddEntryToMap extends OperatorBase<Add<? extends Map.Entry, ? exten
     @Override
     public boolean supports(TherianContext context, Add<? extends Map.Entry, ? extends Map> add) {
         // cannot add to immutable types
-        if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
+        if (context.evalSuccess(ImmutableCheck.of(add.getTargetPosition()))) {
             return false;
         }
         if (add.getSourcePosition().getValue() == null) {
@@ -68,5 +68,4 @@ public class AddEntryToMap extends OperatorBase<Add<? extends Map.Entry, ? exten
         return targetValueType == null
             || TypeUtils.isInstance(add.getSourcePosition().getValue().getValue(), targetValueType);
     }
-
 }

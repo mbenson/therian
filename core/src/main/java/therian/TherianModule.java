@@ -74,18 +74,15 @@ public class TherianModule {
                 }
                 handle(type.getAnnotation(DependsOn.class));
             }
-
         }
 
         final DependencyManager dependencyManager = new DependencyManager();
         for (Operator<?> op : operators) {
             dependencyManager.handle(op);
         }
-
         if (operatorTypesNeeded.isEmpty()) {
             return operators;
         }
-
         final Operator<?>[] deps = new Operator[operatorTypesNeeded.size()];
         int index = 0;
         for (@SuppressWarnings("rawtypes")
@@ -93,7 +90,7 @@ public class TherianModule {
             try {
                 deps[index++] = dep.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
         return ArrayUtils.addAll(operators, deps);
@@ -116,7 +113,7 @@ public class TherianModule {
 
     private static <T> T[] toArray(Iterable<T> iterable, Class<?> componentType) {
         final Collection<T> coll;
-        if (iterable instanceof Collection) {
+        if (iterable instanceof Collection<?>) {
             coll = (Collection<T>) iterable;
         } else {
             coll = IteratorUtils.toList(iterable.iterator());
@@ -180,5 +177,4 @@ public class TherianModule {
     public TherianModule withOperators(Iterable<Operator<?>> operators) {
         return withOperators(toArray(operators, Operator.class));
     }
-
 }

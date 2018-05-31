@@ -39,5 +39,4 @@ public class SizeOfMap implements Operator<Size<Map<?, ?>>> {
     public boolean supports(TherianContext context, Size<Map<?, ?>> operation) {
         return true;
     }
-
 }

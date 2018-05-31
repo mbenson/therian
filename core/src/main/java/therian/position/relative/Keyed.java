@@ -105,7 +105,7 @@ public class Keyed {
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof PositionFactory == false) {
+            if (!(obj instanceof PositionFactory)) {
                 return false;
             }
             return Objects.equals(key, ((PositionFactory<?, ?>) obj).key);

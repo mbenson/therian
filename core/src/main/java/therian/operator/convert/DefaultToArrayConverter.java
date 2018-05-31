@@ -39,7 +39,8 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
     @Override
     public boolean perform(TherianContext context, final Convert<?, ?> convert) {
         final Type targetElementType = context.eval(GetElementType.of(convert.getTargetPosition()));
-        final Position.ReadWrite<List<?>> list = Positions.readWrite(TypeUtils.parameterize(List.class, targetElementType));
+        final Position.ReadWrite<List<?>> list =
+            Positions.readWrite(TypeUtils.parameterize(List.class, targetElementType));
 
         return context.evalSuccess(Convert.to(list, convert.getSourcePosition()))
             && context.evalSuccess(Convert.to(convert.getTargetPosition(), list));
@@ -55,9 +56,7 @@ public class DefaultToArrayConverter extends Converter.WithDynamicTarget<Object>
             return false;
         }
         final Type targetElementType = context.eval(getTargetElementType);
-        Type[] typeArguments = { targetElementType };
-
-        return context.supports(Convert.to(Positions.readWrite(TypeUtils.parameterize(List.class, typeArguments)),
+        return context.supports(Convert.to(Positions.readWrite(TypeUtils.parameterize(List.class, targetElementType)),
             convert.getSourcePosition()));
     }
 }

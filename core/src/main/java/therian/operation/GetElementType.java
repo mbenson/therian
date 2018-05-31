@@ -30,6 +30,15 @@ import therian.Operation;
  */
 public class GetElementType<T> extends Operation<Type> {
 
+    /**
+     * Fluent factory method.
+     * @param typedItem
+     * @return {@link GetElementType}
+     */
+    public static <T> GetElementType<T> of(Typed<T> typedItem) {
+        return new GetElementType<>(typedItem);
+    }
+
     private final Typed<T> typedItem;
 
     private GetElementType(Typed<T> typedItem) {
@@ -61,9 +70,5 @@ public class GetElementType<T> extends Operation<Type> {
     @BindTypeVariable
     public Typed<T> getTypedItem() {
         return typedItem;
-    }
-
-    public static <T> GetElementType<T> of(Typed<T> typedItem) {
-        return new GetElementType<>(typedItem);
     }
 }

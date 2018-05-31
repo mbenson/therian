@@ -1,7 +1,6 @@
 package therian.util;
 
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -20,7 +19,6 @@ import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ClassUtils.Interfaces;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.reflect.Typed;
@@ -239,23 +237,7 @@ public class Types {
         if (TypeUtils.isArrayType(type)) {
             return toString(TypeUtils.getArrayComponentType(type)) + "[]";
         }
-        // provide TypeUtils impl until lang 3.4 release:
-        if (type instanceof Class<?>) {
-            return classToString((Class<?>) type);
-        }
-        if (type instanceof ParameterizedType) {
-            return parameterizedTypeToString((ParameterizedType) type);
-        }
-        if (type instanceof WildcardType) {
-            return wildcardTypeToString((WildcardType) type);
-        }
-        if (type instanceof TypeVariable<?>) {
-            return typeVariableToString((TypeVariable<?>) type);
-        }
-        if (type instanceof GenericArrayType) {
-            return genericArrayTypeToString((GenericArrayType) type);
-        }
-        throw new IllegalArgumentException(ObjectUtils.identityToString(type));
+        return TypeUtils.toString(type);
     }
 
     private static Type readTyped(Method method, Object target) {
@@ -437,125 +419,6 @@ public class Types {
         return result;
     }
 
-    /**
-     * Format a {@link Class} as a {@link String}.
-     *
-     * @param c {@code Class} to format
-     * @return String
-     * @since 3.2
-     */
-    private static String classToString(Class<?> c) {
-        final StringBuilder buf = new StringBuilder();
-
-        if (c.getEnclosingClass() != null) {
-            buf.append(classToString(c.getEnclosingClass())).append('.').append(c.getSimpleName());
-        } else {
-            buf.append(c.getName());
-        }
-        if (c.getTypeParameters().length > 0) {
-            buf.append('<');
-            appendAllTo(buf, ", ", c.getTypeParameters());
-            buf.append('>');
-        }
-        return buf.toString();
-    }
-
-    /**
-     * Format a {@link TypeVariable} as a {@link String}.
-     *
-     * @param v {@code TypeVariable} to format
-     * @return String
-     * @since 3.2
-     */
-    private static String typeVariableToString(TypeVariable<?> v) {
-        final StringBuilder buf = new StringBuilder(v.getName());
-        final Type[] bounds = v.getBounds();
-        if (bounds.length > 0 && !(bounds.length == 1 && Object.class.equals(bounds[0]))) {
-            buf.append(" extends ");
-            appendAllTo(buf, " & ", v.getBounds());
-        }
-        return buf.toString();
-    }
-
-    /**
-     * Format a {@link ParameterizedType} as a {@link String}.
-     *
-     * @param p {@code ParameterizedType} to format
-     * @return String
-     * @since 3.2
-     */
-    private static String parameterizedTypeToString(ParameterizedType p) {
-        final StringBuilder buf = new StringBuilder();
-
-        final Type useOwner = p.getOwnerType();
-        final Class<?> raw = (Class<?>) p.getRawType();
-        final Type[] typeArguments = p.getActualTypeArguments();
-        if (useOwner == null) {
-            buf.append(raw.getName());
-        } else {
-            if (useOwner instanceof Class<?>) {
-                buf.append(((Class<?>) useOwner).getName());
-            } else {
-                buf.append(useOwner.toString());
-            }
-            buf.append('.').append(raw.getSimpleName());
-        }
-
-        appendAllTo(buf.append('<'), ", ", typeArguments).append('>');
-        return buf.toString();
-    }
-
-    /**
-     * Format a {@link WildcardType} as a {@link String}.
-     *
-     * @param w {@code WildcardType} to format
-     * @return String
-     * @since 3.2
-     */
-    private static String wildcardTypeToString(WildcardType w) {
-        final StringBuilder buf = new StringBuilder().append('?');
-        final Type[] lowerBounds = w.getLowerBounds();
-        final Type[] upperBounds = w.getUpperBounds();
-        if (lowerBounds.length > 1 || lowerBounds.length == 1 && lowerBounds[0] != null) {
-            appendAllTo(buf.append(" super "), " & ", lowerBounds);
-        } else if (upperBounds.length > 1 || upperBounds.length == 1 && !Object.class.equals(upperBounds[0])) {
-            appendAllTo(buf.append(" extends "), " & ", upperBounds);
-        }
-        return buf.toString();
-    }
-
-    /**
-     * Format a {@link GenericArrayType} as a {@link String}.
-     *
-     * @param g {@code GenericArrayType} to format
-     * @return String
-     * @since 3.2
-     */
-    private static String genericArrayTypeToString(GenericArrayType g) {
-        return String.format("%s[]", toString(g.getGenericComponentType()));
-    }
-
-    /**
-     * Append {@code types} to @{code buf} with separator {@code sep}.
-     *
-     * @param buf destination
-     * @param sep separator
-     * @param types to append
-     * @return {@code buf}
-     * @since 3.2
-     */
-    private static StringBuilder appendAllTo(StringBuilder buf, String sep, Type... types) {
-        Validate.notEmpty(Validate.noNullElements(types));
-        if (types.length > 0) {
-            buf.append(toString(types[0]));
-            for (int i = 1; i < types.length; i++) {
-                buf.append(sep).append(toString(types[i]));
-            }
-        }
-        return buf;
-    }
-
     private Types() {
     }
-
 }

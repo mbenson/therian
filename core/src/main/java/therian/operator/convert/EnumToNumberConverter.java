@@ -46,11 +46,10 @@ public class EnumToNumberConverter extends Converter.WithDynamicTarget<Enum<?>> 
             return false;
         }
         final Type targetType = operation.getTargetPosition().getType();
-        if (targetType instanceof Class == false) {
+        if (!(targetType instanceof Class)) {
             return false;
         }
         final Class<?> targetClass = (Class<?>) targetType;
         return Number.class.isAssignableFrom(targetClass) && ClassUtils.wrapperToPrimitive(targetClass) != null;
     }
-
 }

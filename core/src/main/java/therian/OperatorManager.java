@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package therian;
 
 import java.lang.reflect.ParameterizedType;
@@ -54,16 +53,6 @@ class OperatorManager {
     @SuppressWarnings("rawtypes")
     private static class OperatorInfo {
 
-        final Operator operator;
-        final Type targetType;
-        final Class<?> rawTargetType;
-
-        OperatorInfo(Operator operator, Type targetType) {
-            this.operator = operator;
-            this.targetType = targetType;
-            rawTargetType = getRawType(targetType);
-        }
-
         private static Class<?> getRawType(Type targetType) {
             if (targetType instanceof Class<?>) {
                 return (Class<?>) targetType;
@@ -75,6 +64,16 @@ class OperatorManager {
                 return getRawType(TypeUtils.getImplicitUpperBounds((WildcardType) targetType)[0]);
             }
             throw new IllegalArgumentException();
+        }
+
+        final Operator operator;
+        final Type targetType;
+        final Class<?> rawTargetType;
+
+        OperatorInfo(Operator operator, Type targetType) {
+            this.operator = operator;
+            this.targetType = targetType;
+            rawTargetType = getRawType(targetType);
         }
 
         /**
@@ -114,7 +113,6 @@ class OperatorManager {
                 if (!TypeUtils.isInstance(operation, operatorInfo.targetType)) {
                     return false;
                 }
-
                 final Map<TypeVariable<?>, Type> operationArgs =
                     TypeUtils.getTypeArguments(operation.getClass(), Operation.class);
 
@@ -126,7 +124,6 @@ class OperatorManager {
                         if (c.equals(Operation.class)) {
                             break;
                         }
-
                         for (TypeVariable<?> var : c.getTypeParameters()) {
                             Type operationVariableType = Types.resolveAt(operation, var, operationArgs);
                             if (operationVariableType == null) {
@@ -157,44 +154,38 @@ class OperatorManager {
             final Filter filter = new Filter(operation);
             final Iterator<Class<?>> hierarchy = ClassUtils.hierarchy(operation.getClass()).iterator();
 
-            return new Iterable<Operator<?>>() {
+            return () -> new Iterator<Operator<?>>() {
+
+                @SuppressWarnings("rawtypes")
+                Iterator<Operator> currentInfo = cachedOperator(operation);
 
                 @Override
-                public Iterator<Operator<?>> iterator() {
-                    return new Iterator<Operator<?>>() {
-
-                        @SuppressWarnings("rawtypes")
-                        Iterator<Operator> currentInfo = cachedOperator(operation);
-
-                        @Override
-                        public boolean hasNext() {
-                            while (currentInfo == null || !currentInfo.hasNext()) {
-                                if (hierarchy.hasNext()) {
-                                    final Class<?> c = hierarchy.next();
-                                    if (subgroups.containsKey(c)) {
-                                        currentInfo = subgroups.get(c).stream().filter(filter)
-                                            .map(OperatorInfo::getOperator).iterator();
-                                    }
-                                    continue;
-                                }
-                                return false;
+                public boolean hasNext() {
+                    while (currentInfo == null || !currentInfo.hasNext()) {
+                        if (hierarchy.hasNext()) {
+                            final Class<?> c = hierarchy.next();
+                            if (subgroups.containsKey(c)) {
+                                currentInfo = subgroups.get(c).stream().filter(filter)
+                                    .map(OperatorInfo::getOperator).iterator();
                             }
-                            return true;
+                            continue;
                         }
+                        return false;
+                    }
+                    return true;
+                }
 
-                        @Override
-                        public Operator<?> next() {
-                            if (hasNext()) {
-                                return currentInfo.next();
-                            }
-                            throw new NoSuchElementException();
-                        }
+                @Override
+                public Operator<?> next() {
+                    if (hasNext()) {
+                        return currentInfo.next();
+                    }
+                    throw new NoSuchElementException();
+                }
 
-                        @Override
-                        public void remove() {
-                            throw new UnsupportedOperationException();
-                        }
-                    };
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
                 }
             };
         }
@@ -203,7 +194,7 @@ class OperatorManager {
         Iterator<Operator> cachedOperator(Operation<?> operation) {
             final Operator operator = operatorCache.get(operation.getProfile());
             if (operator != null && operator.supports(context, operation)) {
-                return Collections.<Operator> singleton(operator).iterator();
+                return Collections.singleton(operator).iterator();
             }
             return null;
         }
@@ -217,25 +208,6 @@ class OperatorManager {
                 operatorCache.put(operation.getProfile(), operator);
             }
         }
-    }
-
-    private final Therian parent;
-    private final List<OperatorInfo> operatorInfos;
-    private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
-    private final Logger logger;
-
-    /**
-     * See {@link Caching#ALL}
-     */
-    private final Map<Operation.Profile, Operator<?>> operatorCache = new HashMap<>();
-
-    OperatorManager(Therian parent, Set<Operator<?>> operators) {
-        this.parent = Validate.notNull(parent, "parent");
-        validate(operators);
-        operatorInfos = Collections.unmodifiableList(buildOperatorInfos(operators));
-        subgroups = Collections.unmodifiableMap(buildOperatorInfoSubgroups(operatorInfos));
-        logger = parent.getLogger(getClass());
-        logger.debug("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
     }
 
     private static void validate(Set<Operator<?>> operators) {
@@ -289,4 +261,22 @@ class OperatorManager {
         return result;
     }
 
+    private final Therian parent;
+    private final List<OperatorInfo> operatorInfos;
+    private final Map<Class<?>, Collection<OperatorInfo>> subgroups;
+    private final Logger logger;
+
+    /**
+     * See {@link Caching#ALL}
+     */
+    private final Map<Operation.Profile, Operator<?>> operatorCache = new HashMap<>();
+
+    OperatorManager(Therian parent, Set<Operator<?>> operators) {
+        this.parent = Validate.notNull(parent, "parent");
+        validate(operators);
+        operatorInfos = Collections.unmodifiableList(buildOperatorInfos(operators));
+        subgroups = Collections.unmodifiableMap(buildOperatorInfoSubgroups(operatorInfos));
+        logger = parent.getLogger(getClass());
+        logger.debug("{} created; operator subgroups map: {}", getClass().getSimpleName(), subgroups);
+    }
 }

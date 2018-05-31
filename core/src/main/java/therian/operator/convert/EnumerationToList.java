@@ -46,5 +46,4 @@ public class EnumerationToList extends AssignableElementConverter<Enumeration<?>
         operation.getTargetPosition().setValue(result);
         return true;
     }
-
 }

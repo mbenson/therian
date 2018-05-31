@@ -67,11 +67,11 @@ public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object>
             if ((rawTargetType.getModifiers() & Modifier.ABSTRACT) > 0) {
                 return null;
             }
-            final Constructor<?> result =
-                ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
-                    ClassUtils.toClass(convert.getSourcePosition().getValue()));
-            return result == null ? convert.getSourcePosition().getValue() == null ? null : ConstructorUtils
-                .getAccessibleConstructor(rawTargetType) : result;
+            final Constructor<?> result = ConstructorUtils.getMatchingAccessibleConstructor(rawTargetType,
+                ClassUtils.toClass(convert.getSourcePosition().getValue()));
+
+            return result == null && convert.getSourcePosition().getValue() != null
+                ? ConstructorUtils.getAccessibleConstructor(rawTargetType) : result;
         }
 
         @SuppressWarnings("unchecked")
@@ -89,7 +89,6 @@ public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object>
         public Typed getTargetType() {
             return targetType;
         }
-
     }
 
     // specifically avoid doing typed ops as we want to catch stuff that slips through the cracks
@@ -103,5 +102,4 @@ public class DefaultCopyingConverter extends Converter.WithDynamicTarget<Object>
     public boolean supports(TherianContext context, Convert<?, ?> convert) {
         return new Delegate(convert).supports(context, convert);
     }
-
 }

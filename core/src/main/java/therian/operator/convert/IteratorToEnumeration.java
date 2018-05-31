@@ -55,9 +55,7 @@ public class IteratorToEnumeration extends AssignableElementConverter<Iterator<?
             public Object nextElement() {
                 return iter.next();
             }
-
         });
         return true;
     }
-
 }

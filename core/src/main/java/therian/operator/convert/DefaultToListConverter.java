@@ -74,7 +74,6 @@ public class DefaultToListConverter extends Converter<Object, List> {
         if (!super.supports(context, convert) || convert.getSourcePosition().getValue() == null) {
             return false;
         }
-
         final GetElementType<?> getTargetElementType = GetElementType.of(convert.getTargetPosition());
         if (!context.supports(getTargetElementType)) {
             return false;
@@ -87,5 +86,4 @@ public class DefaultToListConverter extends Converter<Object, List> {
         final Type sourceElementType = context.eval(getSourceElementType);
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
-
 }

@@ -50,6 +50,10 @@ public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
         }
     }
 
+    private static Class<?> getRawTargetType(Convert<?, ?> operation) {
+        return TypeUtils.getRawType(operation.getTargetPosition().getType(), null);
+    }
+
     @Override
     public boolean perform(TherianContext context, Convert<?, ?> convert) {
         final Object value;
@@ -95,9 +99,5 @@ public class ELCoercionConverter extends Converter.WithDynamicTarget<Object> {
         }
         return source == null || "".equals(source) || source instanceof String
             && PropertyEditorManager.findEditor(useTargetType) != null;
-    }
-
-    private static Class<?> getRawTargetType(Convert<?, ?> operation) {
-        return TypeUtils.getRawType(operation.getTargetPosition().getType(), null);
     }
 }

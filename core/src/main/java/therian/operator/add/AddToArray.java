@@ -65,5 +65,4 @@ public class AddToArray extends OperatorBase<Add<?, ?>> {
         final Type targetElementType = context.eval(GetElementType.of(add.getTargetPosition()));
         return TypeUtils.isInstance(add.getSourcePosition().getValue(), targetElementType);
     }
-
 }

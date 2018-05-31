@@ -98,5 +98,4 @@ public abstract class Converter<SOURCE, TARGET> extends AbstractConverter<Conver
             && TypeUtils.isAssignable(convert.getSourceType().getType(), getSourceBound())
             && TypeUtils.isAssignable(getTargetBound(), convert.getTargetType().getType());
     }
-
 }

@@ -45,9 +45,8 @@ public class DefaultToEnumerationConverter extends Converter<Object, Enumeration
     @Override
     public boolean perform(TherianContext context, Convert<? extends Object, ? super Enumeration> convert) {
         final Type targetElementType = context.eval(GetElementType.of(convert.getTargetPosition()));
-        Type[] typeArguments = { targetElementType };
         final Position.ReadWrite<Iterator<?>> iterator =
-            Positions.readWrite(TypeUtils.parameterize(Iterator.class, typeArguments));
+            Positions.readWrite(TypeUtils.parameterize(Iterator.class, targetElementType));
         return context.evalSuccess(Convert.to(iterator, convert.getSourcePosition()))
             && context.evalSuccess(Convert.to(convert.getTargetPosition(), iterator));
     }
@@ -75,5 +74,4 @@ public class DefaultToEnumerationConverter extends Converter<Object, Enumeration
 
         return TypeUtils.isAssignable(sourceElementType, targetElementType);
     }
-
 }

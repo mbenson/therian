@@ -45,6 +45,12 @@ import therian.util.Positions;
 public class MapToBeanCopier extends Copier<Map, Object> {
     public static final String[] IGNORED_PROPERTIES = { "class" };
 
+    private static Type getKeyType(Position<? extends Map> target) {
+        return ObjectUtils.defaultIfNull(
+            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
+                Map.class.getTypeParameters()[0]), Object.class);
+    }
+
     @Override
     public boolean perform(TherianContext context, Copy<? extends Map, ? extends Object> copy) {
         final Type sourceKeyType = getKeyType(copy.getSourcePosition());
@@ -79,7 +85,6 @@ public class MapToBeanCopier extends Copier<Map, Object> {
         if (!super.supports(context, copy)) {
             return false;
         }
-
         final Type sourceKeyType = getKeyType(copy.getSourcePosition());
 
         final Set<String> propertyNames =
@@ -98,11 +103,5 @@ public class MapToBeanCopier extends Copier<Map, Object> {
             }
         }
         return false;
-    }
-
-    private Type getKeyType(Position<? extends Map> target) {
-        return ObjectUtils.defaultIfNull(
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
-                Map.class.getTypeParameters()[0]), Object.class);
     }
 }

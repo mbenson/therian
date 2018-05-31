@@ -1,6 +1,7 @@
 package therian.operator.copy;
 
 import java.util.List;
+import java.util.function.IntFunction;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
@@ -24,16 +25,26 @@ import therian.position.relative.Element;
 @StandardOperator
 @DependsOn({ DefaultSizeOperator.class, SizeOfCollection.class, SizeOfIterable.class })
 public class ElementCopier extends OperatorBase<Copy<?, ?>> {
-    private interface ElementFactory {
-        ReadWrite<?> element(int index);
+
+    @SuppressWarnings("unchecked")
+    private static IntFunction<ReadWrite<?>> createElementFactory(final Position.Readable<?> source) {
+        if (source.getValue() != null) {
+            if (TypeUtils.isArrayType(source.getType())) {
+                return index -> Element.atArrayIndex(index).of(source);
+            }
+            if (TypeUtils.isAssignable(source.getType(), Iterable.class)) {
+                return index -> Element.atIndex(index).of((Position.Readable<Iterable<?>>) source);
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean perform(TherianContext context, Copy<?, ?> copy) {
-        final ElementFactory sourceElementFactory = createElementFactory(copy.getSourcePosition());
-        final ElementFactory targetElementFactory = createElementFactory(copy.getTargetPosition());
+        final IntFunction<ReadWrite<?>> sourceElementFactory = createElementFactory(copy.getSourcePosition());
+        final IntFunction<ReadWrite<?>> targetElementFactory = createElementFactory(copy.getTargetPosition());
         for (int i = 0, sz = context.eval(Size.of(copy.getSourcePosition())); i < sz; i++) {
-            if (context.evalSuccess(Copy.to(targetElementFactory.element(i), sourceElementFactory.element(i)))) {
+            if (context.evalSuccess(Copy.to(targetElementFactory.apply(i), sourceElementFactory.apply(i)))) {
                 continue;
             }
             return false;
@@ -48,31 +59,5 @@ public class ElementCopier extends OperatorBase<Copy<?, ?>> {
 
         return sourceSize <= targetSize && createElementFactory(copy.getSourcePosition()) != null
             && createElementFactory(copy.getTargetPosition()) != null;
-    }
-
-    private static ElementFactory createElementFactory(final Position.Readable<?> source) {
-        if (source.getValue() != null) {
-            if (TypeUtils.isArrayType(source.getType())) {
-                return new ElementFactory() {
-
-                    @Override
-                    public ReadWrite<?> element(int index) {
-                        return Element.atArrayIndex(index).of(source);
-                    }
-                };
-            }
-            if (TypeUtils.isAssignable(source.getType(), Iterable.class)) {
-
-                return new ElementFactory() {
-
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public ReadWrite<?> element(int index) {
-                        return Element.atIndex(index).of((Position.Readable<Iterable<?>>) source);
-                    }
-                };
-            }
-        }
-        return null;
     }
 }

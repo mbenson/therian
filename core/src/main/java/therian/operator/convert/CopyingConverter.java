@@ -194,7 +194,6 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
         public Typed<Object> getSourceType() {
             return sourceType;
         }
-
     }
 
     private static <T> Constructor<T> requireDefaultConstructor(Class<T> type) {
@@ -278,13 +277,13 @@ public abstract class CopyingConverter<SOURCE, TARGET> extends Converter<SOURCE,
      *
      * @param readable object
      * @return TARGET
+     * @throws Exception in exceptional situations
      */
     protected abstract TARGET createCopyDestination(Position.Readable<? extends SOURCE> readable) throws Exception;
 
     @Override
     public String toString() {
-        return String.format("CopyingConverter for target type %s",
+        return String.format("%s for target type %s", CopyingConverter.class.getSimpleName(),
             Types.toString(Types.resolveAt(this, Converter.class.getTypeParameters()[1])));
     }
-
 }

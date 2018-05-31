@@ -62,7 +62,7 @@ public class AddToListIterator extends OperatorBase<Add<?, ? extends ListIterato
     @Override
     public boolean supports(TherianContext context, Add<?, ? extends ListIterator<?>> add) {
         // cannot add to immutable types
-        if (context.eval(ImmutableCheck.of(add.getTargetPosition())).booleanValue()) {
+        if (context.evalSuccess(ImmutableCheck.of(add.getTargetPosition()))) {
             return false;
         }
         if (!TypeUtils.isAssignable(add.getTargetPosition().getType(), ListIterator.class)) {
@@ -79,5 +79,4 @@ public class AddToListIterator extends OperatorBase<Add<?, ? extends ListIterato
         }
         return TypeUtils.isAssignable(add.getSourcePosition().getType(), targetElementType);
     }
-
 }

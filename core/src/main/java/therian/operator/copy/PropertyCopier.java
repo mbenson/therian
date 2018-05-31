@@ -67,12 +67,12 @@ import uelbox.UEL;
 public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARGET> {
 
     /**
-     * Configures a {@link PropertyCopier} for property mapping, using a fluent syntax of
-     * "mapping: value from foo to bar, value from x to y, etc.".
+     * Configures a {@link PropertyCopier} for property mapping, using a fluent syntax of "mapping: value from foo to
+     * bar, value from x to y, etc.".
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE, ElementType.METHOD })
+    @Target({ ElementType.TYPE, ElementType.METHOD })
     public @interface Mapping {
 
         /**
@@ -102,7 +102,7 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE, ElementType.METHOD })
+    @Target({ ElementType.TYPE, ElementType.METHOD })
     public @interface Matching {
 
         /**
@@ -134,7 +134,8 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         NOOP,
 
         /**
-         * Indicates that the operation will be implemented by copying {@code null} values to target properties.
+         * Indicates that the operation will be implemented by copying
+         * {@code null} values to target properties.
          */
         COPY_NULLS;
 
@@ -183,8 +184,8 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
      */
     public static <SOURCE, TARGET> PropertyCopier<SOURCE, TARGET> getInstance(Typed<SOURCE> sourceType,
         Typed<TARGET> targetType, Mapping mapping, Matching matching) {
-        return new FromFactory<SOURCE, TARGET>(Validate.notNull(sourceType, "sourceType"), Validate.notNull(targetType,
-            "targetType"), mapping, matching);
+        return new FromFactory<>(Validate.notNull(sourceType, "sourceType"), Validate.notNull(targetType, "targetType"),
+            mapping, matching);
     }
 
     private static List<Pair<RelativePositionFactory.ReadWrite<Object, ?>, RelativePositionFactory.ReadWrite<Object, ?>>> parse(
@@ -270,7 +271,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         } else {
             nullBehavior = null;
         }
-
         if (nullBehavior == NullBehavior.UNSUPPORTED) {
             return false;
         }
@@ -282,7 +282,6 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (nullBehavior == NullBehavior.NOOP && matched.iterator().hasNext()) {
             return true;
         }
-
         boolean result = handle(context, Phase.EVALUATION, mapped);
         result = handle(context, Phase.EVALUATION, matched) || result;
         return result;
@@ -293,12 +292,10 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         if (!super.supports(context, copy)) {
             return false;
         }
-        if (copy.getSourcePosition().getValue() == null) {
-            if (context.getTypedContext(NullBehavior.class, defaultNullBehavior()) == NullBehavior.UNSUPPORTED) {
-                return false;
-            }
+        if (copy.getSourcePosition().getValue() == null
+            && context.getTypedContext(NullBehavior.class, defaultNullBehavior()) == NullBehavior.UNSUPPORTED) {
+            return false;
         }
-
         return handle(context, Phase.SUPPORT_CHECK, map(context, copy))
             || handle(context, Phase.SUPPORT_CHECK, match(context, copy));
     }
@@ -359,10 +356,10 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         // if no properties were explicitly specified for matching, take whatever we can get
         final boolean lenient = properties.isEmpty();
         if (lenient) {
-            properties.addAll(BeanProperties.getPropertyNames(ReturnProperties.WRITABLE, context,
-                copy.getTargetPosition()));
-            properties.retainAll(BeanProperties.getPropertyNames(ReturnProperties.ALL, context,
-                copy.getSourcePosition()));
+            properties
+                .addAll(BeanProperties.getPropertyNames(ReturnProperties.WRITABLE, context, copy.getTargetPosition()));
+            properties
+                .retainAll(BeanProperties.getPropertyNames(ReturnProperties.ALL, context, copy.getSourcePosition()));
         }
         properties.removeAll(Arrays.asList(matching.exclude()));
 
@@ -386,5 +383,4 @@ public abstract class PropertyCopier<SOURCE, TARGET> extends Copier<SOURCE, TARG
         }
         return result;
     }
-
 }

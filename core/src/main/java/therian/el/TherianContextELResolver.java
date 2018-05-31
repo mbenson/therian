@@ -79,5 +79,4 @@ public class TherianContextELResolver extends ELResolver {
         // TODO coerce parameters
         return super.invoke(context, base, method, paramTypes, params);
     }
-
 }

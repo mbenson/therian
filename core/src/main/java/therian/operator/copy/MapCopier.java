@@ -75,7 +75,6 @@ public class MapCopier extends Copier<Map, Map> {
             if (!context.evalSuccess(Convert.to(targetValue, Positions.readOnly(sourceValueType, e.getValue())))) {
                 return false;
             }
-
             final MutablePair<?, ?> newEntry = MutablePair.of(targetKey.getValue(), targetValue.getValue());
             if (!context.evalSuccess(Add.to(copy.getTargetPosition(),
                 Positions.<Map.Entry> readOnly(targetEntryType, newEntry)))) {
@@ -116,7 +115,6 @@ public class MapCopier extends Copier<Map, Map> {
             Positions.<Map.Entry> readOnly(targetEntryType, EMPTY_ENTRY)))) {
             return false;
         }
-
         final Position.ReadWrite sourceKey =
             Positions.readWrite(ObjectUtils.defaultIfNull(sourceKeyType, Object.class));
         final Position.ReadWrite sourceValue =

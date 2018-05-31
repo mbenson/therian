@@ -48,5 +48,4 @@ public class EnumerationToIterator extends AssignableElementConverter<Enumeratio
         return context.evalSuccess(Convert.to(rw, operation.getSourcePosition()))
             && context.evalSuccess(Positions.writeValue(operation.getTargetPosition()), Convert.to(Iterator.class, rw));
     }
-
 }

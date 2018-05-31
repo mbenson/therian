@@ -46,5 +46,4 @@ public class ConvertingCopier extends Copier<Object, Object> {
             && context.eval(ImmutableCheck.of(copy.getTargetPosition())).booleanValue()
             && context.supports(Convert.to((Position.Writable<?>) copy.getTargetPosition(), copy.getSourcePosition()));
     }
-
 }

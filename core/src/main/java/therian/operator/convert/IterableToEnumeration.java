@@ -42,5 +42,4 @@ public class IterableToEnumeration extends AssignableElementConverter<Iterable<?
             .evalSuccess(Positions.writeValue(convert.getTargetPosition()),
                 Convert.to(Enumeration.class, Positions.readOnly(convert.getSourcePosition().getValue().iterator())));
     }
-
 }

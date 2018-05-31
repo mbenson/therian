@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.el.ELContext;
@@ -44,14 +45,6 @@ import uelbox.ELContextWrapper;
  * Therian context.
  */
 public class TherianContext extends ELContextWrapper {
-    /**
-     * Callback interface.
-     *
-     * @param <T>
-     */
-    public interface Callback<T> {
-        void handle(T arg);
-    }
 
     /**
      * Represents a requested {@link Operation}.
@@ -246,16 +239,13 @@ public class TherianContext extends ELContextWrapper {
 
         int depth(Frame<?> parent) {
             int result = 0;
-            for (Frame<?> f = parent; f != null && f.key != null; f = f.parent, result++) {
-                ;
-            }
+            for (Frame<?> f = parent; f != null && f.key != null; f = f.parent, result++);
             return result;
         }
 
         String logString() {
             return lead + getKey();
         }
-
     }
 
     private interface CachedEvaluator<T> {
@@ -313,7 +303,6 @@ public class TherianContext extends ELContextWrapper {
                 return false;
             }
         }
-
     }
 
     private class CachedResult<T> implements CachedEvaluator<T> {
@@ -329,7 +318,6 @@ public class TherianContext extends ELContextWrapper {
             operation.setResult(value);
             return true;
         }
-
     }
 
     private final Deque<Frame<?>> stack = new ArrayDeque<>();
@@ -418,11 +406,11 @@ public class TherianContext extends ELContextWrapper {
      * @throws NullPointerException on {@code null} input
      * @throws OperationException potentially, via {@link Operation#getResult()}
      */
-    public final synchronized <RESULT> boolean evalSuccess(Callback<? super RESULT> callback,
+    public final synchronized <RESULT> boolean evalSuccess(Consumer<? super RESULT> callback,
         Operation<RESULT> operation, Hint... hints) {
         if (evalSuccess(operation, hints)) {
             if (callback != null) {
-                callback.handle(operation.getResult());
+                callback.accept(operation.getResult());
             }
             return true;
         }
@@ -501,12 +489,10 @@ public class TherianContext extends ELContextWrapper {
         if (logger.isTraceEnabled()) {
             logger.trace("{} requested", frame.logString());
         }
-
         final TherianContext originalContext = getCurrentInstance();
         if (originalContext != this) {
             CURRENT_INSTANCE.set(this);
         }
-
         final Caching caching = parent.getBehavior(Caching.class, Caching.ALL);
 
         try {
@@ -533,7 +519,6 @@ public class TherianContext extends ELContextWrapper {
                     }
                 }
             }
-
             final Iterable<Operator<?>> supportingOperators = supportChecker.operatorsSupporting(frame.operation);
 
             final Operator.Phase phase = frame.phase;
@@ -545,7 +530,6 @@ public class TherianContext extends ELContextWrapper {
                     if (phase == Phase.EVALUATION) {
                         frame.operation.setSuccessful(true);
                     }
-
                     if (caching.implies(Caching.CONTEXT) && Caching.isReusable(operator, phase)) {
 
                         switch (phase) {
@@ -559,7 +543,7 @@ public class TherianContext extends ELContextWrapper {
                             }
                             break;
                         case EVALUATION:
-                            if (cache.get(request) instanceof CachedResult<?> == false) {
+                            if (!(cache.get(request) instanceof CachedResult<?>)) {
                                 cache.put(request, new CachedResult<>(frame.operation.getResult()));
                             }
                             break;
@@ -602,5 +586,4 @@ public class TherianContext extends ELContextWrapper {
             cache.clear();
         }
     }
-
 }

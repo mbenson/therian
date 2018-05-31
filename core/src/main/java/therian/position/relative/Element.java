@@ -37,7 +37,7 @@ import uelbox.IterableELResolver;
  * Provides fluent access to {@link RelativePositionFactory} instances for:
  * <ul>
  * <li>array elements</li>
- * <li> {@link List} elements</li>
+ * <li>{@link List} elements</li>
  * <li>{@link Iterable} elements (requires {@link IterableELResolver})</li>
  * </ul>
  * Because this implementation uses unified EL facilities, growing lists/collections is not supported.
@@ -81,10 +81,9 @@ public class Element {
                         try {
                             final String name = Integer.toString(index);
 
-                            for (Iterator<FeatureDescriptor> fd =
-                                IteratorUtils.filteredIterator(
-                                    context.getELResolver().getFeatureDescriptors(context, parent),
-                                    d -> name.equals(d.getName())); fd.hasNext();) {
+                            for (Iterator<FeatureDescriptor> fd = IteratorUtils.filteredIterator(
+                                context.getELResolver().getFeatureDescriptors(context, parent),
+                                d -> name.equals(d.getName())); fd.hasNext();) {
 
                                 final Type fromGenericTypeAttribute =
                                     Type.class.cast(fd.next().getValue(ELConstants.GENERIC_TYPE));
@@ -108,12 +107,16 @@ public class Element {
             if (obj == this) {
                 return true;
             }
-            if (!obj.getClass().equals(getClass())) {
+            if (obj == null || !obj.getClass().equals(getClass())) {
                 return false;
             }
             return ((PositionFactory<?, ?>) obj).index == index;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(index);
+        }
         /**
          * Get the index
          *
@@ -131,18 +134,13 @@ public class Element {
      * @return {@link PositionFactory}
      */
     public static <T> PositionFactory<Object, T> atArrayIndex(final int index) {
-        final PositionFactory<Object, T> result = new PositionFactory<Object, T>(index) {
+        return new PositionFactory<Object, T>(index) {
 
             @Override
             public <P> RelativePosition.ReadWrite<P, T> of(Position.Readable<P> parentPosition) {
                 final Type parentType = parentPosition.getType();
                 Validate.isTrue(TypeUtils.isArrayType(parentType), "%s is not an array type", parentType);
                 return super.of(parentPosition);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(index);
             }
 
             @Override
@@ -155,7 +153,6 @@ public class Element {
                 return TypeUtils.getArrayComponentType(parentPosition.getType());
             }
         };
-        return result;
     }
 
     /**
@@ -165,12 +162,7 @@ public class Element {
      * @return {@link PositionFactory}
      */
     public static <T> PositionFactory<Iterable<? extends T>, T> atIndex(final int index) {
-        final PositionFactory<Iterable<? extends T>, T> result = new PositionFactory<Iterable<? extends T>, T>(index) {
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(index);
-            }
+        return new PositionFactory<Iterable<? extends T>, T>(index) {
 
             @Override
             public String toString() {
@@ -179,10 +171,9 @@ public class Element {
 
             @Override
             protected <P> Type evaluateElementType(Position<P> parentPosition) {
-                return TypeUtils.getTypeArguments(parentPosition.getType(), Iterable.class).get(
-                    Iterable.class.getTypeParameters()[0]);
+                return TypeUtils.getTypeArguments(parentPosition.getType(), Iterable.class)
+                    .get(Iterable.class.getTypeParameters()[0]);
             }
         };
-        return result;
     }
 }

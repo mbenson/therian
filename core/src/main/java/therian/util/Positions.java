@@ -25,7 +25,6 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.reflect.Typed;
 
 import therian.TherianContext;
-import therian.TherianContext.Callback;
 import therian.position.AbstractPosition;
 import therian.position.Position;
 import therian.position.Position.Readable;
@@ -200,7 +199,7 @@ public class Positions {
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final Class<T> type, final T value) {
-        return Positions.<T> readOnly((Type) type, value);
+        return readOnly((Type) type, value);
     }
 
     /**
@@ -211,7 +210,7 @@ public class Positions {
      * @return Position.Readable
      */
     public static <T> Position.Readable<T> readOnly(final Typed<T> typed, final T value) {
-        return Positions.<T> readOnly(typed, (Supplier<T>) () -> value);
+        return readOnly(typed, (Supplier<T>) () -> value);
     }
 
     /**
@@ -244,7 +243,7 @@ public class Positions {
      * @return Position.ReadWrite
      */
     public static <T> Position.ReadWrite<T> readWrite(final Class<T> type) {
-        return Positions.<T> readWrite((Type) type);
+        return readWrite((Type) type);
     }
 
     /**
@@ -279,7 +278,7 @@ public class Positions {
      * @return Position.ReadWrite
      */
     public static <T> Position.ReadWrite<T> readWrite(final Class<T> type, T initialValue) {
-        return Positions.<T> readWrite((Type) type, initialValue);
+        return readWrite((Type) type, initialValue);
     }
 
     /**
@@ -301,8 +300,7 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Type type) {
-        return writable(type, t -> {
-        });
+        return writable(type, noop());
     }
 
     /**
@@ -314,7 +312,7 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Type type, Consumer<T> consumer) {
-        return new W<T>(Validate.notNull(type, "type"), Validate.notNull(consumer, "consumer"));
+        return new W<>(Validate.notNull(type, "type"), Validate.notNull(consumer, "consumer"));
     }
 
     /**
@@ -324,8 +322,7 @@ public class Positions {
      * @return Position.Writable
      */
     public static <T> Position.Writable<T> writable(final Typed<T> typed) {
-        return writable(typed, t -> {
-        });
+        return writable(typed, noop());
     }
 
     /**
@@ -356,17 +353,15 @@ public class Positions {
      * @return UnaryProcedure
      * @see TherianContext#forwardTo(therian.Operation, Callback)
      */
-    public static <T> Callback<T> writeValue(final Position.Writable<? super T> pos) {
-        return new Callback<T>() {
+    public static <T> Consumer<T> writeValue(final Position.Writable<? super T> pos) {
+        return pos::setValue;
+    }
 
-            @Override
-            public void handle(T value) {
-                pos.setValue(value);
-            }
+    private static <T> Consumer<T> noop() {
+        return t -> {
         };
     }
 
     private Positions() {
     }
-
 }

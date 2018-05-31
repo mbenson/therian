@@ -17,6 +17,7 @@ package therian.operator.size;
 
 import therian.Operator;
 import therian.TherianContext;
+import therian.Operator.DependsOn;
 import therian.buildweaver.StandardOperator;
 import therian.operation.Size;
 import therian.operator.OptimisticOperatorBase;
@@ -26,6 +27,7 @@ import therian.util.Positions;
  * {@link Operator} to take the size of an {@link Iterable}.
  */
 @StandardOperator
+@DependsOn(SizeOfIterator.class)
 public class SizeOfIterable extends OptimisticOperatorBase<Size<Iterable<?>>> {
 
     @Override
@@ -38,5 +40,4 @@ public class SizeOfIterable extends OptimisticOperatorBase<Size<Iterable<?>>> {
         }
         return true;
     }
-
 }

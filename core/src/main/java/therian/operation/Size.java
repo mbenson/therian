@@ -26,6 +26,15 @@ import therian.position.Position;
  */
 public class Size<T> extends Operation<Integer> {
 
+    /**
+     * Fluent factory method.
+     * @param position
+     * @return {@link Size}
+     */
+    public static <T> Size<T> of(Position.Readable<T> position) {
+        return new Size<>(position);
+    }
+
     private final Position.Readable<T> position;
 
     private Size(Position.Readable<T> position) {
@@ -63,9 +72,4 @@ public class Size<T> extends Operation<Integer> {
     public String toString() {
         return String.format("Size of %s", getPosition());
     }
-
-    public static <T> Size<T> of(Position.Readable<T> position) {
-        return new Size<>(position);
-    }
-
 }

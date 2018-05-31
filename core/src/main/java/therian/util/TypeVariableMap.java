@@ -34,8 +34,10 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
 
     public static TypeVariableMap wrap(Map<TypeVariable<?>, Type> m) {
-        return m instanceof TypeVariableMap ? (TypeVariableMap) m : new TypeVariableMap(m == null
-            ? Collections.emptyMap() : m);
+        if (m instanceof TypeVariableMap) {
+            return (TypeVariableMap) m;
+        }
+        return new TypeVariableMap(m == null ? Collections.emptyMap() : m);
     }
 
     private static String toString(Type type) {
@@ -109,7 +111,6 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
             public int size() {
                 return wrapped.size();
             }
-
         };
     }
 
@@ -127,5 +128,4 @@ public class TypeVariableMap extends AbstractMap<TypeVariable<?>, Type> {
     public String toString() {
         return entrySet().toString().replaceFirst("^\\[", "{").replaceFirst("\\]$", "}");
     }
-
 }

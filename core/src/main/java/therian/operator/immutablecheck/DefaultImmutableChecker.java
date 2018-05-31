@@ -47,17 +47,17 @@ public class DefaultImmutableChecker extends ImmutableChecker {
 
     static {
         KNOWN_IMMUTABLE_PREFIXES = new String[] { "immutable", "unmodifiable", "empty" };
-        final HashSet<Class<?>> s = new HashSet<Class<?>>();
+        final Set<Class<?>> s = new HashSet<>();
         Collections.<Class<?>> addAll(s, String.class, Enum.class, Annotation.class, Class.class, Arrays.asList()
             .getClass());
         addTypeTo(s, Collections.emptySet());
         addTypeTo(s, Collections.unmodifiableSet(new HashSet<>()));
         addTypeTo(s, Collections.emptyList());
         addTypeTo(s, Collections.unmodifiableList(new ArrayList<>()));
-        addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<>()));
+        addTypeTo(s, Collections.unmodifiableSortedSet(new TreeSet<String>()));
         addTypeTo(s, Collections.emptyMap());
         addTypeTo(s, Collections.unmodifiableMap(new HashMap<>()));
-        addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<>()));
+        addTypeTo(s, Collections.unmodifiableSortedMap(new TreeMap<String, Object>()));
 
         Collections.addAll(s, Collections.singleton(null).getClass(), Collections.singletonList(null).getClass(),
             Collections.singletonMap(null, null).getClass());
@@ -103,7 +103,7 @@ public class DefaultImmutableChecker extends ImmutableChecker {
         while (c.isAnonymousClass()) {
             c = c.getEnclosingClass();
         }
-        if (target.contains(c) && !target.equals(c)
+        if (target.contains(c) && !type.equals(c)
             || StringUtils.startsWithAny(c.getSimpleName().toLowerCase(Locale.US), KNOWN_IMMUTABLE_PREFIXES)) {
             target.add(type);
         }

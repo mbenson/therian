@@ -15,7 +15,7 @@
  */
 package therian;
 
-import org.apache.commons.lang3.Validate;
+import java.util.Objects;
 
 /**
  * Operation exception
@@ -31,26 +31,25 @@ public class OperationException extends RuntimeException {
 
     public OperationException(Operation<?> source) {
         super();
-        this.source = Validate.notNull(source);
+        this.source = Objects.requireNonNull(source);
     }
 
     public OperationException(Operation<?> source, String message, Object... args) {
         super(String.format(message, args));
-        this.source = Validate.notNull(source);
+        this.source = Objects.requireNonNull(source);
     }
 
     public OperationException(Operation<?> source, Throwable cause) {
         super(cause);
-        this.source = Validate.notNull(source);
+        this.source = Objects.requireNonNull(source);
     }
 
     public OperationException(Operation<?> source, Throwable cause, String message, Object... args) {
         super(String.format(message, args), cause);
-        this.source = Validate.notNull(source);
+        this.source = Objects.requireNonNull(source);
     }
 
     public Operation<?> getSource() {
         return source;
     }
-
 }

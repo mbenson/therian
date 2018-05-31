@@ -31,6 +31,17 @@ import therian.position.Position.Readable;
 @Reusable({/* NEVER */})
 public final class ImmutableCheck<T> extends Operation<Boolean> {
 
+    /**
+     * Create an {@link ImmutableCheck} operation against {@code position}.
+     *
+     * @param <T>
+     * @param position
+     * @return {@link ImmutableCheck}
+     */
+    public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
+        return new ImmutableCheck<>(position);
+    }
+
     private final Position.Readable<T> position;
 
     private ImmutableCheck(Readable<T> position) {
@@ -56,10 +67,10 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
         if (obj == this) {
             return true;
         }
-        if (!obj.getClass().equals(getClass())) {
+        if (obj == null || !obj.getClass().equals(getClass())) {
             return false;
         }
-        ImmutableCheck<?> other = (ImmutableCheck<?>) obj;
+        final ImmutableCheck<?> other = (ImmutableCheck<?>) obj;
         return Objects.equals(other.getPosition(), getPosition());
     }
 
@@ -71,16 +82,5 @@ public final class ImmutableCheck<T> extends Operation<Boolean> {
     @Override
     public String toString() {
         return String.format("Immutable check of %s", getPosition());
-    }
-
-    /**
-     * Create an {@link ImmutableCheck} operation against {@code position}.
-     *
-     * @param <T>
-     * @param position
-     * @return operation
-     */
-    public static <T> ImmutableCheck<T> of(Position.Readable<T> position) {
-        return new ImmutableCheck<>(position);
     }
 }

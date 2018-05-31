@@ -87,10 +87,7 @@ public abstract class FromSourceToTarget<T extends Operation<?>> extends Operato
         if (obj == this) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        return obj.getClass().equals(getClass()) && sourceBound != null && targetBound != null;
+        return super.equals(obj) && sourceBound != null && targetBound != null;
     }
 
     @Override
@@ -100,7 +97,7 @@ public abstract class FromSourceToTarget<T extends Operation<?>> extends Operato
 
     @Override
     public String toString() {
-        return String.format("%s from %s to %s", getClass().getSimpleName(), Objects.toString(sourceBound, UNKNOWN),
-            Objects.toString(targetBound, UNKNOWN));
+        return String.format("%s from %s to %s", Types.getSimpleName(getClass()),
+            Objects.toString(sourceBound, UNKNOWN), Objects.toString(targetBound, UNKNOWN));
     }
 }

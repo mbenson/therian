@@ -28,16 +28,22 @@ import therian.position.Position;
  */
 public class Add<SOURCE, TARGET> extends Transform<SOURCE, TARGET, Boolean, Position.Readable<TARGET>> {
 
+    /**
+     * Fluent factory method.
+     * @param targetPosition
+     * @param sourcePosition
+     * @return {@link Add}
+     */
+    public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
+        Position.Readable<SOURCE> sourcePosition) {
+        return new Add<>(sourcePosition, targetPosition);
+    }
+
     protected Add(Position.Readable<SOURCE> sourcePosition, Position.Readable<TARGET> targetPosition) {
         super(sourcePosition, targetPosition);
     }
 
     public void setResult(boolean result) {
         setResult(Boolean.valueOf(result));
-    }
-
-    public static <SOURCE, TARGET> Add<SOURCE, TARGET> to(Position.Readable<TARGET> targetPosition,
-        Position.Readable<SOURCE> sourcePosition) {
-        return new Add<>(sourcePosition, targetPosition);
     }
 }

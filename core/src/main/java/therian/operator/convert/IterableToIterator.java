@@ -40,5 +40,4 @@ public class IterableToIterator extends AssignableElementConverter<Iterable<?>, 
         operation.getTargetPosition().setValue(operation.getSourcePosition().getValue().iterator());
         return true;
     }
-
 }

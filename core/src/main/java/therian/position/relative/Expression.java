@@ -56,10 +56,8 @@ public class Expression {
 
             private BaseContext(final ELContext wrapped, final Object base) {
                 super(wrapped);
-                getVariableMapper().setVariable(
-                    BASE_VARIABLE_NAME,
-                    UEL.getExpressionFactory(this).createValueExpression(base,
-                        base == null ? Object.class : base.getClass()));
+                getVariableMapper().setVariable(BASE_VARIABLE_NAME, UEL.getExpressionFactory(this)
+                    .createValueExpression(base, base == null ? Object.class : base.getClass()));
             }
 
             @Override
@@ -84,9 +82,8 @@ public class Expression {
                 } else if (TypeUtils.isAssignable(baseType, Iterable.class)) {
                     @SuppressWarnings("unchecked")
                     final Position.Readable<Iterable<?>> iterablePosition = (Position.Readable<Iterable<?>>) current;
-                    current =
-                        Element.atIndex(UEL.coerceToType(context, Integer.class, property).intValue()).of(
-                            iterablePosition);
+                    current = Element.atIndex(UEL.coerceToType(context, Integer.class, property).intValue())
+                        .of(iterablePosition);
                 } else if (TypeUtils.isAssignable(baseType, Map.class)) {
                     @SuppressWarnings("unchecked")
                     final Position.Readable<Map<Object, Object>> mapPosition =
@@ -103,8 +100,8 @@ public class Expression {
             }
         }
 
-        private static final String BASE_VARIABLE_NAME = String.format("%s_baseVariable",
-            Expression.PositionFactory.class.getName().replace('.', '_'));
+        private static final String BASE_VARIABLE_NAME =
+            String.format("%s_baseVariable", Expression.PositionFactory.class.getName().replace('.', '_'));
 
         private final String expr;
         private final boolean optional;
@@ -141,10 +138,8 @@ public class Expression {
                     final TherianContext context = TherianContext.getInstance();
                     Type result = null;
                     synchronized (this) {
-                        if (cachedType != null) {
-                            if (cachedType.getLeft() == context) {
-                                result = cachedType.getRight();
-                            }
+                        if (cachedType != null && cachedType.getLeft() == context) {
+                            result = cachedType.getRight();
                         }
                     }
 
@@ -241,7 +236,7 @@ public class Expression {
                     synchronized (this) {
                         cachedType = ImmutablePair.of(context, result);
                     }
-                    Validate.validState(result != null, "Cannot get type for expression " + expr);
+                    Validate.validState(result != null, "Cannot get type for expression %s", expr);
                     return result;
                 }
 

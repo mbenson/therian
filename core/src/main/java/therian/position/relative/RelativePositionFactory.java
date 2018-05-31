@@ -95,5 +95,4 @@ public abstract class RelativePositionFactory<PARENT, TYPE> {
      * @return {@link RelativePosition}
      */
     public abstract <P extends PARENT> RelativePosition<P, TYPE> of(Position.Readable<P> parentPosition);
-
 }

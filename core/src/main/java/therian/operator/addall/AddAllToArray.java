@@ -82,5 +82,4 @@ public class AddAllToArray extends OperatorBase<AddAll<?, ?>> {
             && context.supports(Convert.to(Positions.readWrite(addAll.getTargetPosition().getType()),
                 addAll.getSourcePosition()));
     }
-
 }

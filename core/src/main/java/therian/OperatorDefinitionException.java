@@ -15,6 +15,8 @@
  */
 package therian;
 
+import java.util.Objects;
+
 /**
  * Exception thrown to signify a problem with the definition of an {@link Operator}.
  */
@@ -25,22 +27,22 @@ public class OperatorDefinitionException extends RuntimeException {
     private final Operator<?> operator;
 
     public OperatorDefinitionException(Operator<?> operator) {
-        this.operator = operator;
+        this.operator = Objects.requireNonNull(operator);
     }
 
     public OperatorDefinitionException(Operator<?> operator, String message, Object... args) {
         super(String.format(message, args));
-        this.operator = operator;
+        this.operator = Objects.requireNonNull(operator);
     }
 
     public OperatorDefinitionException(Operator<?> operator, Throwable throwable, String message, Object... args) {
         super(String.format(message, args), throwable);
-        this.operator = operator;
+        this.operator = Objects.requireNonNull(operator);
     }
 
     public OperatorDefinitionException(Operator<?> operator, Throwable throwable) {
         super(throwable);
-        this.operator = operator;
+        this.operator = Objects.requireNonNull(operator);
     }
 
     public Operator<?> getOperator() {

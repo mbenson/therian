@@ -101,8 +101,7 @@ public abstract class SelfContainedTherianModule extends TherianModule {
         try {
             return cs.newInstance(args);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
-
 }

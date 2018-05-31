@@ -54,7 +54,7 @@ public abstract class Operation<RESULT> {
             this.genericType = Validate.notNull(genericType);
             this.discriminator = discriminator;
             hashCode = ArrayUtils.isEmpty(discriminator) ? Objects.hash(genericType)
-                : Arrays.deepHashCode(ArrayUtils.add(discriminator, 0, genericType));
+                : Arrays.deepHashCode(ArrayUtils.insert(0, discriminator, genericType));
         }
 
         @Override
@@ -67,7 +67,7 @@ public abstract class Operation<RESULT> {
             if (obj == this) {
                 return true;
             }
-            if (obj instanceof Profile == false) {
+            if (!(obj instanceof Profile)) {
                 return false;
             }
             final Profile other = (Profile) obj;
@@ -101,7 +101,6 @@ public abstract class Operation<RESULT> {
                 VALID_INFO.put(type, Boolean.valueOf(valid));
             }
         }
-
         final Class<?> parent = type.getSuperclass();
         if (!Operation.class.equals(parent)) {
             init(parent.asSubclass(Operation.class));
@@ -117,7 +116,7 @@ public abstract class Operation<RESULT> {
 
     private boolean successful;
     private RESULT result;
-    private Profile profile;
+    private volatile Profile profile;
 
     /**
      * Get the result. Default implementation throws {@link OperationException} if the operation was unsuccessful.
@@ -161,7 +160,6 @@ public abstract class Operation<RESULT> {
         if (!TypeUtils.isInstance(this, expectedType)) {
             return false;
         }
-
         final Map<TypeVariable<?>, Type> typeArguments = TypeUtils.getTypeArguments(expectedType, Operation.class);
         for (Class<?> c : ClassUtils.hierarchy(TypeUtils.getRawType(expectedType, operator.getClass()))) {
             if (c.equals(Operation.class)) {

@@ -33,9 +33,15 @@ public class DefaultSizeOperator extends OptimisticOperatorBase<Size<?>> {
     @Override
     public boolean perform(TherianContext context, Size<?> operation) {
         final Object value = operation.getPosition().getValue();
-        final int result = value == null ? 0 : value.getClass().isArray() ? Array.getLength(value) : 1;
+        final int result;
+        if (value == null) {
+            result = 0;
+        } else if (value.getClass().isArray()) {
+            result = Array.getLength(value);
+        } else {
+            result = 1;
+        }
         operation.setResult(result);
         return true;
     }
-
 }

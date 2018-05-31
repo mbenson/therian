@@ -60,12 +60,13 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public boolean perform(TherianContext context, Convert<?, ?> convert) {
         if (convert.getSourcePosition().getValue() == null
             && context.getTypedContext(NullBehavior.class) == NullBehavior.UNSUPPORTED) {
             return false;
         }
+        @SuppressWarnings("rawtypes")
         final Convert raw = convert;
         raw.getTargetPosition().setValue(raw.getSourcePosition().getValue());
         return true;
@@ -77,5 +78,4 @@ public class NOPConverter extends Converter.WithDynamicTarget<Object> {
             && (convert.getSourcePosition().getValue() != null || context.getTypedContext(NullBehavior.class,
                 NullBehavior.DEFAULT) == NullBehavior.DEFAULT);
     }
-
 }

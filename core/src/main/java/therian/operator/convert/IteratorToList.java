@@ -18,6 +18,7 @@ package therian.operator.convert;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import therian.Operator.DependsOn;
 import therian.TherianContext;
@@ -40,11 +41,8 @@ public class IteratorToList extends AssignableElementConverter<Iterator<?>, List
     @Override
     public boolean perform(TherianContext context, Convert<? extends Iterator<?>, ? super List> operation) {
         final List<Object> result = new ArrayList<>();
-        for (Iterator<?> iter = operation.getSourcePosition().getValue(); iter != null && iter.hasNext();) {
-            result.add(iter.next());
-        }
+        Optional.of(operation.getSourcePosition().getValue()).ifPresent(iter -> iter.forEachRemaining(result::add));
         operation.getTargetPosition().setValue(result);
         return true;
     }
-
 }

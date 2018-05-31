@@ -50,11 +50,8 @@ public class IterableToList extends AssignableElementConverter<Iterable<?>, List
     @Override
     public boolean perform(TherianContext context, Convert<? extends Iterable<?>, ? super List> convert) {
         final Type sourceElementType = context.eval(GetElementType.of(convert.getSourcePosition()));
-        Type[] typeArguments = { sourceElementType };
-        return context.evalSuccess(Convert.to(
-            convert.getTargetPosition(),
-            Positions.readOnly(TypeUtils.parameterize(Iterator.class, typeArguments), convert.getSourcePosition()
-                .getValue().iterator())));
+        return context.evalSuccess(Convert.to(convert.getTargetPosition(),
+            Positions.readOnly(TypeUtils.parameterize(Iterator.class, sourceElementType),
+                convert.getSourcePosition().getValue().iterator())));
     }
-
 }

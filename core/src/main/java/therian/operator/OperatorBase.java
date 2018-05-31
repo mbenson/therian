@@ -8,7 +8,7 @@ import therian.Operator;
 public abstract class OperatorBase<T extends Operation<?>> implements Operator<T> {
     @Override
     public boolean equals(Object obj) {
-        return obj == this || getClass().isInstance(obj);
+        return obj == this || obj != null && obj.getClass().equals(getClass());
     }
 
     @Override

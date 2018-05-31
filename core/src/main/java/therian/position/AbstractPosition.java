@@ -4,8 +4,18 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 
+/**
+ * Base {@link Position} implementation,
+ * 
+ * @param <T>
+ */
 public abstract class AbstractPosition<T> implements Position<T> {
 
+    /**
+     * Base readable {@link Position}.
+     *
+     * @param <T>
+     */
     public static abstract class Readable<T> extends AbstractPosition<T> implements Position.Readable<T> {
 
         /**
@@ -32,6 +42,11 @@ public abstract class AbstractPosition<T> implements Position<T> {
         }
     }
 
+    /**
+     * Base writable {@link Position}.
+     *
+     * @param <T>
+     */
     public static abstract class Writable<T> extends AbstractPosition<T> implements Position.Writable<T> {
 
         /**
@@ -56,6 +71,5 @@ public abstract class AbstractPosition<T> implements Position<T> {
         public int hashCode() {
             return Objects.hash(getType());
         }
-
     }
 }

@@ -45,6 +45,11 @@ public class BeanToMapCopier extends Copier<Object, Map> {
 
     public static final String IGNORE_CLASS_PROPERTY = "class";
 
+    private static Type getKeyType(Position<? extends Map> target) {
+        return ObjectUtils.defaultIfNull(TypeUtils.unrollVariables(
+            TypeUtils.getTypeArguments(target.getType(), Map.class), Map.class.getTypeParameters()[0]), Object.class);
+    }
+
     private final Predicate<String> ignored = this::isIgnored;
 
     protected boolean isIgnored(String propertyName) {
@@ -58,21 +63,18 @@ public class BeanToMapCopier extends Copier<Object, Map> {
         final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
 
         final Stream<Copy<?, ?>> copyEntries =
-            getProperties(context, copy.getSourcePosition()).<Copy<?, ?>> map(
-                propertyName -> {
-                    final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
-                    if (!context.supports(convertKey)) {
-                        return null;
-                    }
-                    final Object key = context.eval(convertKey);
-                    final Copy<?, ?> copyEntry =
-                        Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()), Property.at(propertyName)
-                            .of(copy.getSourcePosition()));
-                    return copyEntry;
-                }).filter(Objects::nonNull);
+            getProperties(context, copy.getSourcePosition()).<Copy<?, ?>> map(propertyName -> {
+                final Convert<String, ?> convertKey = Convert.to(targetKey, Positions.readOnly(propertyName));
+                if (!context.supports(convertKey)) {
+                    return null;
+                }
+                final Object key = context.eval(convertKey);
+                return Copy.Safely.to(Keyed.value().at(key).of(copy.getTargetPosition()),
+                    Property.at(propertyName).of(copy.getSourcePosition()));
+            }).filter(Objects::nonNull);
 
-        return copyEntries.map(copyEntry -> Boolean.valueOf(context.evalSuccess(copyEntry)))
-            .collect(Collectors.toSet()).contains(Boolean.TRUE);
+        return copyEntries.map(copyEntry -> Boolean.valueOf(context.evalSuccess(copyEntry))).collect(Collectors.toSet())
+            .contains(Boolean.TRUE);
     }
 
     /**
@@ -84,23 +86,14 @@ public class BeanToMapCopier extends Copier<Object, Map> {
         if (!super.supports(context, copy)) {
             return false;
         }
-
         final Type targetKeyType = getKeyType(copy.getTargetPosition());
-
         final Position.ReadWrite<?> targetKey = Positions.readWrite(targetKeyType);
 
         return getProperties(context, copy.getSourcePosition())
-            .filter(propertyName -> context.supports(Convert.to(targetKey, Positions.readOnly(propertyName))))
-            .findFirst().isPresent();
+            .anyMatch(propertyName -> context.supports(Convert.to(targetKey, Positions.readOnly(propertyName))));
     }
 
     private Stream<String> getProperties(TherianContext context, Position.Readable<?> source) {
         return BeanProperties.getPropertyNames(context, source).stream().filter(ignored.negate());
-    }
-
-    private Type getKeyType(Position<? extends Map> target) {
-        return ObjectUtils.defaultIfNull(
-            TypeUtils.unrollVariables(TypeUtils.getTypeArguments(target.getType(), Map.class),
-                Map.class.getTypeParameters()[0]), Object.class);
     }
 }
