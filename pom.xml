@@ -72,7 +72,7 @@
       </dependency>
       <dependency>
         <groupId>com.github.mbenson.therian</groupId>
-        <artifactId>therian-property-accessor-weaver</artifactId>
+        <artifactId>therian-property-method-weaver</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
