@@ -21,13 +21,12 @@ import java.io.OutputStream;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import javax.activation.DataSource;
-
 import org.apache.commons.weaver.model.ScanRequest;
 import org.apache.commons.weaver.model.ScanResult;
 import org.apache.commons.weaver.model.Scanner;
 import org.apache.commons.weaver.model.WeavableClass;
 import org.apache.commons.weaver.model.WeaveEnvironment;
+import org.apache.commons.weaver.model.WeaveEnvironment.Resource;
 import org.apache.commons.weaver.spi.Weaver;
 import org.kohsuke.MetaInfServices;
 import org.objectweb.asm.ClassReader;
@@ -114,7 +113,7 @@ public class PropertyMethodWeaver implements Weaver {
                 super.visitEnd();
                 final byte[] bytecode = ((ClassWriter) cv).toByteArray();
 
-                final DataSource classfile = env.getClassfile(className);
+                final Resource classfile = env.getClassfile(className);
                 env.debug("Writing class %s to resource %s", className, classfile.getName());
                 try (OutputStream outputStream = classfile.getOutputStream()) {
                     outputStream.write(bytecode);
